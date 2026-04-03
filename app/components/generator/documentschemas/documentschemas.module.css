@@ -1,0 +1,121 @@
+/* Document Content Styles */
+.documentContent {
+    max-width: 100%;
+}
+
+.documentHeader {
+    text-align: center;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #000000;
+}
+
+.documentHeader h1 {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0 0 16px 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #000000;
+}
+
+.documentMeta {
+    font-size: 12px;
+    color: #666666;
+}
+
+.documentMeta p {
+    margin: 4px 0;
+}
+
+.documentBody {
+    margin-bottom: 32px;
+}
+
+.section {
+    margin-bottom: 24px;
+    page-break-inside: avoid;
+}
+
+.section h2 {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0 0 12px 0;
+    text-transform: uppercase;
+    color: #000000;
+    border-bottom: 1px solid #cccccc;
+    padding-bottom: 4px;
+}
+
+.subsection {
+    margin: 16px 0;
+    padding-left: 16px;
+}
+
+.subsection h3 {
+    font-size: 14px;
+    font-weight: bold;
+    margin: 0 0 8px 0;
+    color: #000000;
+}
+
+.field {
+    background-color: #e3f2fd !important;
+    padding: 2px 6px !important;
+    border-radius: 3px !important;
+    font-weight: 500 !important;
+    color: #1565c0 !important;
+    border: 1px solid #90caf9 !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.field:hover {
+    background-color: #bbdefb !important;
+    border-color: #64b5f6 !important;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+}
+
+.table td {
+    border: 1px solid #000000;
+    padding: 8px;
+    text-align: left;
+}
+
+.documentFooter {
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid #cccccc;
+}
+
+.signatures {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 32px;
+    margin-top: 40px;
+}
+
+.signatureBlock {
+    text-align: center;
+}
+
+.signatureLine {
+    height: 1px;
+    background-color: #000000;
+    margin-bottom: 8px;
+    width: 200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.signatureBlock p {
+    margin: 4px 0;
+    font-size: 12px;
+    font-weight: bold;
+    color: #000000;
+}

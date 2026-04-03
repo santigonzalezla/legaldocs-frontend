@@ -1,0 +1,59 @@
+.dashboard
+{
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 100vh;
+    gap: 30px;
+}
+
+.cards
+{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 2fr));
+    gap: 20px;
+}
+
+.infoapp
+{
+    height: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    justify-content: space-between;
+}
+
+.infoappleft
+{
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex-basis: 60%;
+}
+
+.loadingDocs
+{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+@media (max-width: 1260px)
+{
+    .cards {
+        grid-template-columns: repeat(2, 1fr); /* 2 columnas fijas en móviles */
+    }
+}
+
+@media (max-width: 900px)
+{
+    .cards {
+        grid-template-columns: repeat(1, 1fr);
+    }
+}

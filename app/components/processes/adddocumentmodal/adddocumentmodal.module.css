@@ -1,0 +1,210 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.modal {
+    background: var(--content-bg);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 620px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.modalHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 1.5rem 0;
+    flex-shrink: 0;
+}
+
+.modalHeader h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.closeBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: var(--hover-bg);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.closeBtn:hover {
+    background: var(--border-light);
+    color: var(--text-primary);
+}
+
+.closeBtn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.searchRow {
+    padding: 1rem 1.5rem 0;
+    flex-shrink: 0;
+}
+
+.searchWrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 0.55rem 0.75rem;
+    background: var(--bg-primary);
+}
+
+.searchIcon {
+    width: 15px;
+    height: 15px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.searchInput {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.searchInput::placeholder {
+    color: var(--text-secondary);
+}
+
+.body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.75rem 0;
+    min-height: 0;
+}
+
+.empty {
+    padding: 2.5rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.table th {
+    padding: 0.6rem 1.5rem;
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.row {
+    border-bottom: 1px solid var(--border-light);
+    transition: background 0.15s;
+}
+
+.row:last-child {
+    border-bottom: none;
+}
+
+.row:hover {
+    background: var(--hover-bg);
+}
+
+.table td {
+    padding: 0.75rem 1.5rem;
+    color: var(--text-primary);
+}
+
+.docCell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.docIcon {
+    width: 15px;
+    height: 15px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.typeCell {
+    color: var(--text-secondary);
+    font-size: 0.825rem;
+}
+
+.addBtn {
+    padding: 0.35rem 0.85rem;
+    border: none;
+    border-radius: 7px;
+    background: var(--primary-color);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.addBtn:hover:not(:disabled) {
+    opacity: 0.85;
+}
+
+.addBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 1rem 1.5rem 1.5rem;
+    border-top: 1px solid var(--border-light);
+    flex-shrink: 0;
+}
+
+.cancelBtn {
+    padding: 0.55rem 1.25rem;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cancelBtn:hover {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+}

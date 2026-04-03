@@ -1,0 +1,537 @@
+.container {
+    width: 100%;
+}
+
+/* ── Save banner ───────────────────────────────────────────────────────────── */
+
+.saveBanner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: var(--content-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    transition: border-color 0.2s ease;
+}
+
+.saveBanner:focus-within {
+    border-color: var(--primary-color);
+}
+
+.saveBannerIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: var(--primary-color-alpha);
+    color: var(--primary-color);
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.saveBannerIcon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.saveBannerLeft {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+}
+
+.saveBannerLabel {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.saveBannerBody {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.saveBannerInput,
+.saveBannerSelect {
+    padding: 0.55rem 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    background: var(--content-bg);
+    outline: none;
+    transition: all 0.3s ease;
+    font-family: 'Satoshi', sans-serif;
+    flex: 1;
+    min-width: 160px;
+    max-width: 300px;
+}
+
+.saveBannerSelect {
+    cursor: pointer;
+}
+
+.saveBannerInput:focus,
+.saveBannerSelect:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+.saveBannerBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.55rem 1rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary-color);
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--font-family);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.saveBannerBtn:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.saveBannerBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.toggleButton {
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: center;
+}
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+    font-family: var(--font-family);
+}
+
+.button:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.buttonActive {
+    background-color: var(--primary-color);
+    color: var(--content-bg);
+    border-color: var(--primary-color);
+}
+
+.buttonActive:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.buttonInactive {
+    background-color: var(--button-bg);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+.buttonInactive:hover:not(:disabled) {
+    background-color: var(--button-hover-bg);
+    transform: translateY(-1px);
+}
+
+.buttonIcon {
+    width: 16px;
+    height: 16px;
+}
+
+.downloadCard {
+    background: var(--content-bg);
+    border-radius: 8px;
+    box-shadow: var(--sidebar-shadow);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.downloadHeader {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.downloadTitle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.downloadTitle h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+}
+
+.downloadIcon {
+    width: 20px;
+    height: 20px;
+    color: var(--primary-color);
+}
+
+.downloadContent {
+    padding: 24px;
+}
+
+.downloadGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.downloadButton {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--content-bg);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    font-family: var(--font-family);
+}
+
+.downloadButton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.downloadButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.pdfButton {
+    border-color: #ef4444;
+}
+
+.pdfButton:hover:not(:disabled) {
+    border-color: #dc2626;
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.wordButton {
+    border-color: #3b82f6;
+}
+
+.wordButton:hover:not(:disabled) {
+    border-color: #2563eb;
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.templateButton {
+    border-color: #10b981;
+}
+
+.templateButton:hover:not(:disabled) {
+    border-color: #059669;
+    background: rgba(16, 185, 129, 0.05);
+}
+
+.downloadButtonIcon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.pdfButton .downloadButtonIcon {
+    color: #ef4444;
+}
+
+.wordButton .downloadButtonIcon {
+    color: #3b82f6;
+}
+
+.templateButton .downloadButtonIcon {
+    color: #10b981;
+}
+
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.downloadButtonContent {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.downloadButtonTitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.downloadButtonDescription {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.noContentMessage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-secondary);
+    background: var(--button-bg);
+    border-radius: 8px;
+    border: 1px dashed var(--border-color);
+}
+
+.noContentIcon {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+.noContentMessage p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    max-width: 400px;
+    font-family: var(--font-family);
+}
+
+/* ── Save section ─────────────────────────────────────────────────────────── */
+
+.saveSection {
+    padding: 20px 24px 24px;
+    border-top: 1px solid var(--border-light);
+}
+
+.saveSectionHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.saveSectionHeader h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+}
+
+.saveSectionIcon {
+    width: 17px;
+    height: 17px;
+    color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+.saveBody {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.saveField {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.saveField label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-family: var(--font-family);
+    display: flex;
+    align-items: center;
+}
+
+.optional {
+    font-weight: 400;
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+.saveInput,
+.saveSelect {
+    padding: 0.6rem 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    background: var(--content-bg);
+    outline: none;
+    transition: all 0.3s ease;
+    font-family: var(--font-family);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.saveSelect {
+    cursor: pointer;
+}
+
+.saveInput:focus,
+.saveSelect:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+.saveInput::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
+.saveSuccessMsg {
+    padding: 10px 14px;
+    background: #ecfdf5;
+    border: 1px solid #10b981;
+    border-radius: 8px;
+    color: #059669;
+    font-size: 0.82rem;
+    font-weight: 500;
+    font-family: var(--font-family);
+}
+
+.saveBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0.65rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary-color);
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--font-family);
+    align-self: flex-start;
+}
+
+.saveBtn:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.saveBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .downloadGrid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .downloadButton {
+        padding: 16px;
+        gap: 12px;
+    }
+
+    .downloadButtonIcon {
+        width: 20px;
+        height: 20px;
+    }
+
+    .downloadButtonTitle {
+        font-size: 15px;
+    }
+
+    .downloadButtonDescription {
+        font-size: 12px;
+    }
+
+    .downloadContent {
+        padding: 16px;
+    }
+
+    .downloadHeader {
+        padding: 16px;
+    }
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .downloadButton {
+    background: var(--content-bg);
+}
+
+[data-theme="dark"] .pdfButton:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+[data-theme="dark"] .wordButton:hover:not(:disabled) {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+[data-theme="dark"] .templateButton:hover:not(:disabled) {
+    background: rgba(16, 185, 129, 0.1);
+}

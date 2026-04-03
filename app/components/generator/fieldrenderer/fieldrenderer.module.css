@@ -1,0 +1,134 @@
+.fieldContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.label {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.25;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+}
+
+.required {
+    color: #ef4444;
+    margin-left: 4px;
+}
+
+.input {
+    display: flex;
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--content-bg);
+    font-size: 14px;
+    line-height: 1.25;
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+    font-family: var(--font-family);
+}
+
+.input::placeholder {
+    color: var(--text-secondary);
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+.input:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    background-color: var(--button-bg);
+}
+
+.input:invalid {
+    border-color: #ef4444;
+}
+
+.checkboxContainer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.checkbox {
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--content-bg);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    accent-color: var(--primary-color);
+}
+
+.checkbox:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.checkbox:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+.checkboxLabel {
+    font-size: 14px;
+    line-height: 1.25;
+    color: var(--text-primary);
+    cursor: pointer;
+    user-select: none;
+    font-family: var(--font-family);
+}
+
+.select {
+    display: flex;
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--content-bg);
+    font-size: 14px;
+    line-height: 1.25;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: var(--font-family);
+}
+
+.select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+.select:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    background-color: var(--button-bg);
+}
+
+.selectOption {
+    padding: 8px;
+    text-transform: capitalize;
+    color: var(--text-primary);
+    background-color: var(--content-bg);
+}
+
+.selectOption:hover {
+    background-color: var(--hover-bg);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .input,
+    .select {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+}

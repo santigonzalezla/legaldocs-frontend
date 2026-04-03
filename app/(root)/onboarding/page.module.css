@@ -1,0 +1,215 @@
+.page
+{
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--page-bg);
+    padding: 40px 24px;
+    transition: background 0.3s ease;
+}
+
+/* ─── Card ─────────────────────────────────────────────────────────────────── */
+
+.card
+{
+    background: var(--content-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 48px 44px;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: 0 4px 32px rgba(0, 0, 0, 0.07);
+    transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+/* ─── Header ───────────────────────────────────────────────────────────────── */
+
+.header
+{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+    margin-bottom: 36px;
+}
+
+.logo
+{
+    object-fit: contain;
+    margin-bottom: 4px;
+}
+
+.iconWrapper
+{
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: var(--primary-color-alpha);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+}
+
+.iconWrapper svg { width: 26px; height: 26px; }
+
+.title
+{
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.subtitle
+{
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 380px;
+    margin: 0;
+}
+
+/* ─── Form ─────────────────────────────────────────────────────────────────── */
+
+.form
+{
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.row
+{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.field
+{
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.label
+{
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.required { color: #ef4444; }
+
+.optional
+{
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-secondary);
+}
+
+/* ─── Input ────────────────────────────────────────────────────────────────── */
+
+.inputWrapper
+{
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.inputIcon
+{
+    position: absolute;
+    left: 13px;
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+    color: var(--text-secondary);
+}
+
+.inputIcon svg { width: 16px; height: 16px; }
+
+.input
+{
+    width: 100%;
+    padding: 11px 14px 11px 40px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--page-bg);
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input::placeholder { color: var(--text-secondary); opacity: 0.7; }
+
+.input:focus
+{
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+/* ─── Textarea ─────────────────────────────────────────────────────────────── */
+
+.textarea
+{
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--page-bg);
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    font-size: 14px;
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    line-height: 1.55;
+}
+
+.textarea::placeholder { color: var(--text-secondary); opacity: 0.7; }
+
+.textarea:focus
+{
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+/* ─── Error ────────────────────────────────────────────────────────────────── */
+
+.errorMsg
+{
+    font-size: 13px;
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 8px;
+    padding: 10px 14px;
+}
+
+/* ─── Submit ───────────────────────────────────────────────────────────────── */
+
+.submit
+{
+    width: 100%;
+    padding: 13px;
+    background: var(--primary-color);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: opacity 0.2s ease, transform 0.15s ease;
+    margin-top: 6px;
+}
+
+.submit:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+.submit:active:not(:disabled) { transform: translateY(0); }
+.submit:disabled { opacity: 0.5; cursor: not-allowed; }

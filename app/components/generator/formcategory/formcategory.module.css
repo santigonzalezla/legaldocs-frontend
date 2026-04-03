@@ -1,0 +1,142 @@
+.categoryCard {
+    background: var(--content-bg);
+    border-radius: 8px;
+    box-shadow: var(--sidebar-shadow);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.categoryHeader
+{
+    padding: 18px;
+}
+
+.headerTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.expandButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    font-family: var(--font-family);
+}
+
+.expandButton:hover {
+    background-color: var(--hover-bg);
+}
+
+.expandButton:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.expandIcon {
+    width: 16px;
+    height: 16px;
+    color: var(--text-secondary);
+}
+
+.categoryTitle {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.25;
+    margin: 0;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+}
+
+.deleteButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    color: #ef4444;
+    transition: all 0.3s ease;
+    font-family: var(--font-family);
+}
+
+.deleteButton:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+}
+
+.deleteButton:focus-visible {
+    outline: 2px solid #ef4444;
+    outline-offset: 2px;
+}
+
+.deleteIcon {
+    width: 16px;
+    height: 16px;
+}
+
+.categoryContent
+{
+    border-top: 1px solid var(--border-light);
+    padding: 0 24px 24px 24px;
+}
+
+.fieldsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 16px;
+}
+
+.nestedCategory {
+    margin-left: 16px;
+    border-left: 2px solid var(--border-color);
+    padding-left: 16px;
+    margin-top: 16px;
+}
+
+.nestedTitle {
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--text-primary);
+    margin: 0 0 12px 0;
+    text-transform: capitalize;
+    font-family: var(--font-family);
+}
+
+.fieldItem {
+    margin-bottom: 16px;
+}
+
+.fieldItem:last-child {
+    margin-bottom: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .categoryHeader {
+        padding: 16px;
+    }
+
+    .categoryContent {
+        padding: 0 16px 16px 16px;
+    }
+
+    .categoryTitle {
+        font-size: 16px;
+    }
+}

@@ -1,0 +1,386 @@
+.templateEditor
+{
+    width: 100%;
+    background: var(--content-bg);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-light);
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ─── Header ────────────────────────────────────────────────────────────────── */
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+}
+
+/* ─── Form ──────────────────────────────────────────────────────────────────── */
+
+.form { margin-bottom: 2rem; }
+
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.required { color: #ef4444; }
+
+.input,
+.select {
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    background: var(--content-bg);
+    transition: all 0.3s ease;
+    font-family: var(--font-family);
+}
+
+.input:focus,
+.select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+/* ─── Editor Section ────────────────────────────────────────────────────────── */
+
+.editorSection {
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.editorHeader {
+    background: var(--hover-bg);
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-right: 1rem;
+}
+
+.tabs { display: flex; }
+
+.tab {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-secondary);
+    font-weight: 500;
+    border-bottom: 3px solid transparent;
+    font-family: var(--font-family);
+    font-size: 0.875rem;
+}
+
+.tab:hover {
+    color: var(--text-primary);
+    background: var(--content-bg);
+}
+
+.tab.active {
+    color: var(--primary-color);
+    background: var(--content-bg);
+    border-bottom-color: var(--primary-color);
+}
+
+/* ─── Toolbar ───────────────────────────────────────────────────────────────── */
+
+.editorToolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.fileInput { display: none; }
+
+.uploadDocxButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--content-bg);
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--font-family);
+    white-space: nowrap;
+}
+
+.uploadDocxButton svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.uploadDocxButton:hover:not(:disabled) {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: var(--primary-color-alpha);
+}
+
+.uploadDocxButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ─── Edit View ─────────────────────────────────────────────────────────────── */
+
+.editorContent { min-height: 500px; }
+
+.editView {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    height: 500px;
+}
+
+.variablesPanel {
+    background: var(--hover-bg);
+    padding: 1rem;
+    border-right: 1px solid var(--border-light);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.panelTitle {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 0.25rem 0;
+}
+
+.panelHint {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    margin: 0 0 0.5rem 0;
+}
+
+.variablesList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.variableGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-bottom: 0.75rem;
+}
+
+.variableGroupLabel {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-secondary);
+    padding: 0.2rem 0;
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: 0.2rem;
+}
+
+.variableButton {
+    background: var(--content-bg);
+    border: 1px solid var(--border-light);
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    font-family: monospace;
+}
+
+.variableButton:hover {
+    background: var(--primary-color-alpha);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.noVarsText {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.noVarsText code {
+    background: var(--content-bg);
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    font-family: monospace;
+    color: var(--primary-color);
+}
+
+.textEditor { flex: 1; overflow: hidden; }
+
+.textarea {
+    width: 100%;
+    height: 100%;
+    padding: 1rem;
+    border: none;
+    outline: none;
+    resize: none;
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--text-primary);
+    background: var(--content-bg);
+}
+
+/* ─── Preview ───────────────────────────────────────────────────────────────── */
+
+.previewView {
+    padding: 1.5rem;
+    height: 500px;
+    overflow-y: auto;
+}
+
+.previewContent {
+    line-height: 1.7;
+    color: var(--text-primary);
+}
+
+.previewContent h1 { font-size: 1.5rem; font-weight: 700; margin: 0 0 1rem 0; }
+.previewContent h2 { font-size: 1.25rem; font-weight: 600; margin: 1.5rem 0 0.75rem 0; }
+.previewContent h3 { font-size: 1.125rem; font-weight: 600; margin: 1rem 0 0.5rem 0; }
+
+.varHighlight {
+    background: var(--primary-color-alpha);
+    color: var(--primary-color);
+    padding: 0.1rem 0.3rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-family: monospace;
+    font-size: 0.875em;
+}
+
+.previewEmpty {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    padding: 2rem;
+}
+
+/* ─── Actions ───────────────────────────────────────────────────────────────── */
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-light);
+}
+
+.cancelButton {
+    background: none;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--font-family);
+}
+
+.cancelButton:hover { background: var(--hover-bg); }
+
+.saveButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--font-family);
+}
+
+.saveButton:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+
+.saveButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ─── Responsive ────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+    .templateEditor { padding: 1rem; }
+    .formRow { grid-template-columns: 1fr; }
+    .editView {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+    }
+    .variablesPanel {
+        border-right: none;
+        border-bottom: 1px solid var(--border-light);
+        max-height: 160px;
+    }
+    .actions { flex-direction: column; }
+    .editorHeader { padding-right: 0.5rem; }
+}

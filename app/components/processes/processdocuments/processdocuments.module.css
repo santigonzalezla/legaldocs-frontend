@@ -1,0 +1,204 @@
+.container {
+    background: var(--content-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-light);
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.headerIcon {
+    width: 18px;
+    height: 18px;
+    color: var(--primary-color);
+}
+
+.title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.count {
+    background: var(--primary-color-alpha);
+    color: var(--primary-color);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+}
+
+.headerActions {
+    display: flex;
+    gap: 0.6rem;
+}
+
+.btnSecondary,
+.btnPrimary {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 8px;
+    font-size: 0.825rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.btnSecondary svg,
+.btnPrimary svg {
+    width: 14px;
+    height: 14px;
+}
+
+.btnSecondary {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-light);
+}
+
+.btnSecondary:hover {
+    background: var(--button-hover-bg);
+}
+
+.btnPrimary {
+    background: var(--primary-color);
+    color: #fff;
+}
+
+.btnPrimary:hover {
+    opacity: 0.88;
+}
+
+.empty {
+    padding: 2.5rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.tableWrapper {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.table thead tr {
+    border-bottom: 1px solid var(--border-light);
+}
+
+.table th {
+    padding: 0.75rem 1.25rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+    background: var(--hover-bg);
+}
+
+.row {
+    border-bottom: 1px solid var(--border-light);
+    transition: background 0.15s;
+}
+
+.row:last-child {
+    border-bottom: none;
+}
+
+.row:hover {
+    background: var(--hover-bg);
+}
+
+.table td {
+    padding: 0.85rem 1.25rem;
+    color: var(--text-primary);
+}
+
+.docCell {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-weight: 500;
+}
+
+.docIcon {
+    width: 16px;
+    height: 16px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.typeCell {
+    color: var(--text-secondary);
+    font-size: 0.825rem;
+}
+
+.dateCell {
+    color: var(--text-secondary);
+    font-size: 0.825rem;
+    white-space: nowrap;
+}
+
+.actions {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.actionBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 7px;
+    background: var(--hover-bg);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.actionBtn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.actionBtn:hover {
+    background: var(--primary-color-alpha);
+    color: var(--primary-color);
+}
+
+.actionBtn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.deleteBtn:hover {
+    background: #fef2f2;
+    color: #ef4444;
+}

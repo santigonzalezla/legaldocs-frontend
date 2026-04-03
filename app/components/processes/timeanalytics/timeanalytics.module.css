@@ -1,0 +1,354 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* ── Loading / Empty ────────────────────────────────────────────────────────── */
+
+.loading {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-family: var(--font-family);
+}
+
+.empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 4rem 2rem;
+    background: var(--content-bg);
+    border: 1px dashed var(--border-color);
+    border-radius: 16px;
+    text-align: center;
+}
+
+.emptyIcon {
+    width: 40px;
+    height: 40px;
+    color: var(--text-secondary);
+    opacity: 0.4;
+    margin-bottom: 0.5rem;
+}
+
+.empty p {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+}
+
+.empty span {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-family: var(--font-family);
+}
+
+/* ── Summary cards ──────────────────────────────────────────────────────────── */
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.card {
+    background: var(--content-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    padding: 1.1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: box-shadow 0.2s;
+}
+
+.card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.cardIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+
+.cardIcon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.cardBody {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+}
+
+.cardValue {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    line-height: 1.2;
+}
+
+.cardLabel {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+}
+
+.cardSub {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    font-family: var(--font-family);
+}
+
+/* ── Charts grid ────────────────────────────────────────────────────────────── */
+
+.charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+@media (max-width: 900px) {
+    .charts { grid-template-columns: 1fr; }
+}
+
+.chartCard {
+    background: var(--content-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.chartHeader {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.chartHeaderIcon {
+    width: 18px;
+    height: 18px;
+    color: var(--primary-color);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.chartTitle {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+}
+
+.chartSub {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    font-family: var(--font-family);
+}
+
+/* ── Bar list ───────────────────────────────────────────────────────────────── */
+
+.barList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.barRow {
+    display: grid;
+    grid-template-columns: 160px 1fr 52px;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.barLabel {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.barAvatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 0.65rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    font-family: var(--font-family);
+}
+
+.barDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.barLabelText {
+    display: flex;
+    flex-direction: column;
+    gap: 0.05rem;
+    min-width: 0;
+}
+
+.barName {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.barMeta {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    font-family: var(--font-family);
+    white-space: nowrap;
+}
+
+.barTrack {
+    height: 8px;
+    background: var(--hover-bg);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.barFill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    min-width: 4px;
+}
+
+.barValue {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: right;
+    font-family: var(--font-family);
+    white-space: nowrap;
+}
+
+/* ── Cross table ────────────────────────────────────────────────────────────── */
+
+.crossCard {
+    background: var(--content-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.crossTable {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+.crossRow {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 1rem;
+    align-items: start;
+}
+
+.crossUser {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 0.15rem;
+}
+
+.crossAvatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 0.65rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    font-family: var(--font-family);
+}
+
+.crossName {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.crossBars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.crossCell {
+    display: grid;
+    grid-template-columns: 130px 1fr 36px;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.crossCellLabel {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    font-family: var(--font-family);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.crossCellTrack {
+    height: 6px;
+    background: var(--hover-bg);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.crossCellFill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+    min-width: 2px;
+}
+
+.crossCellPct {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: right;
+    font-family: var(--font-family);
+}

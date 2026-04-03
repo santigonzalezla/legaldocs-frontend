@@ -1,0 +1,147 @@
+/* Table View */
+.tableContainer {
+    background: var(--content-bg);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-light);
+    overflow: hidden;
+}
+
+.tableWrapper {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    background: var(--hover-bg);
+    padding: 1rem;
+    text-align: left;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-light);
+    white-space: nowrap;
+}
+
+.table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+.tableRow {
+    transition: background-color 0.2s ease;
+}
+
+.tableRow:hover {
+    background: var(--hover-bg);
+}
+
+.documentCell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 250px;
+}
+
+.documentCell svg {
+    color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+.documentName {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.typeCell {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.clientCell,
+.authorCell {
+    color: var(--text-secondary);
+}
+
+.dateCell,
+.sizeCell {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.tableActions
+{
+    display: flex;
+    gap: 15px;
+}
+
+.actionButton
+{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.actionButton:hover
+{
+    background: var(--hover-bg);
+    color: var(--text-primary);
+}
+
+.tags
+{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.tag
+{
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    background: var(--hover-bg);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .gridContainer {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .documentCard {
+        padding: 1rem;
+    }
+
+    .cardActions {
+        opacity: 1;
+    }
+
+    .table th,
+    .table td {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .documentCell {
+        min-width: 200px;
+    }
+}

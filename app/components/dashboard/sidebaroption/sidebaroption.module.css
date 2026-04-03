@@ -1,0 +1,351 @@
+.option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--sidebar-text);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+    margin-bottom: 2px;
+    font-size: 14px;
+    font-weight: 500;
+    animation: fadeInLeft 0.3s ease-out;
+}
+
+.option:hover {
+    background: var(--sidebar-hover);
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.option:active {
+    transform: translateX(2px) scale(0.98);
+}
+
+.iconContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.option:hover .iconContainer {
+    transform: scale(1.1);
+}
+
+.text {
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    transition: all 0.2s ease;
+    color: var(--sidebar-text);
+}
+
+.optionLink {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    text-decoration: none;
+    color: inherit;
+    min-width: 0;
+    cursor: pointer;
+}
+
+.chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-left: auto;
+}
+
+.expandableOption {
+    margin-bottom: 2px;
+}
+
+.expanded {
+    background: var(--sidebar-hover);
+    color: var(--sidebar-text);
+}
+
+.expanded .chevron {
+    color: var(--sidebar-text);
+    transform: rotate(0deg);
+}
+
+/* Animaciones mejoradas para subopciones */
+.suboptions {
+    margin-left: 32px;
+    border-left: 2px solid var(--sidebar-border);
+    padding-left: 12px;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.suboptionsExpanded {
+    max-height: 500px;
+    opacity: 1;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    animation: slideDownSmooth 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.suboptionsCollapsed {
+    max-height: 0;
+    opacity: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    animation: slideUpSmooth 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Animaciones suaves para expansión/colapso */
+@keyframes slideDownSmooth {
+    from {
+        max-height: 0;
+        opacity: 0;
+        transform: translateY(-10px);
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+    to {
+        max-height: 500px;
+        opacity: 1;
+        transform: translateY(0);
+        margin-top: 8px;
+        margin-bottom: 8px;
+    }
+}
+
+@keyframes slideUpSmooth {
+    from {
+        max-height: 500px;
+        opacity: 1;
+        transform: translateY(0);
+        margin-top: 8px;
+        margin-bottom: 8px;
+    }
+    to {
+        max-height: 0;
+        opacity: 0;
+        transform: translateY(-10px);
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.suboption {
+    display: block;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 400;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-bottom: 2px;
+    position: relative;
+    opacity: 0;
+    transform: translateX(-10px);
+    animation: fadeInSuboption 0.3s ease-out forwards;
+}
+
+.suboption:nth-child(1) {
+    animation-delay: 0.1s;
+}
+.suboption:nth-child(2) {
+    animation-delay: 0.15s;
+}
+.suboption:nth-child(3) {
+    animation-delay: 0.2s;
+}
+.suboption:nth-child(4) {
+    animation-delay: 0.25s;
+}
+.suboption:nth-child(5) {
+    animation-delay: 0.3s;
+}
+.suboption:nth-child(6) {
+    animation-delay: 0.35s;
+}
+.suboption:nth-child(7) {
+    animation-delay: 0.4s;
+}
+.suboption:nth-child(8) {
+    animation-delay: 0.45s;
+}
+
+@keyframes fadeInSuboption {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.suboption:hover {
+    background: var(--sidebar-hover);
+    color: var(--sidebar-text);
+    transform: translateX(3px);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.suboption:active {
+    transform: translateX(1px) scale(0.98);
+}
+
+.suboptionDot {
+    width: 3px;
+    height: 3px;
+    background: var(--text-secondary);
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+.suboption:hover .suboptionDot {
+    background: var(--sidebar-text);
+    transform: scale(1.3);
+}
+
+.suboptionText {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: all 0.2s ease;
+}
+
+/* Estilos para cuando el sidebar está colapsado */
+.collapsed .option {
+    justify-content: center;
+    padding: 12px 8px;
+    margin-bottom: 8px;
+}
+
+.collapsed .text,
+.collapsed .chevron {
+    display: none;
+}
+
+.collapsed .suboptions {
+    display: none;
+}
+
+.collapsed .iconContainer {
+    width: 24px;
+    height: 24px;
+}
+
+/* Colores por categoría */
+.option[data-category="main"] .iconContainer {
+    color: #3b82f6;
+}
+
+.option[data-category="generator"] .iconContainer {
+    color: #10b981;
+}
+
+.option[data-category="documents"] .iconContainer {
+    color: #f59e0b;
+}
+
+.option[data-category="settings"] .iconContainer {
+    color: #8b5cf6;
+}
+
+.option[data-category="resources"] .iconContainer {
+    color: #ef4444;
+}
+
+.option[data-category="subscription"] .iconContainer {
+    color: #06b6d4;
+}
+
+.option[data-category="processes"] .iconContainer {
+    color: #92400e;
+}
+
+[data-theme="dark"] .option[data-category="main"]:hover {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+}
+
+[data-theme="dark"] .option[data-category="generator"]:hover {
+    background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+}
+
+[data-theme="dark"] .option[data-category="documents"]:hover {
+    background: linear-gradient(135deg, #78350f 0%, #92400e 100%);
+}
+
+[data-theme="dark"] .option[data-category="settings"]:hover {
+    background: linear-gradient(135deg, #4c1d95 0%, #6b21a8 100%);
+}
+
+[data-theme="dark"] .option[data-category="resources"]:hover {
+    background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
+}
+
+[data-theme="dark"] .option[data-category="subscription"]:hover {
+    background: linear-gradient(135deg, #164e63 0%, #0e7490 100%);
+}
+
+[data-theme="dark"] .option[data-category="processes"]:hover {
+    background: linear-gradient(135deg, #431407 0%, #7c2d12 100%);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .option {
+        padding: 12px 16px;
+        gap: 16px;
+    }
+
+    .text {
+        font-size: 15px;
+    }
+
+    .suboption {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+}
+
+/* Efecto de hover mejorado para opciones expandibles */
+.expandableOption:hover .chevron {
+    transform: scale(1.1);
+}
+
+/* Transición suave para el chevron cuando rota */
+.chevron svg {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.expanded .chevron svg {
+    transform: rotate(0deg);
+}

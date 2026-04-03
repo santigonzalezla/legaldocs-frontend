@@ -1,0 +1,484 @@
+.container
+{
+    border-radius: 8px;
+    width: 100%;
+    box-shadow: var(--sidebar-shadow);
+    background: #FFF;
+    border: 1px solid var(--border-color);
+}
+
+.toggleButton {
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: center;
+}
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+    font-family: var(--font-family);
+}
+
+.button:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.buttonActive {
+    background-color: var(--primary-color);
+    color: var(--content-bg);
+    border-color: var(--primary-color);
+}
+
+.buttonActive:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.buttonInactive {
+    background-color: var(--button-bg);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+.buttonInactive:hover {
+    background-color: var(--button-hover-bg);
+    transform: translateY(-1px);
+}
+
+.buttonSecondary {
+    background-color: var(--button-bg);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+.buttonSecondary:hover {
+    background-color: var(--button-hover-bg);
+    transform: translateY(-1px);
+}
+
+.buttonPrimary {
+    background-color: var(--primary-color);
+    color: var(--content-bg);
+    border-color: var(--primary-color);
+}
+
+.buttonPrimary:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.buttonIcon {
+    width: 16px;
+    height: 16px;
+}
+
+.editorCard
+{
+    overflow-y: hidden;
+    max-height: 705px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: var(--sidebar-shadow);
+    transition: all 0.3s ease;
+    animation: slideDown 0.3s ease-out;
+    width: 100%;
+    background-color: #FFF;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.editorHeader
+{
+    border-radius: 8px 8px 0 0;
+    padding: 15px 24px;
+    background: var(--button-bg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--sidebar-border);
+}
+
+.editorTitle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.editorTitle h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+}
+
+.editorIcon {
+    width: 20px;
+    height: 20px;
+    color: var(--primary-color);
+}
+
+.editorActions {
+    display: flex;
+    gap: 8px;
+}
+
+.toolbar {
+    padding: 5px 10px;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    background: var(--border-light);
+}
+
+.toolbarGroup {
+    display: flex;
+    gap: 4px;
+    padding: 0 8px;
+    border-right: 1px solid var(--border-color);
+}
+
+.toolbarGroup:last-child {
+    border-right: none;
+}
+
+.toolbarButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-primary);
+}
+
+.toolbarButton:hover {
+    background-color: var(--hover-bg);
+}
+
+.toolbarButton:active {
+    background-color: var(--primary-color);
+    color: var(--content-bg);
+}
+
+.toolbarIcon {
+    width: 16px;
+    height: 16px;
+}
+
+.editorContainer
+{
+    overflow-y: auto;
+    display: flex;
+    height: 100%;
+    border-radius: 8px;
+    width: 100%;
+    box-shadow: var(--sidebar-shadow);
+    background-color: #FFF;
+}
+
+.editorContent
+{
+    flex: 1;
+    max-height: 625px;
+    padding: 24px;
+    overflow-y: auto;
+    background: #f9f9f9;
+}
+
+.editorContentEditable
+{
+    max-height: 585px;
+}
+
+.documentEditor {
+    min-height: 500px;
+    background: #ffffff;
+    color: #000000;
+    padding: 40px;
+    border-radius: 4px;
+    border: 1px solid var(--border-light);
+    font-family: "Times New Roman", serif;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.documentEditor.editable {
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+.documentEditor:focus {
+    outline: none;
+}
+
+/* Document Content Styles */
+.documentContent {
+    max-width: 100%;
+}
+
+/* ─── Bare-tag styles for mammoth-generated HTML ────────────────────────────── */
+
+.documentEditor h1 {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0 0 16px 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #000;
+}
+
+.documentEditor h2 {
+    font-size: 15px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin: 20px 0 10px 0;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #ccc;
+}
+
+.documentEditor h3 {
+    font-size: 14px;
+    font-weight: bold;
+    margin: 14px 0 6px 0;
+}
+
+.documentEditor p {
+    margin: 6px 0;
+    text-align: justify;
+}
+
+.documentEditor ul,
+.documentEditor ol {
+    padding-left: 24px;
+    margin: 8px 0;
+}
+
+.documentEditor li {
+    margin: 4px 0;
+}
+
+.documentEditor strong { font-weight: bold; }
+
+.documentEditor em { font-style: italic; }
+
+.documentEditor hr {
+    border: none;
+    border-top: 1px solid #ccc;
+    margin: 16px 0;
+}
+
+.documentHeader {
+    text-align: center;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #000000;
+}
+
+.documentHeader h1 {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0 0 16px 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #000000;
+}
+
+.documentMeta {
+    font-size: 12px;
+    color: #666666;
+}
+
+.documentMeta p {
+    margin: 4px 0;
+}
+
+.documentBody {
+    margin-bottom: 32px;
+}
+
+.section {
+    margin-bottom: 24px;
+    page-break-inside: avoid;
+}
+
+.section h2 {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0 0 12px 0;
+    text-transform: uppercase;
+    color: #000000;
+    border-bottom: 1px solid #cccccc;
+    padding-bottom: 4px;
+}
+
+.subsection {
+    margin: 16px 0;
+    padding-left: 16px;
+}
+
+.subsection h3 {
+    font-size: 14px;
+    font-weight: bold;
+    margin: 0 0 8px 0;
+    color: #000000;
+}
+
+.field {
+    background-color: #e3f2fd !important;
+    padding: 2px 6px !important;
+    border-radius: 3px !important;
+    font-weight: 500 !important;
+    color: #1565c0 !important;
+    border: 1px solid #90caf9 !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.field:hover {
+    background-color: #bbdefb !important;
+    border-color: #64b5f6 !important;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+}
+
+.table td {
+    border: 1px solid #000000;
+    padding: 8px;
+    text-align: left;
+}
+
+.documentFooter {
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid #cccccc;
+}
+
+.signatures {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 32px;
+    margin-top: 40px;
+}
+
+.signatureBlock {
+    text-align: center;
+}
+
+.signatureLine {
+    height: 1px;
+    background-color: #000000;
+    margin-bottom: 8px;
+    width: 200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.signatureBlock p {
+    margin: 4px 0;
+    font-size: 12px;
+    font-weight: bold;
+    color: #000000;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .editorContainer {
+        flex-direction: column;
+    }
+
+    .editorContent {
+        padding: 16px;
+    }
+
+    .documentEditor {
+        padding: 20px;
+        font-size: 12px;
+    }
+
+    .toolbar {
+        padding: 8px 16px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .toolbarGroup {
+        padding: 0 4px;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .editorCard {
+        box-shadow: none;
+        border: none;
+    }
+
+    .editorHeader,
+    .toolbar {
+        display: none;
+    }
+
+    .editorContent {
+        padding: 0;
+    }
+
+    .documentEditor {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+    }
+
+    .field {
+        background-color: transparent !important;
+        border: none !important;
+        color: #000000 !important;
+        font-weight: bold !important;
+    }
+}
+
+.buttonUnsaved {
+    background-color: #f59e0b !important;
+    border-color: #f59e0b !important;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}

@@ -1,0 +1,205 @@
+/* ── Overlay ──────────────────────────────────────────────────── */
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(3px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+/* ── Modal ────────────────────────────────────────────────────── */
+
+.modal {
+    background: var(--content-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 1.75rem;
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.modalHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.modalHeader h2 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    padding: 0.3rem;
+    display: flex;
+    align-items: center;
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
+}
+
+.closeButton:hover {
+    color: var(--text-primary);
+    background: var(--page-bg);
+}
+
+.closeButton svg { width: 18px; height: 18px; }
+
+/* ── Form ─────────────────────────────────────────────────────── */
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.formGroup label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.input,
+.textarea {
+    padding: 0.625rem 0.875rem;
+    background: var(--page-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.15s;
+    font-family: inherit;
+    resize: vertical;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.input:focus,
+.textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 15%, transparent);
+}
+
+.input::placeholder,
+.textarea::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+.slugPreview {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-family: monospace;
+}
+
+/* ── Color picker ─────────────────────────────────────────────── */
+
+.colorPicker {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.colorSwatch {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2.5px solid transparent;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    padding: 0;
+}
+
+.colorSwatch:hover {
+    transform: scale(1.18);
+}
+
+.colorSwatchActive {
+    border-color: var(--text-primary);
+    transform: scale(1.18);
+    box-shadow: 0 0 0 2px var(--bg-secondary);
+}
+
+.colorPreview {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+.colorDot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.colorHex {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-family: monospace;
+}
+
+/* ── Actions ──────────────────────────────────────────────────── */
+
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.cancelButton {
+    padding: 0.575rem 1.25rem;
+    background: var(--page-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: inherit;
+}
+
+.cancelButton:hover { background: var(--bg-secondary); }
+
+.saveButton {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.575rem 1.25rem;
+    background: var(--primary-color);
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: white;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    font-family: inherit;
+}
+
+.saveButton svg { width: 15px; height: 15px; }
+
+.saveButton:hover:not(:disabled) { opacity: 0.88; }
+
+.saveButton:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}

@@ -1,0 +1,239 @@
+.container {
+    width: 100%;
+}
+
+.actionsCard {
+    background: var(--content-bg);
+    border-radius: 8px;
+    box-shadow: var(--sidebar-shadow);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.actionsHeader {
+    padding: 20px 24px 16px 24px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.actionsTitle {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+}
+
+.actionsDescription {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-family: var(--font-family);
+}
+
+.actionsContent {
+    padding: 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.actionButton {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    background: var(--button-bg);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: var(--font-family);
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+}
+
+.actionButton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.actionButton:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.actionButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.buttonPdf {
+    border-color: #ef4444;
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+}
+
+.buttonPdf:hover:not(:disabled) {
+    border-color: #dc2626;
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+}
+
+.buttonWord {
+    border-color: #3b82f6;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+}
+
+.buttonWord:hover:not(:disabled) {
+    border-color: #2563eb;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+}
+
+.buttonTemplate {
+    border-color: #10b981;
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+}
+
+.buttonTemplate:hover:not(:disabled) {
+    border-color: #059669;
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+}
+
+.buttonIcon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.buttonPdf .buttonIcon {
+    color: #dc2626;
+}
+
+.buttonWord .buttonIcon {
+    color: #2563eb;
+}
+
+.buttonTemplate .buttonIcon {
+    color: #059669;
+}
+
+.buttonContent {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.buttonLabel {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.buttonSubtext {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.2;
+}
+
+.emptyMessage {
+    padding: 20px 24px;
+    text-align: center;
+    border-top: 1px solid var(--border-light);
+    background: var(--button-bg);
+}
+
+.emptyMessage p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-style: italic;
+    font-family: var(--font-family);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .actionsContent {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 16px;
+    }
+
+    .actionButton {
+        padding: 16px;
+        gap: 12px;
+    }
+
+    .buttonIcon {
+        width: 20px;
+        height: 20px;
+    }
+
+    .buttonLabel {
+        font-size: 15px;
+    }
+
+    .buttonSubtext {
+        font-size: 12px;
+    }
+
+    .actionsHeader {
+        padding: 16px;
+    }
+
+    .actionsTitle {
+        font-size: 16px;
+    }
+
+    .actionsDescription {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .actionsContent {
+        padding: 12px;
+    }
+
+    .actionButton {
+        padding: 12px;
+        gap: 10px;
+    }
+
+    .buttonContent {
+        gap: 2px;
+    }
+
+    .buttonLabel {
+        font-size: 14px;
+    }
+
+    .buttonSubtext {
+        font-size: 11px;
+    }
+}
+
+/* Animation for button press effect */
+.actionButton:active:not(:disabled) {
+    transform: translateY(0);
+    transition: transform 0.1s ease;
+}
+
+/* Loading state (optional) */
+.actionButton.loading {
+    pointer-events: none;
+}
+
+.actionButton.loading .buttonIcon {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

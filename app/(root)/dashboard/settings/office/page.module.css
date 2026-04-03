@@ -1,0 +1,113 @@
+.office
+{
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 100vh;
+}
+
+.header h1
+{
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.header p
+{
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+}
+
+.tabsContainer
+{
+    background: var(--content-bg);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-light);
+    overflow: hidden;
+}
+
+.tabsList
+{
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+
+    background: var(--hover-bg);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.tabButton
+{
+    width: 100%;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-family), serif;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text-secondary);
+    font-weight: 500;
+    border-bottom: 3px solid transparent;
+}
+
+.tabButton:hover {
+    background: var(--content-bg);
+    color: var(--text-primary);
+}
+
+.tabButton.active {
+    background: var(--content-bg);
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.tabIcon {
+    font-size: 1.25rem;
+}
+
+.tabLabel {
+    font-size: 0.875rem;
+    white-space: nowrap;
+}
+
+.tabContent {
+    padding: 2rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .pageContainer {
+        padding: 1rem;
+    }
+
+    .tabsList {
+        flex-direction: column;
+    }
+
+    .tabButton {
+        justify-content: flex-start;
+        border-bottom: none;
+        border-right: 3px solid transparent;
+    }
+
+    .tabButton.active {
+        border-bottom: none;
+        border-right-color: var(--primary-color);
+    }
+
+    .tabContent {
+        padding: 1.5rem;
+    }
+}

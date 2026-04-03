@@ -1,0 +1,253 @@
+.container {
+    position: relative;
+}
+
+.triggerButton {
+    margin-top: 8px;
+    background: var(--button-bg);
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+}
+
+.triggerButton:hover {
+    background-color: var(--button-hover-bg);
+    transform: translateY(-1px);
+}
+
+.triggerButton:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.triggerIcon {
+    width: 16px;
+    height: 16px;
+}
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    padding: 16px;
+    backdrop-filter: blur(4px);
+}
+
+.modal {
+    background: var(--content-bg);
+    border-radius: 8px;
+    box-shadow: var(--sidebar-shadow);
+    border: 1px solid var(--border-color);
+    width: 100%;
+    max-width: 425px;
+    max-height: 90vh;
+    overflow-y: auto;
+    transition: all 0.3s ease;
+}
+
+.header {
+    padding: 24px 24px 16px 24px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.title {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.25;
+    margin: 0;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+}
+
+.content {
+    padding: 24px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.label {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.25;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+}
+
+.input {
+    display: flex;
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--content-bg);
+    font-size: 14px;
+    line-height: 1.25;
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+    font-family: var(--font-family);
+}
+
+.input::placeholder {
+    color: var(--text-secondary);
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+.select {
+    display: flex;
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--content-bg);
+    font-size: 14px;
+    line-height: 1.25;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: var(--font-family);
+}
+
+.select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+.checkboxGroup {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.checkbox {
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--content-bg);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    accent-color: var(--primary-color);
+}
+
+.checkbox:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.checkbox:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+.checkboxLabel {
+    font-size: 14px;
+    line-height: 1.25;
+    color: var(--text-primary);
+    cursor: pointer;
+    user-select: none;
+    font-family: var(--font-family);
+}
+
+.buttonGroup
+{
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.buttonOutline,
+.buttonPrimary
+{
+    width: 35%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.25;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+    gap: 8px;
+    text-decoration: none;
+    white-space: nowrap;
+    font-family: var(--font-family), sans-serif;
+}
+
+.button:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.buttonOutline {
+    background-color: var(--button-bg);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+.buttonOutline:hover {
+    background-color: var(--button-hover-bg);
+    transform: translateY(-1px);
+}
+
+.buttonPrimary {
+    background-color: var(--primary-color);
+    color: var(--content-bg);
+    border-color: var(--primary-color);
+}
+
+.buttonPrimary:hover {
+    background-color: var(--primary-color);
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .modal {
+        margin: 8px;
+        max-width: calc(100vw - 16px);
+    }
+
+    .header,
+    .content {
+        padding: 16px;
+    }
+
+    .input,
+    .select {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+}
