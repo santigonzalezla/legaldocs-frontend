@@ -7,6 +7,8 @@ import {useFetch} from '@/hooks/useFetch';
 import type {FirmMember, User} from '@/app/interfaces/interfaces';
 import {FirmMemberRole, FirmMemberStatus} from '@/app/interfaces/enums';
 import {toast} from 'sonner';
+import {useConfirm} from '@/hooks/useConfirm';
+import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
 
 // Backend populates user relation on active members
 type MemberWithUser = FirmMember & {
@@ -70,6 +72,8 @@ const TeamManagement = () =>
     const {execute: removeMember} =
         useFetch<void>('', {method: 'DELETE', immediate: false, firmScoped: true});
 
+    const {confirm, confirmState, handleConfirm, handleCancel} = useConfirm();
+
     // Close dropdown on outside click
     useEffect(() =>
     {
@@ -109,7 +113,7 @@ const TeamManagement = () =>
 
     const handleRemove = async (member: MemberWithUser) =>
     {
-        if (!window.confirm(`¿Eliminar a ${memberName(member)} del equipo?`)) return;
+        if (!await confirm({title: 'Eliminar miembro', message: `¿Eliminar a ${memberName(member)} del equipo?`, confirmLabel: 'Eliminar'})) return;
         await removeMember({}, `firm/me/members/${member.id}`);
         toast.success('Miembro eliminado.');
         refetch();
@@ -327,6 +331,17 @@ const TeamManagement = () =>
                         </div>
                     </div>
                 </div>
+            )}
+
+            {confirmState && (
+                <ConfirmModal
+                    title={confirmState.title}
+                    message={confirmState.message}
+                    confirmLabel={confirmState.confirmLabel}
+                    danger={confirmState.danger}
+                    onConfirm={handleConfirm}
+                    onCancel={handleCancel}
+                />
             )}
         </div>
     );

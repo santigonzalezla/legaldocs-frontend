@@ -6,6 +6,8 @@ import {useFetch} from '@/hooks/useFetch';
 import {toast} from 'sonner';
 import {ArrowLeft, Briefcase, Building, Calendar, Edit, Trash, User} from '@/app/components/svg';
 import type {Client, LegalBranch, LegalProcess} from '@/app/interfaces/interfaces';
+import {useConfirm} from '@/hooks/useConfirm';
+import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
 import TimeTracker from '@/app/components/processes/timetracker/TimeTracker';
 import ProcessDocuments from '@/app/components/processes/processdocuments/ProcessDocuments';
 import {ClientType, ProcessStatus} from '@/app/interfaces/enums';
@@ -48,10 +50,12 @@ const ProcessDetailPage = () =>
     const {execute: deleteProcess} =
         useFetch<void>('', {method: 'DELETE', immediate: false, firmScoped: true});
 
+    const {confirm, confirmState, handleConfirm, handleCancel} = useConfirm();
+
     const handleDelete = async () =>
     {
         if (!process) return;
-        if (!window.confirm(`¿Eliminar el proceso "${process.title}"?`)) return;
+        if (!await confirm({title: 'Eliminar proceso', message: `¿Eliminar el proceso "${process.title}"?`, confirmLabel: 'Eliminar'})) return;
         await deleteProcess({}, `process/${id}`);
         toast.success('Proceso eliminado.');
         router.push('/dashboard/processes');
@@ -173,6 +177,17 @@ const ProcessDetailPage = () =>
                     </p>
                 </div>
             </div>
+
+            {confirmState && (
+                <ConfirmModal
+                    title={confirmState.title}
+                    message={confirmState.message}
+                    confirmLabel={confirmState.confirmLabel}
+                    danger={confirmState.danger}
+                    onConfirm={handleConfirm}
+                    onCancel={handleCancel}
+                />
+            )}
         </div>
     );
 };

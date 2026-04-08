@@ -8,6 +8,8 @@ import {useFetch} from '@/hooks/useFetch';
 import {toast} from 'sonner';
 import {ProcessStatus} from '@/app/interfaces/enums';
 import type {Client, LegalBranch, LegalProcess, PaginatedResponse} from '@/app/interfaces/interfaces';
+import {useConfirm} from '@/hooks/useConfirm';
+import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
 import DocumentStatCard   from '@/app/components/documents/generated/documentstatscard/DocumentStatsCard';
 import ProcessFilters     from '@/app/components/processes/processfilters/ProcessFilters';
 import ProcessGrid        from '@/app/components/processes/processgrid/ProcessGrid';
@@ -53,6 +55,8 @@ const ProcessesPage = () =>
 
     const {execute: deleteProcess} =
         useFetch<void>('', {method: 'DELETE', immediate: false, firmScoped: true});
+
+    const {confirm, confirmState, handleConfirm, handleCancel} = useConfirm();
 
     const processes  = processRes?.data ?? [];
     const clients    = clientRes?.data  ?? [];
@@ -104,7 +108,7 @@ const ProcessesPage = () =>
 
     const handleDelete = async (p: LegalProcess) =>
     {
-        if (!window.confirm(`¿Eliminar el proceso "${p.title}"?`)) return;
+        if (!await confirm({title: 'Eliminar proceso', message: `¿Eliminar el proceso "${p.title}"?`, confirmLabel: 'Eliminar'})) return;
         await deleteProcess({}, `process/${p.id}`);
         toast.success('Proceso eliminado.');
         refetch();
@@ -169,6 +173,17 @@ const ProcessesPage = () =>
                 onClose={handleCloseModal}
                 onSave={handleCreate}
             />
+
+            {confirmState && (
+                <ConfirmModal
+                    title={confirmState.title}
+                    message={confirmState.message}
+                    confirmLabel={confirmState.confirmLabel}
+                    danger={confirmState.danger}
+                    onConfirm={handleConfirm}
+                    onCancel={handleCancel}
+                />
+            )}
         </div>
     );
 };

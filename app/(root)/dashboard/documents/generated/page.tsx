@@ -7,6 +7,8 @@ import {useFetch} from '@/hooks/useFetch';
 import {toast} from 'sonner';
 import type {Document, LegalBranch, PaginatedResponse} from '@/app/interfaces/interfaces';
 import {DocumentStatus} from '@/app/interfaces/enums';
+import {useConfirm} from '@/hooks/useConfirm';
+import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
 import DocumentStatCard   from '@/app/components/documents/generated/documentstatscard/DocumentStatsCard';
 import DocumentFilters    from '@/app/components/documents/shared/documentfilters/DocumentFilters';
 import DocumentList       from '@/app/components/documents/generated/documentlist/DocumentList';
@@ -43,6 +45,8 @@ const Generated = () =>
     const {execute: toggleFav} =
         useFetch<{isFavorite: boolean}>('', {method: 'PATCH', immediate: false, firmScoped: true});
 
+    const {confirm, confirmState, handleConfirm, handleCancel} = useConfirm();
+
     const docs = response?.data ?? [];
 
     const stats = {
@@ -54,7 +58,7 @@ const Generated = () =>
 
     const handleTrash = async (doc: Document) =>
     {
-        if (!window.confirm(`¿Mover "${doc.title}" a la papelera?`)) return;
+        if (!await confirm({title: 'Mover a papelera', message: `¿Mover "${doc.title}" a la papelera?`, confirmLabel: 'Mover a papelera'})) return;
         const result = await trashDoc({}, `document/${doc.id}`);
         if (!result) return;
         toast.success('Documento movido a la papelera.');
@@ -106,6 +110,17 @@ const Generated = () =>
                     viewMode={viewMode}
                     onTrash={handleTrash}
                     onToggleFavorite={handleToggleFavorite}
+                />
+            )}
+
+            {confirmState && (
+                <ConfirmModal
+                    title={confirmState.title}
+                    message={confirmState.message}
+                    confirmLabel={confirmState.confirmLabel}
+                    danger={confirmState.danger}
+                    onConfirm={handleConfirm}
+                    onCancel={handleCancel}
                 />
             )}
         </div>

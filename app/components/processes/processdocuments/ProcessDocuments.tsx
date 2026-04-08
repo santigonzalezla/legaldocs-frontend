@@ -7,6 +7,8 @@ import {useFetch} from '@/hooks/useFetch';
 import {toast} from 'sonner';
 import {Edit, File, Plus, Trash} from '@/app/components/svg';
 import type {Document, PaginatedResponse} from '@/app/interfaces/interfaces';
+import {useConfirm} from '@/hooks/useConfirm';
+import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
 import {getEditUrl} from '@/app/components/documents/generated/documentlist/DocumentList';
 import AddDocumentModal from '@/app/components/processes/adddocumentmodal/AddDocumentModal';
 import GenerateDocumentModal from '@/app/components/processes/generatedocumentmodal/GenerateDocumentModal';
@@ -29,11 +31,13 @@ const ProcessDocuments = ({processId}: ProcessDocumentsProps) =>
     const {execute: trashDoc} =
         useFetch<void>('', {method: 'DELETE', immediate: false, firmScoped: true});
 
+    const {confirm, confirmState, handleConfirm, handleCancel} = useConfirm();
+
     const docs = response?.data ?? [];
 
     const handleTrash = async (doc: Document) =>
     {
-        if (!window.confirm(`¿Mover "${doc.title}" a la papelera?`)) return;
+        if (!await confirm({title: 'Mover a papelera', message: `¿Mover "${doc.title}" a la papelera?`, confirmLabel: 'Mover a papelera'})) return;
         const result = await trashDoc({}, `document/${doc.id}`);
         if (result === null) return;
         toast.success('Documento movido a la papelera.');
@@ -126,6 +130,17 @@ const ProcessDocuments = ({processId}: ProcessDocumentsProps) =>
                 processId={processId}
                 onClose={() => setGenerateOpen(false)}
             />
+
+            {confirmState && (
+                <ConfirmModal
+                    title={confirmState.title}
+                    message={confirmState.message}
+                    confirmLabel={confirmState.confirmLabel}
+                    danger={confirmState.danger}
+                    onConfirm={handleConfirm}
+                    onCancel={handleCancel}
+                />
+            )}
         </div>
     );
 };

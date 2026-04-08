@@ -229,6 +229,7 @@ export interface Subscription
     cancelledAt:  string | null;
     createdAt:    string;
     updatedAt:    string;
+    plan:         SubscriptionPlan;
 }
 
 export interface Invoice
@@ -358,4 +359,27 @@ export interface PaginatedResponse<T>
     total: number;
     page:  number;
     limit: number;
+    pages: number;
+}
+
+export interface LibraryDocument
+{
+    id:          string;
+    numId:       number;
+    firmId:      string;
+    uploadedBy:  string;
+    title:       string;
+    description: string | null;
+    type:        string;
+    fileKey:     string;
+    fileUrl:     string;
+    fileName:    string;
+    fileSize:    number;
+    mimeType:    string;
+    isIndexed:   boolean;
+    branchId:    string | null;
+    branch:      {id: string; name: string; color: string | null; icon: string | null; slug: string} | null;
+    deletedAt:   string | null;
+    createdAt:   string;
+    updatedAt:   string;
 }

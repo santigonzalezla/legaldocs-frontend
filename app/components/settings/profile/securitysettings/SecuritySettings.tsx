@@ -2,6 +2,8 @@
 import { useState } from "react"
 import styles from "./securitysettings.module.css"
 import {Eye, EyeOff, Key, Shield, Smartphone, Lock} from "@/app/components/svg";
+import {useFetch} from "@/hooks/useFetch";
+import {toast} from "sonner";
 
 const SecuritySettings = () =>
 {
@@ -14,24 +16,35 @@ const SecuritySettings = () =>
         confirm: false,
     });
     const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-    const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+    const {isLoading: isChangingPassword, execute: changePassword} = useFetch<{message: string}>(
+        'user/me/password',
+        {method: 'PATCH', immediate: false},
+    );
 
     const handlePasswordChange = async () =>
     {
         if (newPassword !== confirmPassword)
         {
-            alert("Las contraseñas no coinciden");
+            toast.error("Las contraseñas nuevas no coinciden");
             return;
         }
 
-        setIsChangingPassword(true);
-        // Simular cambio de contraseña
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setIsChangingPassword(false);
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-        console.log("Contraseña cambiada");
+        if (newPassword.length < 8)
+        {
+            toast.error("La nueva contraseña debe tener al menos 8 caracteres");
+            return;
+        }
+
+        const result = await changePassword({body: {currentPassword, newPassword}});
+
+        if (result)
+        {
+            toast.success("Contraseña actualizada correctamente");
+            setCurrentPassword("");
+            setNewPassword("");
+            setConfirmPassword("");
+        }
     }
 
     const togglePasswordVisibility = (field: keyof typeof showPasswords) =>

@@ -7,6 +7,8 @@ import {useFetch} from '@/hooks/useFetch';
 import type {DocumentTemplate, LegalBranch, PaginatedResponse} from '@/app/interfaces/interfaces';
 import {TemplateOrigin} from '@/app/interfaces/enums';
 import {toast} from 'sonner';
+import {useConfirm} from '@/hooks/useConfirm';
+import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
 
 interface TemplateListProps
 {
@@ -39,6 +41,8 @@ const TemplateList = ({onCreateNew, onEditTemplate, onSaved}: TemplateListProps)
         firmScoped: true,
     });
 
+    const {confirm, confirmState, handleConfirm, handleCancel} = useConfirm();
+
     const branchMap = Object.fromEntries((branches ?? []).map(b => [b.id, b]));
     const templates = templatesRes?.data ?? [];
 
@@ -56,7 +60,7 @@ const TemplateList = ({onCreateNew, onEditTemplate, onSaved}: TemplateListProps)
 
     const handleDelete = async (id: string) =>
     {
-        if (!window.confirm('¿Eliminar esta plantilla? Esta acción no se puede deshacer.')) return;
+        if (!await confirm({title: 'Eliminar plantilla', message: '¿Eliminar esta plantilla? Esta acción no se puede deshacer.', confirmLabel: 'Eliminar'})) return;
         const result = await executeDelete({}, `template/${id}`);
         if (!result) return;
         toast.success('Plantilla eliminada.');
@@ -253,6 +257,17 @@ const TemplateList = ({onCreateNew, onEditTemplate, onSaved}: TemplateListProps)
                         <p className={styles.createDescription}>Diseña una plantilla personalizada para tu despacho</p>
                     </div>
                 </div>
+            )}
+
+            {confirmState && (
+                <ConfirmModal
+                    title={confirmState.title}
+                    message={confirmState.message}
+                    confirmLabel={confirmState.confirmLabel}
+                    danger={confirmState.danger}
+                    onConfirm={handleConfirm}
+                    onCancel={handleCancel}
+                />
             )}
         </div>
     );

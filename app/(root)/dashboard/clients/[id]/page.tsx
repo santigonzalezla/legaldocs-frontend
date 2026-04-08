@@ -9,6 +9,8 @@ import {ArrowLeft, Briefcase, Building, Calendar, Edit, Mail, MapPin, Phone, Tra
 import type {Client, LegalProcess, PaginatedResponse} from '@/app/interfaces/interfaces';
 import {ClientType, ProcessStatus} from '@/app/interfaces/enums';
 import {STATUS_COLOR, STATUS_LABEL} from '@/app/components/processes/processgrid/ProcessGrid';
+import {useConfirm} from '@/hooks/useConfirm';
+import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
 
 const formatDate = (d: string) =>
     new Date(d).toLocaleDateString('es-ES', {day: '2-digit', month: 'long', year: 'numeric'});
@@ -32,12 +34,14 @@ const ClientDetailPage = () =>
     const {execute: deleteClient} =
         useFetch<void>('', {method: 'DELETE', immediate: false, firmScoped: true});
 
+    const {confirm, confirmState, handleConfirm, handleCancel} = useConfirm();
+
     const processes = processRes?.data ?? [];
 
     const handleDelete = async () =>
     {
         if (!client) return;
-        if (!window.confirm(`¿Eliminar el cliente "${clientName(client)}"? Esta acción no se puede deshacer.`)) return;
+        if (!await confirm({title: 'Eliminar cliente', message: `¿Eliminar el cliente "${clientName(client)}"? Esta acción no se puede deshacer.`, confirmLabel: 'Eliminar'})) return;
         await deleteClient({}, `client/${id}`);
         toast.success('Cliente eliminado.');
         router.push('/dashboard/clients');
@@ -166,6 +170,17 @@ const ClientDetailPage = () =>
                     </div>
                 )}
             </div>
+
+            {confirmState && (
+                <ConfirmModal
+                    title={confirmState.title}
+                    message={confirmState.message}
+                    confirmLabel={confirmState.confirmLabel}
+                    danger={confirmState.danger}
+                    onConfirm={handleConfirm}
+                    onCancel={handleCancel}
+                />
+            )}
         </div>
     );
 };

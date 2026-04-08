@@ -10,6 +10,9 @@ interface DocumentFiltersProps {
     onStatusChange?: (status: string) => void
     selectedType?: string
     onTypeChange?: (type: string) => void
+    selectedExtra?: string
+    onExtraChange?: (value: string) => void
+    extraOptions?: Array<{ value: string; label: string }>
     viewMode?: "grid" | "table"
     onViewModeChange?: (mode: "grid" | "table") => void
     statusOptions: Array<{ value: string; label: string }>
@@ -18,7 +21,7 @@ interface DocumentFiltersProps {
 
 const defaultTypeOptions = [{value: "all", label: "Todos los tipos"}];
 
-const DocumentFilters: React.FC<DocumentFiltersProps> = ({ searchTerm, onSearchChange, selectedStatus, onStatusChange, selectedType, onTypeChange, viewMode, onViewModeChange, statusOptions, typeOptions }) =>
+const DocumentFilters: React.FC<DocumentFiltersProps> = ({ searchTerm, onSearchChange, selectedStatus, onStatusChange, selectedType, onTypeChange, selectedExtra, onExtraChange, extraOptions, viewMode, onViewModeChange, statusOptions, typeOptions }) =>
 {
     return (
         <div className={styles.filtersContainer}>
@@ -66,6 +69,22 @@ const DocumentFilters: React.FC<DocumentFiltersProps> = ({ searchTerm, onSearchC
                             ))}
                         </select>
                     </div>
+
+                    {extraOptions && (
+                        <div className={styles.filterGroup}>
+                            <select
+                                value={selectedExtra}
+                                onChange={(e) => onExtraChange?.(e.target.value)}
+                                className={styles.filterSelect}
+                            >
+                                {extraOptions.map((option) => (
+                                    <option key={option.value} value={option.value}>
+                                        {option.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
                 </div>
 
                 {/* View Mode Toggle */}

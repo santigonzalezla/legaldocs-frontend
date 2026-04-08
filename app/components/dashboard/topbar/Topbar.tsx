@@ -10,7 +10,8 @@ import {Bell, Building, Check, Moon, Search, Settings, Sun, User, Logout, ArrowD
 import {useEffect, useRef, useState} from 'react';
 import Link from 'next/link';
 import {toast} from 'sonner';
-import type {Firm, FirmWithRole, User as UserType} from '@/app/interfaces/interfaces';
+import type {Firm, FirmWithRole, Subscription, User as UserType} from '@/app/interfaces/interfaces';
+import {SubscriptionStatus} from '@/app/interfaces/enums';
 
 const PAGE_TITLES: Record<string, string> = {
     dashboard:    'Resumen',
@@ -47,6 +48,7 @@ const Topbar = () =>
     const {data: userData}  = useFetch<UserType>('user/me');
     const {data: firmData}  = useFetch<Firm>('firm/me', {firmScoped: true});
     const {data: myFirms}   = useFetch<FirmWithRole[]>('firm/my-firms');
+    const {data: subData}   = useFetch<Subscription>('subscription/me', {firmScoped: true});
 
     const pageKey = pathname.split('/')[2] ?? 'dashboard';
     const title = PAGE_TITLES[pageKey] ?? 'Dashboard';
@@ -58,6 +60,14 @@ const Topbar = () =>
     const fullName = userData
         ? `${userData.firstName} ${userData.lastName}`
         : 'Cargando...';
+
+    const planLabel = (() =>
+    {
+        if (!subData) return 'Sin plan';
+        if (subData.status === SubscriptionStatus.TRIAL) return 'Prueba gratuita';
+        if (subData.status === SubscriptionStatus.CANCELLED) return `${subData.plan.displayName} (cancelado)`;
+        return subData.plan.displayName;
+    })();
 
     useEffect(() =>
     {
@@ -176,7 +186,7 @@ const Topbar = () =>
                         <div className={styles.avatar}>{initials}</div>
                         <div className={styles.toprightusertitle}>
                             <h2>{fullName}</h2>
-                            <p>Plan Profesional</p>
+                            <p>{planLabel}</p>
                         </div>
                         <span className={`${styles.chevron} ${isDropdownOpen ? styles.chevronOpen : ''}`}>
                             <ArrowDown/>

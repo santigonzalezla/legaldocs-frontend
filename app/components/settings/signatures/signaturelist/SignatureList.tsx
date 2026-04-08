@@ -6,6 +6,8 @@ import {useFetch} from '@/hooks/useFetch';
 import type {DigitalSignature} from '@/app/interfaces/interfaces';
 import {SignatureType} from '@/app/interfaces/enums';
 import {toast} from 'sonner';
+import {useConfirm} from '@/hooks/useConfirm';
+import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
 
 interface SignatureListProps
 {
@@ -26,6 +28,8 @@ const SignatureList = ({onCreateNew, onEdit, listKey}: SignatureListProps) =>
 
     const {execute: deleteSignature} = useFetch<void>('', {method: 'DELETE', immediate: false});
 
+    const {confirm, confirmState, handleConfirm, handleCancel} = useConfirm();
+
     const {execute: setDefault} = useFetch<DigitalSignature>('', {method: 'PATCH', immediate: false});
 
     const formatDate = (dateString: string) =>
@@ -33,7 +37,7 @@ const SignatureList = ({onCreateNew, onEdit, listKey}: SignatureListProps) =>
 
     const handleDelete = async (id: string, name: string) =>
     {
-        if (!window.confirm(`¿Eliminar la firma "${name}"?`)) return;
+        if (!await confirm({title: 'Eliminar firma', message: `¿Eliminar la firma "${name}"?`, confirmLabel: 'Eliminar'})) return;
         await deleteSignature({}, `signature/${id}`);
         toast.success('Firma eliminada.');
         refetch();
@@ -131,6 +135,17 @@ const SignatureList = ({onCreateNew, onEdit, listKey}: SignatureListProps) =>
                     <p className={styles.createDescription}>Dibuja, escribe o sube una nueva firma digital</p>
                 </div>
             </div>
+
+            {confirmState && (
+                <ConfirmModal
+                    title={confirmState.title}
+                    message={confirmState.message}
+                    confirmLabel={confirmState.confirmLabel}
+                    danger={confirmState.danger}
+                    onConfirm={handleConfirm}
+                    onCancel={handleCancel}
+                />
+            )}
         </div>
     );
 };

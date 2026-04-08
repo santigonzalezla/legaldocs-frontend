@@ -7,6 +7,8 @@ import {useFetch} from '@/hooks/useFetch';
 import {toast} from 'sonner';
 import type {Document, LegalBranch, PaginatedResponse} from '@/app/interfaces/interfaces';
 import {DocumentStatus} from '@/app/interfaces/enums';
+import {useConfirm} from '@/hooks/useConfirm';
+import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
 import StatsCard       from '@/app/components/documents/shared/statscard/StatsCard';
 import DocumentFilters from '@/app/components/documents/shared/documentfilters/DocumentFilters';
 import DraftList       from '@/app/components/documents/drafts/draftlist/DraftList';
@@ -35,6 +37,8 @@ const Drafts = () =>
     const {execute: trashDoc} =
         useFetch<void>('', {method: 'DELETE', immediate: false, firmScoped: true});
 
+    const {confirm, confirmState, handleConfirm, handleCancel} = useConfirm();
+
     const docs = response?.data ?? [];
 
     const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
@@ -46,7 +50,7 @@ const Drafts = () =>
 
     const handleTrash = async (doc: Document) =>
     {
-        if (!window.confirm(`¿Mover "${doc.title}" a la papelera?`)) return;
+        if (!await confirm({title: 'Mover a papelera', message: `¿Mover "${doc.title}" a la papelera?`, confirmLabel: 'Mover a papelera'})) return;
         await trashDoc({}, `document/${doc.id}`);
         toast.success('Borrador movido a la papelera.');
         refetch();
@@ -86,6 +90,17 @@ const Drafts = () =>
                     selectedType={selectedType}
                     viewMode={viewMode}
                     onTrash={handleTrash}
+                />
+            )}
+
+            {confirmState && (
+                <ConfirmModal
+                    title={confirmState.title}
+                    message={confirmState.message}
+                    confirmLabel={confirmState.confirmLabel}
+                    danger={confirmState.danger}
+                    onConfirm={handleConfirm}
+                    onCancel={handleCancel}
                 />
             )}
         </div>

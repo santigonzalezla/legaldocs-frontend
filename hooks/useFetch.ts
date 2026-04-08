@@ -108,9 +108,16 @@ export function useFetch<T = any>(url: string, options: UseFetchOptions = {}): U
                 throw new Error(message);
             }
 
-            const responseData: T = merged.responseType === 'blob'
-                ? await response.blob() as T
-                : await response.json();
+            let responseData: T;
+            if (merged.responseType === 'blob')
+            {
+                responseData = await response.blob() as T;
+            }
+            else
+            {
+                const text = await response.text();
+                responseData = text.length > 0 ? JSON.parse(text) : null as unknown as T;
+            }
 
             setData(responseData);
             return responseData;

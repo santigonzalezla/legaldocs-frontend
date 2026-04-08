@@ -1,49 +1,400 @@
-.dashboard
-{
+.page {
     display: flex;
     flex-direction: column;
-    position: relative;
+    gap: 2rem;
     width: 100%;
-    height: 100%;
-    min-height: 100vh;
-    gap: 30px;
 }
 
-.cards
-{
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 2fr));
-    gap: 20px;
+/* ── Loading / empty ──────────────────────────────────────────── */
+
+.loading {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    padding: 2rem 0;
 }
 
-.infoapp
-{
-    height: 100%;
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 4rem 0;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.emptyState svg { width: 48px; height: 48px; opacity: 0.35; }
+.emptyState p   { margin: 0; font-size: 0.95rem; }
+
+/* ── Header ───────────────────────────────────────────────────── */
+
+.header {
     display: flex;
     align-items: flex-start;
-    gap: 20px;
     justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
 }
 
-.infoappleft
-{
-    height: 100%;
+.header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.25rem;
+}
+
+.header p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────── */
+
+.btnPrimary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1.25rem;
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: opacity 0.15s;
+    flex-shrink: 0;
+}
+
+.btnPrimary:hover { opacity: 0.88; }
+.btnPrimary svg   { width: 16px; height: 16px; }
+
+.btnDanger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1.2rem;
+    background: transparent;
+    color: #dc2626;
+    border: 1px solid #dc2626;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+}
+
+.btnDanger:hover { background: #dc2626; color: #fff; }
+
+/* ── Expiry banner ────────────────────────────────────────────── */
+
+.expiryBanner {
+    background: var(--content-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    flex-basis: 60%;
+    gap: 0.6rem;
 }
 
-@media (max-width: 1260px)
-{
-    .cards {
-        grid-template-columns: repeat(2, 1fr); /* 2 columnas fijas en móviles */
-    }
+.expiryBannerWarn {
+    background: #fff8f0;
+    border-color: #fed7aa;
 }
 
-@media (max-width: 900px)
-{
-    .cards {
-        grid-template-columns: repeat(1, 1fr);
-    }
+.expiryBannerTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.expiryLabel {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.expiryLabel strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.expiryDays {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.progressTrack {
+    width: 100%;
+    height: 6px;
+    background: var(--border-color);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.4s ease;
+}
+
+/* ── Plan card ────────────────────────────────────────────────── */
+
+.planCard {
+    background: var(--content-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.planCardTop {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.planInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex: 1;
+}
+
+.planNameRow {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.planName {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.statusBadge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.65rem;
+    border-radius: 20px;
+}
+
+.planDesc {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.planPricing {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.2rem;
+    flex-shrink: 0;
+}
+
+.planPrice {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.planCycle {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.planMeta {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.metaItem {
+    font-size: 0.825rem;
+    color: var(--text-secondary);
+}
+
+.metaItem strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* ── Sections ─────────────────────────────────────────────────── */
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.sectionTitle {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+/* ── Limits grid ──────────────────────────────────────────────── */
+
+.limitsGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.875rem;
+}
+
+.limitCard {
+    background: var(--content-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+}
+
+.limitCardTop {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+}
+
+.limitIcon {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.limitIcon svg { width: 18px; height: 18px; }
+
+.limitInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.limitLabel {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.limitValue {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.limitMax {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.limitPctRow {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.limitTrack {
+    width: 100%;
+    height: 6px;
+    background: var(--border-color);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.limitFill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.4s ease;
+}
+
+.limitFillUnlimited {
+    height: 100%;
+    width: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--primary-color) 0%, color-mix(in srgb, var(--primary-color) 40%, transparent) 100%);
+    opacity: 0.4;
+}
+
+/* ── Features list ────────────────────────────────────────────── */
+
+.featuresList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 0.5rem;
+}
+
+.featureItem {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+.featureCheck {
+    color: #16a34a;
+    flex-shrink: 0;
+    width: 16px !important;
+    height: 16px !important;
+}
+
+/* ── Danger zone ──────────────────────────────────────────────── */
+
+.dangerZone {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    background: #fff5f5;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    padding: 1.25rem 1.5rem;
+}
+
+.dangerTitle {
+    font-size: 0.925rem;
+    font-weight: 600;
+    color: #dc2626;
+    margin: 0 0 0.25rem;
+}
+
+.dangerDesc {
+    font-size: 0.825rem;
+    color: #991b1b;
+    margin: 0;
 }

@@ -4,6 +4,7 @@ import {satoshi} from "@/app/fonts/satoshi";
 import {APP_DESCRIPTION, APP_NAME, SERVER_URL} from "@/lib/constants";
 import Sidebar from "@/app/components/dashboard/sidebar/Sidebar";
 import Topbar from "@/app/components/dashboard/topbar/Topbar";
+import AiAgent from "@/app/components/aiagent/AiAgent";
 import {Suspense} from "react";
 import {ThemeProvider} from "@/context/ThemeContext";
 import {SearchProvider} from "@/context/SearchContext";
@@ -35,6 +36,7 @@ export default function RootLayout({children}: Readonly<{ children: React.ReactN
                                         {children}
                                     </div>
                                 </div>
+                                <AiAgent />
                             </SearchProvider>
                         </Suspense>
                     </FirmGuard>

@@ -156,10 +156,17 @@
     border-radius: 20px;
 }
 
-.deleteButton {
+.cardActions {
     position: absolute;
     top: 0.75rem;
     right: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.editButton,
+.deleteButton {
     background: none;
     border: none;
     cursor: pointer;
@@ -171,7 +178,9 @@
     transition: color 0.15s, background 0.15s;
 }
 
+.editButton:hover  { color: var(--primary-color); background: color-mix(in srgb, var(--primary-color) 10%, transparent); }
 .deleteButton:hover { color: #ef4444; background: #ef444415; }
+.editButton svg,
 .deleteButton svg { width: 16px; height: 16px; }
 
 /* ── Empty state ──────────────────────────────────────────────── */

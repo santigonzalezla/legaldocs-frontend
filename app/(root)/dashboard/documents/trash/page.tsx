@@ -8,6 +8,8 @@ import type {Document, PaginatedResponse} from '@/app/interfaces/interfaces';
 import DocumentFilters from '@/app/components/documents/shared/documentfilters/DocumentFilters';
 import TrashList       from '@/app/components/documents/trash/trashlist/TrashList';
 import {daysUntilExpiry} from '@/app/components/documents/trash/trashlist/TrashList';
+import {useConfirm} from '@/hooks/useConfirm';
+import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
 
 const statusOptions = [
     {value: 'all', label: 'Todos los eliminados'},
@@ -27,6 +29,8 @@ const Trash = () =>
     const {execute: permanentDelete} =
         useFetch<void>('', {method: 'DELETE', immediate: false, firmScoped: true});
 
+    const {confirm, confirmState, handleConfirm, handleCancel} = useConfirm();
+
     const docs = response?.data ?? [];
 
     const expiringSoon = docs.filter(d => daysUntilExpiry(d.trashExpiresAt) <= 7).length;
@@ -40,7 +44,7 @@ const Trash = () =>
 
     const handlePermanentDelete = async (doc: Document) =>
     {
-        if (!window.confirm(`¿Eliminar permanentemente "${doc.title}"? Esta acción no se puede deshacer.`)) return;
+        if (!await confirm({title: 'Eliminar permanentemente', message: `¿Eliminar permanentemente "${doc.title}"? Esta acción no se puede deshacer.`, confirmLabel: 'Eliminar'})) return;
         await permanentDelete({}, `document/${doc.id}/permanent`);
         toast.success('Documento eliminado permanentemente.');
         refetch();
@@ -74,6 +78,17 @@ const Trash = () =>
                     selectedType={selectedType}
                     onRestore={handleRestore}
                     onPermanentDelete={handlePermanentDelete}
+                />
+            )}
+
+            {confirmState && (
+                <ConfirmModal
+                    title={confirmState.title}
+                    message={confirmState.message}
+                    confirmLabel={confirmState.confirmLabel}
+                    danger={confirmState.danger}
+                    onConfirm={handleConfirm}
+                    onCancel={handleCancel}
                 />
             )}
         </div>

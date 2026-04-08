@@ -176,9 +176,9 @@ const Sidebar = () =>
 
             <div className={styles.scrollContainer}>
                 <div className={styles.options}>
-                    {optionGroups.map((group, groupIndex) => (
+                    {optionGroups.filter(g => g.options.length > 0).map((group, groupIndex) => (
                         <div key={groupIndex} className={styles.optionGroup}>
-                            {!isCollapsed && group.options.length > 0 && (
+                            {!isCollapsed && (
                                 <h3 className={styles.groupTitle}>{group.title}</h3>
                             )}
                             {group.options.map((option, index) => (

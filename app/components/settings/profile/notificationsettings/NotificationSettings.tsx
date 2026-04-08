@@ -1,134 +1,109 @@
 "use client"
-import { useState } from "react"
+import {useEffect, useState} from "react"
 import styles from "./notificationsettings.module.css"
-import {Mail, Monitor, Smartphone} from "@/app/components/svg";
+import {Mail, Monitor} from "@/app/components/svg";
+import {useFetch} from "@/hooks/useFetch";
+import {toast} from "sonner";
+import {NotificationPreferences} from "@/app/interfaces/interfaces";
 
-interface NotificationSettings {
-    email: {
-        documentGenerated: boolean,
-        documentShared: boolean,
-        teamUpdates: boolean,
-        systemUpdates: boolean,
-        securityAlerts: boolean,
-    }
-    push: {
-        documentGenerated: boolean,
-        documentShared: boolean,
-        teamUpdates: boolean,
-        reminders: boolean,
-    }
-    desktop: {
-        documentGenerated: boolean,
-        documentShared: boolean,
-        reminders: boolean,
-    }
-}
+type NotificationPrefs = Pick<NotificationPreferences,
+    'emailNewDocument' | 'emailDocumentShared' | 'emailTemplateUpdated' |
+    'emailTeamInvite'  | 'emailBilling'        | 'emailLegalUpdates'    |
+    'inAppNewDocument' | 'inAppDocumentShared'  | 'inAppTeamActivity'    | 'inAppBilling'
+>;
+
+const defaults: NotificationPrefs = {
+    emailNewDocument:     true,
+    emailDocumentShared:  true,
+    emailTemplateUpdated: false,
+    emailTeamInvite:      true,
+    emailBilling:         true,
+    emailLegalUpdates:    false,
+    inAppNewDocument:     true,
+    inAppDocumentShared:  true,
+    inAppTeamActivity:    false,
+    inAppBilling:         true,
+};
+
+const notificationGroups = [
+    {
+        key:         'email',
+        title:       'Notificaciones por Email',
+        icon:        <Mail />,
+        description: 'Recibe notificaciones en tu correo electrónico',
+        options: [
+            {key: 'emailNewDocument'     as keyof NotificationPrefs, label: 'Documento generado'},
+            {key: 'emailDocumentShared'  as keyof NotificationPrefs, label: 'Documento compartido'},
+            {key: 'emailTemplateUpdated' as keyof NotificationPrefs, label: 'Actualización de plantillas'},
+            {key: 'emailTeamInvite'      as keyof NotificationPrefs, label: 'Invitaciones al equipo'},
+            {key: 'emailBilling'         as keyof NotificationPrefs, label: 'Facturación y suscripción'},
+            {key: 'emailLegalUpdates'    as keyof NotificationPrefs, label: 'Actualizaciones normativas'},
+        ],
+    },
+    {
+        key:         'inApp',
+        title:       'Notificaciones en la Aplicación',
+        icon:        <Monitor />,
+        description: 'Notificaciones dentro del dashboard',
+        options: [
+            {key: 'inAppNewDocument'    as keyof NotificationPrefs, label: 'Documento generado'},
+            {key: 'inAppDocumentShared' as keyof NotificationPrefs, label: 'Documento compartido'},
+            {key: 'inAppTeamActivity'   as keyof NotificationPrefs, label: 'Actividad del equipo'},
+            {key: 'inAppBilling'        as keyof NotificationPrefs, label: 'Facturación y suscripción'},
+        ],
+    },
+];
 
 const NotificationSettings = () =>
 {
-    const [settings, setSettings] = useState<NotificationSettings>({
-        email: {
-            documentGenerated: true,
-            documentShared: true,
-            teamUpdates: false,
-            systemUpdates: true,
-            securityAlerts: true,
-        },
-        push: {
-            documentGenerated: true,
-            documentShared: false,
-            teamUpdates: false,
-            reminders: true,
-        },
-        desktop: {
-            documentGenerated: false,
-            documentShared: true,
-            reminders: true,
-        },
-    });
+    const [prefs, setPrefs] = useState<NotificationPrefs>(defaults);
 
-    const [isSaving, setIsSaving] = useState(false);
+    const {data, isLoading: isLoadingPrefs} = useFetch<NotificationPreferences>(
+        'user/me/notification-preferences',
+    );
 
-    const getSettingValue = (category: keyof NotificationSettings, setting: string): boolean => {
-        const categorySettings = settings[category];
-        return (categorySettings as any)[setting] ?? false;
-    };
+    const {isLoading: isSaving, execute: savePrefs} = useFetch<NotificationPreferences>(
+        'user/me/notification-preferences',
+        {method: 'PATCH', immediate: false},
+    );
 
-    const handleToggle = (category: keyof NotificationSettings, setting: string) =>
+    useEffect(() =>
     {
-        setSettings((prev) => ({
-            ...prev,
-            [category]: {
-                ...prev[category],
-                [setting]: !prev[category][setting as keyof (typeof prev)[typeof category]],
-            },
-        }));
-    }
+        if (data)
+        {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const {id, userId, createdAt, updatedAt, ...booleans} = data;
+            setPrefs(booleans);
+        }
+    }, [data]);
+
+    const handleToggle = (key: keyof NotificationPrefs) =>
+    {
+        setPrefs(prev => ({...prev, [key]: !prev[key]}));
+    };
 
     const handleSave = async () =>
     {
-        setIsSaving(true);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setIsSaving(false);
-        console.log("Configuración de notificaciones guardada:", settings);
-    }
-
-    const notificationTypes = [
-        {
-            key: "email" as const,
-            title: "Notificaciones por Email",
-            icon: <Mail />,
-            description: "Recibe notificaciones en tu correo electrónico",
-            options: [
-                { key: "documentGenerated", label: "Documento generado" },
-                { key: "documentShared", label: "Documento compartido" },
-                { key: "teamUpdates", label: "Actualizaciones del equipo" },
-                { key: "systemUpdates", label: "Actualizaciones del sistema" },
-                { key: "securityAlerts", label: "Alertas de seguridad" },
-            ],
-        },
-        {
-            key: "push" as const,
-            title: "Notificaciones Push",
-            icon: <Smartphone />,
-            description: "Notificaciones en tu dispositivo móvil",
-            options: [
-                { key: "documentGenerated", label: "Documento generado" },
-                { key: "documentShared", label: "Documento compartido" },
-                { key: "teamUpdates", label: "Actualizaciones del equipo" },
-                { key: "reminders", label: "Recordatorios" },
-            ],
-        },
-        {
-            key: "desktop" as const,
-            title: "Notificaciones de Escritorio",
-            icon: <Monitor />,
-            description: "Notificaciones en tu navegador web",
-            options: [
-                { key: "documentGenerated", label: "Documento generado" },
-                { key: "documentShared", label: "Documento compartido" },
-                { key: "reminders", label: "Recordatorios" },
-            ],
-        },
-    ];
-
+        const result = await savePrefs({body: prefs});
+        if (result) toast.success('Preferencias de notificaciones guardadas');
+    };
 
     return (
         <div className={styles.notificationSettings}>
-            {notificationTypes.map((type) => (
-                <div key={type.key} className={styles.section}>
+            {notificationGroups.map((group) => (
+                <div key={group.key} className={styles.section}>
                     <div className={styles.sectionHeader}>
                         <div className={styles.sectionTitle}>
-                            {type.icon}
+                            {group.icon}
                             <div>
-                                <h4>{type.title}</h4>
-                                <p className={styles.sectionDescription}>{type.description}</p>
+                                <h4>{group.title}</h4>
+                                <p className={styles.sectionDescription}>{group.description}</p>
                             </div>
                         </div>
                     </div>
 
                     <div className={styles.optionsList}>
-                        {type.options.map((option) => (
+                        {group.options.map((option) => (
                             <div key={option.key} className={styles.optionItem}>
                                 <div className={styles.optionInfo}>
                                     <span className={styles.optionLabel}>{option.label}</span>
@@ -136,12 +111,12 @@ const NotificationSettings = () =>
                                 <div className={styles.toggle}>
                                     <input
                                         type="checkbox"
-                                        id={`${type.key}-${option.key}`}
-                                        checked={getSettingValue(type.key, option.key)}
-                                        onChange={() => handleToggle(type.key as keyof NotificationSettings, option.key)}
+                                        id={option.key}
+                                        checked={prefs[option.key]}
+                                        onChange={() => handleToggle(option.key)}
                                         className={styles.toggleInput}
                                     />
-                                    <label htmlFor={`${type.key}-${option.key}`} className={styles.toggleLabel}>
+                                    <label htmlFor={option.key} className={styles.toggleLabel}>
                                         <span className={styles.toggleSlider}></span>
                                     </label>
                                 </div>
@@ -152,12 +127,16 @@ const NotificationSettings = () =>
             ))}
 
             <div className={styles.saveSection}>
-                <button onClick={handleSave} disabled={isSaving} className={styles.saveButton}>
-                    {isSaving ? "Guardando..." : "Guardar Configuración"}
+                <button
+                    onClick={handleSave}
+                    disabled={isSaving || isLoadingPrefs}
+                    className={styles.saveButton}
+                >
+                    {isSaving ? 'Guardando...' : 'Guardar Configuración'}
                 </button>
             </div>
         </div>
-    )
-}
+    );
+};
 
 export default NotificationSettings;

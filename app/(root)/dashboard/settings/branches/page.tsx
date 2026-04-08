@@ -4,9 +4,10 @@ import {useState} from 'react';
 import styles from './page.module.css';
 import {useFetch} from '@/hooks/useFetch';
 import type {DocumentTemplate, LegalBranch, PaginatedResponse} from '@/app/interfaces/interfaces';
-import {File, Plus, Scale, Buildings, Users, Hammer, Building, Shield, Globe, Trash} from '@/app/components/svg';
+import {File, Plus, Scale, Buildings, Users, Hammer, Building, Shield, Globe, Trash, Edit} from '@/app/components/svg';
 import {toast} from 'sonner';
-import AddBranchModal from '@/app/components/settings/branches/addbranch/AddBranchModal';
+import AddBranchModal  from '@/app/components/settings/branches/addbranch/AddBranchModal';
+import EditBranchModal from '@/app/components/settings/branches/editbranch/EditBranchModal';
 
 const BRANCH_ICONS: Record<string, React.ReactElement> = {
     civil: <Scale/>,
@@ -25,11 +26,18 @@ const toSlug = (name: string) =>
 const BranchesPage = () =>
 {
     const [showModal, setShowModal] = useState(false);
-    const [newName, setNewName] = useState('');
-    const [newDesc, setNewDesc] = useState('');
-    const [newColor, setNewColor] = useState(COLORS[0]);
-    const [saving, setSaving] = useState(false);
-    const [listKey, setListKey] = useState(0);
+    const [newName,   setNewName]   = useState('');
+    const [newDesc,   setNewDesc]   = useState('');
+    const [newColor,  setNewColor]  = useState(COLORS[0]);
+    const [saving,    setSaving]    = useState(false);
+    const [listKey,   setListKey]   = useState(0);
+
+    // Edit state
+    const [editingBranch, setEditingBranch] = useState<LegalBranch | null>(null);
+    const [editName,      setEditName]      = useState('');
+    const [editDesc,      setEditDesc]      = useState('');
+    const [editColor,     setEditColor]     = useState(COLORS[0]);
+    const [editSaving,    setEditSaving]    = useState(false);
 
     const {data: branchesRes, execute: refetchBranches} = useFetch<LegalBranch[]>(
         'branch?isActive=true&limit=50',
@@ -49,6 +57,12 @@ const BranchesPage = () =>
 
     const {execute: deleteBranch} = useFetch<void>('branch', {
         method: 'DELETE',
+        immediate: false,
+        firmScoped: true
+    });
+
+    const {execute: updateBranch} = useFetch<LegalBranch>('branch', {
+        method: 'PATCH',
         immediate: false,
         firmScoped: true
     });
@@ -92,6 +106,37 @@ const BranchesPage = () =>
         if (!confirm(`¿Eliminar la rama "${branch.name}"? Esta acción no se puede deshacer.`)) return;
         await deleteBranch({}, `branch/${branch.id}`);
         setListKey(k => k + 1);
+        refetchBranches();
+    };
+
+    const openEdit = (branch: LegalBranch) =>
+    {
+        setEditingBranch(branch);
+        setEditName(branch.name);
+        setEditDesc(branch.description ?? '');
+        setEditColor(branch.color ?? COLORS[0]);
+    };
+
+    const closeEdit = () =>
+    {
+        setEditingBranch(null);
+        setEditName('');
+        setEditDesc('');
+        setEditColor(COLORS[0]);
+    };
+
+    const handleEdit = async () =>
+    {
+        if (!editingBranch || !editName.trim()) return;
+        setEditSaving(true);
+        const result = await updateBranch(
+            {body: {name: editName.trim(), description: editDesc.trim() || null, color: editColor}},
+            `branch/${editingBranch.id}`
+        );
+        setEditSaving(false);
+        if (!result) return;
+        closeEdit();
+        toast.success('Rama actualizada correctamente');
         refetchBranches();
     };
 
@@ -169,10 +214,14 @@ const BranchesPage = () =>
                                         </span>
                                     </div>
                                 </div>
-                                <button className={styles.deleteButton} onClick={() => handleDelete(b)}
-                                        title="Eliminar rama">
-                                    <Trash/>
-                                </button>
+                                <div className={styles.cardActions}>
+                                    <button className={styles.editButton} onClick={() => openEdit(b)} title="Editar rama">
+                                        <Edit/>
+                                    </button>
+                                    <button className={styles.deleteButton} onClick={() => handleDelete(b)} title="Eliminar rama">
+                                        <Trash/>
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -191,6 +240,19 @@ const BranchesPage = () =>
                 onName={setNewName}
                 onDesc={setNewDesc}
                 onColor={setNewColor}
+            />
+
+            <EditBranchModal
+                open={!!editingBranch}
+                saving={editSaving}
+                name={editName}
+                desc={editDesc}
+                color={editColor}
+                onClose={closeEdit}
+                onSave={handleEdit}
+                onName={setEditName}
+                onDesc={setEditDesc}
+                onColor={setEditColor}
             />
         </div>
     );

@@ -117,3 +117,5 @@ export { default as PanelOpen } from './panelopen.svg';
 export { default as PanelClose } from './panelclose.svg';
 export { default as FileDown } from './filedown.svg';
 export { default as Loader } from './loader.svg';
+export { default as Send } from './send.svg';
+export { default as Legalito } from './legalito.svg';

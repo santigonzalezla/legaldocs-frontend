@@ -1,49 +1,409 @@
-.dashboard
-{
+.page {
     display: flex;
     flex-direction: column;
-    position: relative;
+    gap: 2rem;
     width: 100%;
-    height: 100%;
-    min-height: 100vh;
-    gap: 30px;
 }
 
-.cards
-{
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 2fr));
-    gap: 20px;
+/* ── Loading ──────────────────────────────────────────────────── */
+
+.loading {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    padding: 2rem 0;
 }
 
-.infoapp
-{
-    height: 100%;
-    display: flex;
-    align-items: flex-start;
-    gap: 20px;
-    justify-content: space-between;
+/* ── Header ───────────────────────────────────────────────────── */
+
+.header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.25rem;
 }
 
-.infoappleft
-{
-    height: 100%;
+.header p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* ── Trial banner ─────────────────────────────────────────────── */
+
+.trialBanner {
+    background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+    border: 1px solid #bfdbfe;
+    border-radius: 12px;
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    flex-basis: 60%;
+    gap: 1rem;
+    width: 100%;
 }
 
-@media (max-width: 1260px)
-{
-    .cards {
-        grid-template-columns: repeat(2, 1fr); /* 2 columnas fijas en móviles */
-    }
+.trialBannerBody {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
 }
 
-@media (max-width: 900px)
-{
-    .cards {
-        grid-template-columns: repeat(1, 1fr);
-    }
+.trialBannerLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex: 1;
+}
+
+.trialBannerTag {
+    display: inline-block;
+    align-self: flex-start;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    background: var(--primary-color);
+    color: #fff;
+    padding: 0.2rem 0.65rem;
+    border-radius: 6px;
+}
+
+.trialBannerMsg {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.trialBannerMsg strong { font-weight: 700; }
+
+.trialBannerRight {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.2rem;
+    flex-shrink: 0;
+}
+
+.trialDays {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    line-height: 1;
+}
+
+.trialEnd {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.trialTrack {
+    width: 100%;
+    height: 6px;
+    background: #bfdbfe;
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.trialFill {
+    height: 100%;
+    background: var(--primary-color);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+}
+
+/* ── Billing cycle toggle ─────────────────────────────────────── */
+
+.toggleWrap {
+    display: flex;
+    align-items: center;
+    background: var(--content-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 0.25rem;
+    align-self: flex-start;
+}
+
+.toggleBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.1rem;
+    border: none;
+    border-radius: 7px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-secondary);
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+
+.toggleActive {
+    background: var(--primary-color);
+    color: #fff;
+}
+
+.savingsBadge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: #dcfce7;
+    color: #16a34a;
+    padding: 0.15rem 0.45rem;
+    border-radius: 20px;
+}
+
+.toggleActive .savingsBadge {
+    background: rgba(255,255,255,0.22);
+    color: #fff;
+}
+
+/* ── Plans grid ───────────────────────────────────────────────── */
+
+.plansGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+    align-items: stretch;
+}
+
+/* ── Plan card ────────────────────────────────────────────────── */
+
+.planCard {
+    background: var(--content-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    position: relative;
+    transition: box-shadow 0.15s;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.planCard:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+}
+
+.planCardPopular {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 1px var(--primary-color);
+}
+
+.planCardCurrent {
+    border-color: #16a34a;
+    box-shadow: 0 0 0 1px #16a34a;
+}
+
+/* ── Popular badge ────────────────────────────────────────────── */
+
+.popularBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    position: absolute;
+    top: -1px;
+    right: 1.5rem;
+    background: var(--primary-color);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.3rem 0.75rem;
+    border-radius: 0 0 8px 8px;
+}
+
+.popularBadge svg { width: 13px; height: 13px; }
+
+/* ── Plan header ──────────────────────────────────────────────── */
+
+.planHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.planNameTag {
+    display: inline-block;
+    align-self: flex-start;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--primary-color);
+    background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--primary-color) 25%, transparent);
+    border-radius: 6px;
+    padding: 0.25rem 0.65rem;
+}
+
+/* ── Pricing ──────────────────────────────────────────────────── */
+
+.planPricing {
+    display: flex;
+    align-items: baseline;
+    gap: 0.3rem;
+}
+
+.planPrice {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.planCycle {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.annualNote {
+    font-size: 0.75rem;
+    color: #16a34a;
+    font-weight: 500;
+}
+
+.planDesc {
+    font-size: 0.825rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ── Divider ──────────────────────────────────────────────────── */
+
+.divider {
+    height: 1px;
+    background: var(--border-color);
+    flex-shrink: 0;
+}
+
+/* ── Features ─────────────────────────────────────────────────── */
+
+.featuresList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    flex: 1;
+}
+
+.featureItem {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-size: 0.855rem;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+.featureCheckWrap {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #dcfce7;
+    color: #16a34a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.featureCheckWrap svg {
+    width: 11px;
+    height: 11px;
+}
+
+/* ── Sales banner ─────────────────────────────────────────────── */
+
+.salesBanner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    background: linear-gradient(135deg,
+        color-mix(in srgb, #8b5cf6 6%, var(--content-bg)) 0%,
+        color-mix(in srgb, var(--primary-color) 5%, var(--content-bg)) 100%
+    );
+    border: 1px solid color-mix(in srgb, #8b5cf6 30%, transparent);
+    border-radius: 12px;
+    padding: 1.35rem 1.6rem;
+    box-shadow: 0 0 0 4px color-mix(in srgb, #8b5cf6 6%, transparent);
+}
+
+.salesBannerLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+}
+
+.salesBannerTitle {
+    font-size: 0.975rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.salesBannerMsg {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+    max-width: 60ch;
+}
+
+.salesBannerBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1.25rem;
+    background: #8b5cf6;
+    color: #fff;
+    border: none;
+    border-radius: 9px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: opacity 0.15s;
+}
+
+.salesBannerBtn:hover { opacity: 0.88; }
+.salesBannerBtn svg   { width: 15px; height: 15px; }
+
+/* ── Select button ────────────────────────────────────────────── */
+
+.selectBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    width: 100%;
+    padding: 0.65rem 1rem;
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 9px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.selectBtn:hover:not(:disabled) { opacity: 0.88; }
+.selectBtn:disabled              { cursor: default; }
+.selectBtn svg                   { width: 15px; height: 15px; }
+
+.selectBtnCurrent {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
 }

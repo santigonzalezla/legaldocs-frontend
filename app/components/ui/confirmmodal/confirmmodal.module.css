@@ -1,0 +1,133 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+    padding: 1rem;
+    animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.modal {
+    background: var(--content-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.1rem;
+    padding: 2rem 1.75rem 1.5rem;
+    text-align: center;
+    animation: slideUp 0.18s ease;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(10px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* ── Icon ─────────────────────────────────────────────────────────── */
+
+.iconWrap {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.iconWrap[data-danger='true'] {
+    background: #fef2f2;
+    color: #ef4444;
+}
+
+.iconWrap[data-danger='false'] {
+    background: #eff6ff;
+    color: var(--primary-color);
+}
+
+.icon {
+    width: 24px;
+    height: 24px;
+}
+
+/* ── Body ─────────────────────────────────────────────────────────── */
+
+.body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.message {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ── Actions ──────────────────────────────────────────────────────── */
+
+.actions {
+    display: flex;
+    gap: 0.75rem;
+    width: 100%;
+    margin-top: 0.4rem;
+}
+
+.btnCancel,
+.btnConfirm {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+}
+
+.btnCancel {
+    background: var(--button-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+}
+
+.btnCancel:hover {
+    background: var(--button-hover-bg);
+    color: var(--text-primary);
+}
+
+.btnDanger {
+    background: #ef4444;
+    border: none;
+    color: #fff;
+}
+
+.btnDanger:hover { opacity: 0.88; }
+
+.btnPrimary {
+    background: var(--primary-color);
+    border: none;
+    color: #fff;
+}
+
+.btnPrimary:hover { opacity: 0.88; }

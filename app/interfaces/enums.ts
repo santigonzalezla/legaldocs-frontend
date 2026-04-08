@@ -85,3 +85,16 @@ export enum TimeEntryType
     AUTO   = 'AUTO',
     MANUAL = 'MANUAL',
 }
+
+export enum LibraryDocumentType
+{
+    LAW           = 'LAW',
+    DECREE        = 'DECREE',
+    RESOLUTION    = 'RESOLUTION',
+    CIRCULAR      = 'CIRCULAR',
+    RULING        = 'RULING',
+    JURISPRUDENCE = 'JURISPRUDENCE',
+    DOCTRINE      = 'DOCTRINE',
+    CONTRACT      = 'CONTRACT',
+    OTHER         = 'OTHER',
+}

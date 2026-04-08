@@ -10,6 +10,8 @@ import {ArrowLeft, Briefcase, Building, Calendar, Edit, Mail, MapPin, Phone, Sav
 import {ClientType, ProcessStatus} from '@/app/interfaces/enums';
 import type {Client, LegalProcess, PaginatedResponse} from '@/app/interfaces/interfaces';
 import {STATUS_COLOR, STATUS_LABEL} from '@/app/components/processes/processgrid/ProcessGrid';
+import {useConfirm} from '@/hooks/useConfirm';
+import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
 
 const DOC_TYPES = ['CC', 'NIT', 'CE', 'PP', 'TI', 'RUT'];
 
@@ -45,6 +47,8 @@ const ClientDetailModal = ({clientId, onClose, onSaved, onDeleted}: ClientDetail
 
     const {execute: deleteClient} =
         useFetch<void>('', {method: 'DELETE', immediate: false, firmScoped: true});
+
+    const {confirm, confirmState, handleConfirm, handleCancel} = useConfirm();
 
     const [form, setForm] = useState({
         type:           ClientType.INDIVIDUAL as ClientType,
@@ -97,7 +101,7 @@ const ClientDetailModal = ({clientId, onClose, onSaved, onDeleted}: ClientDetail
     const handleDelete = async () =>
     {
         if (!client) return;
-        if (!window.confirm(`¿Eliminar el cliente "${clientName(client)}"? Esta acción no se puede deshacer.`)) return;
+        if (!await confirm({title: 'Eliminar cliente', message: `¿Eliminar el cliente "${clientName(client)}"? Esta acción no se puede deshacer.`, confirmLabel: 'Eliminar'})) return;
         await deleteClient({}, `client/${clientId}`);
         toast.success('Cliente eliminado.');
         onDeleted();
@@ -397,6 +401,17 @@ const ClientDetailModal = ({clientId, onClose, onSaved, onDeleted}: ClientDetail
                     </div>
                 )}
             </div>
+
+            {confirmState && (
+                <ConfirmModal
+                    title={confirmState.title}
+                    message={confirmState.message}
+                    confirmLabel={confirmState.confirmLabel}
+                    danger={confirmState.danger}
+                    onConfirm={handleConfirm}
+                    onCancel={handleCancel}
+                />
+            )}
         </div>
     );
 };

@@ -7,6 +7,8 @@ import {useFetch} from '@/hooks/useFetch';
 import {toast} from 'sonner';
 import {ClientType} from '@/app/interfaces/enums';
 import type {Client, PaginatedResponse} from '@/app/interfaces/interfaces';
+import {useConfirm} from '@/hooks/useConfirm';
+import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
 import DocumentStatCard    from '@/app/components/documents/generated/documentstatscard/DocumentStatsCard';
 import ClientFilters       from '@/app/components/clients/clientfilters/ClientFilters';
 import ClientGrid          from '@/app/components/clients/clientgrid/ClientGrid';
@@ -35,6 +37,8 @@ const ClientsPage = () =>
     const [saving,           setSaving]           = useState(false);
     const [form,             setForm]             = useState({...EMPTY_FORM});
     const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+
+    const {confirm, confirmState, handleConfirm, handleCancel} = useConfirm();
 
     const {data: response, isLoading, execute: refetch} =
         useFetch<PaginatedResponse<Client>>('client?limit=100', {firmScoped: true});
@@ -96,7 +100,7 @@ const ClientsPage = () =>
         const name = client.type === ClientType.COMPANY
             ? client.companyName
             : `${client.firstName ?? ''} ${client.lastName ?? ''}`.trim();
-        if (!window.confirm(`¿Eliminar cliente "${name}"?`)) return;
+        if (!await confirm({title: 'Eliminar cliente', message: `¿Eliminar cliente "${name}"? Esta acción no se puede deshacer.`, confirmLabel: 'Eliminar'})) return;
         await deleteClient({}, `client/${client.id}`);
         toast.success('Cliente eliminado.');
         refetch();
@@ -159,6 +163,17 @@ const ClientsPage = () =>
                     onClose={() => setSelectedClientId(null)}
                     onSaved={refetch}
                     onDeleted={refetch}
+                />
+            )}
+
+            {confirmState && (
+                <ConfirmModal
+                    title={confirmState.title}
+                    message={confirmState.message}
+                    confirmLabel={confirmState.confirmLabel}
+                    danger={confirmState.danger}
+                    onConfirm={handleConfirm}
+                    onCancel={handleCancel}
                 />
             )}
         </div>
