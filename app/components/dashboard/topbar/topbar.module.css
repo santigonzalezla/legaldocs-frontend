@@ -257,18 +257,28 @@
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
+    min-width: 0;
+    max-width: 130px;
 }
 
 .toprightusertitle h2 {
     font-weight: 500;
     font-size: 14px;
     color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 
 .toprightusertitle p {
     font-weight: 400;
     font-size: 12px;
     color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 
 .topbell {
@@ -475,31 +485,69 @@
     color: var(--text-secondary);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .topbarContainer {
-        padding: 1rem;
-        flex-wrap: wrap;
-        height: auto;
-        gap: 0.5rem;
-    }
+/* ─── Responsive ───────────────────────────────────────────────────────────── */
 
-    .topbarLeft {
-        order: 1;
-    }
-
-    .topbarRight {
-        order: 2;
+/* Pantallas medianas: reducir proporciones */
+@media (max-width: 1100px) {
+    .top h1 {
+        flex-basis: 20%;
+        font-size: 22px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .topbarCenter {
-        order: 3;
-        width: 100%;
-        margin: 0;
-        max-width: none;
+        flex-basis: 32%;
     }
 
-    .topbarTitle {
-        font-size: 1.25rem;
+    .topright {
+        flex-basis: auto;
+        gap: 6px;
+    }
+}
+
+/* Pantallas pequeñas: ocultar buscador */
+@media (max-width: 860px) {
+    .top h1 {
+        font-size: 18px;
+    }
+
+    .topbarCenter {
+        display: none;
+    }
+
+    .topright {
+        flex-basis: auto;
+    }
+}
+
+/* Pantallas muy pequeñas: ocultar título y texto del usuario */
+@media (max-width: 600px) {
+    .top {
+        padding: 20px 15px;
+    }
+
+    .top h1 {
+        display: none;
+    }
+
+    .toprightusertitle {
+        display: none;
+    }
+
+    .chevron {
+        display: none;
+    }
+
+    .topbell,
+    .themeToggle {
+        width: 40px;
+        height: 40px;
+    }
+
+    .toprightuser {
+        height: 40px;
+        padding: 0 8px;
     }
 }
