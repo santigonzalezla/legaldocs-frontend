@@ -2,26 +2,27 @@
 
 import {useEffect, useState} from 'react';
 import styles from './profileform.module.css';
-import {Calendar, Camera, Mail, MapPin, Phone, User} from '@/app/components/svg';
+import {Calendar, Camera, DollarSign, Mail, MapPin, Phone, User} from '@/app/components/svg';
 import {useFetch} from '@/hooks/useFetch';
 import type {User as UserType} from '@/app/interfaces/interfaces';
 import {toast} from 'sonner';
 
 type FormState = {
-    firstName: string;
-    lastName:  string;
-    email:     string;
-    phone:     string;
-    address:   string;
-    city:      string;
-    country:   string;
-    birthDate: string;
-    bio:       string;
+    firstName:  string;
+    lastName:   string;
+    email:      string;
+    phone:      string;
+    address:    string;
+    city:       string;
+    country:    string;
+    birthDate:  string;
+    bio:        string;
+    hourlyRate: string;
 };
 
 const empty: FormState = {
     firstName: '', lastName: '', email: '', phone: '',
-    address: '', city: '', country: '', birthDate: '', bio: '',
+    address: '', city: '', country: '', birthDate: '', bio: '', hourlyRate: '',
 };
 
 const ProfileForm = () =>
@@ -41,15 +42,16 @@ const ProfileForm = () =>
     {
         if (!user) return;
         const loaded: FormState = {
-            firstName: user.firstName ?? '',
-            lastName:  user.lastName  ?? '',
-            email:     user.email     ?? '',
-            phone:     user.phone     ?? '',
-            address:   user.address   ?? '',
-            city:      user.city      ?? '',
-            country:   user.country   ?? '',
-            birthDate: user.birthDate ? user.birthDate.slice(0, 10) : '',
-            bio:       user.bio       ?? '',
+            firstName:  user.firstName ?? '',
+            lastName:   user.lastName  ?? '',
+            email:      user.email     ?? '',
+            phone:      user.phone     ?? '',
+            address:    user.address   ?? '',
+            city:       user.city      ?? '',
+            country:    user.country   ?? '',
+            birthDate:  user.birthDate ? user.birthDate.slice(0, 10) : '',
+            bio:        user.bio       ?? '',
+            hourlyRate: user.hourlyRate != null ? String(user.hourlyRate) : '',
         };
         setForm(loaded);
         setSnapshot(loaded);
@@ -60,10 +62,16 @@ const ProfileForm = () =>
 
     const handleSave = async () =>
     {
-        const payload: Partial<FormState> = {};
+        const payload: Record<string, any> = {};
         (Object.keys(form) as (keyof FormState)[]).forEach(k =>
         {
-            if (form[k] !== snapshot[k]) (payload as any)[k] = form[k] || null;
+            if (form[k] !== snapshot[k])
+            {
+                if (k === 'hourlyRate')
+                    payload[k] = form[k] !== '' ? parseFloat(form[k]) : null;
+                else
+                    payload[k] = form[k] || null;
+            }
         });
 
         if (!Object.keys(payload).length) { setIsEditing(false); return; }
@@ -72,15 +80,16 @@ const ProfileForm = () =>
         if (!result) return;
 
         const updated: FormState = {
-            firstName: result.firstName ?? '',
-            lastName:  result.lastName  ?? '',
-            email:     result.email     ?? '',
-            phone:     result.phone     ?? '',
-            address:   result.address   ?? '',
-            city:      result.city      ?? '',
-            country:   result.country   ?? '',
-            birthDate: result.birthDate ? result.birthDate.slice(0, 10) : '',
-            bio:       result.bio       ?? '',
+            firstName:  result.firstName ?? '',
+            lastName:   result.lastName  ?? '',
+            email:      result.email     ?? '',
+            phone:      result.phone     ?? '',
+            address:    result.address   ?? '',
+            city:       result.city      ?? '',
+            country:    result.country   ?? '',
+            birthDate:  result.birthDate ? result.birthDate.slice(0, 10) : '',
+            bio:        result.bio       ?? '',
+            hourlyRate: result.hourlyRate != null ? String(result.hourlyRate) : '',
         };
         setForm(updated);
         setSnapshot(updated);
@@ -178,6 +187,27 @@ const ProfileForm = () =>
                         <label className={styles.label}>Biografía</label>
                         <textarea className={styles.textarea} rows={4} value={form.bio} disabled={!isEditing}
                             onChange={e => handleField('bio', e.target.value)} />
+                    </div>
+                </div>
+            </div>
+
+            <div className={styles.formSection}>
+                <div className={styles.sectionHeader}>
+                    <h4 className={styles.sectionTitle}>Tarifas</h4>
+                </div>
+                <div className={styles.formGrid}>
+                    <div className={styles.formGroup}>
+                        <label className={styles.label}><DollarSign />Tarifa por hora (COP)</label>
+                        <input
+                            type="number"
+                            min="0"
+                            step="1000"
+                            className={styles.input}
+                            value={form.hourlyRate}
+                            disabled={!isEditing}
+                            placeholder="Ej: 150000"
+                            onChange={e => handleField('hourlyRate', e.target.value)}
+                        />
                     </div>
                 </div>
             </div>

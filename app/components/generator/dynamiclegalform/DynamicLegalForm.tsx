@@ -1,21 +1,16 @@
 'use client';
 
 import styles from './dynamiclegalform.module.css';
-import {FieldConfig, FormSchema, FormData} from "@/app/interfaces/types/formtypes";
-import {useEffect, useState} from "react";
-import {ArrowDown, ArrowGo, Briefcase, Download, File, Save} from "@/app/components/svg";
-import FormCategory from "@/app/components/generator/formcategory/FormCategory";
-import AddCategoryModal from "@/app/components/generator/addcategorymodal/AddCategoryModal";
-import DocumentPreview from "@/app/components/generator/documentpreview/DocumentPreview";
+import {Briefcase, Download, File, Save} from "@/app/components/svg";
 import DocumentEditor from "@/app/components/generator/documenteditor/DocumentEditor";
+import UnsavedChangesGuard from "@/app/components/generator/unsavedchangesguard/UnsavedChangesGuard";
 import { useFormContext } from '@/context/FormContext';
 import { useFetch } from '@/hooks/useFetch';
 import type { LegalProcess, PaginatedResponse } from '@/app/interfaces/interfaces';
 
 const DynamicLegalForm = () =>
 {
-    const [allExpanded, setAllExpanded] = useState(false);
-    const { formData, schema, setSchema, updateFormField, saveDocument, onGenerate, selectedProcessId, setSelectedProcessId, currentDocumentId } = useFormContext();
+    const { formData, schema, saveDocument, onGenerate, selectedProcessId, setSelectedProcessId, currentDocumentId } = useFormContext();
 
     const {data: processRes} = useFetch<PaginatedResponse<LegalProcess>>(
         'process?limit=100',
@@ -23,54 +18,7 @@ const DynamicLegalForm = () =>
     );
     const processes = processRes?.data ?? [];
 
-    useEffect(() =>
-    {
-        // Reinicializar estados cuando cambia el tipo de documento
-        if (schema?.document_type)
-        {
-            setAllExpanded(false);
-        }
-    }, [schema?.document_type])
-
     if (!schema) return <div>No schema provided</div>;
-
-    const handleAddField = (categoryName: string, fieldName: string, config: FieldConfig) =>
-    {
-        setSchema({
-            ...schema,
-            variable_fields: {
-                ...schema.variable_fields,
-                [categoryName]: {
-                    ...schema.variable_fields[categoryName],
-                    [fieldName]: config,
-                },
-            },
-        });
-    }
-
-    const handleAddCategory = (categoryName: string, description: string) =>
-    {
-        setSchema({
-            ...schema,
-            variable_fields: {
-                ...schema.variable_fields,
-                [categoryName]: {},
-            },
-        });
-    }
-
-    const handleDeleteCategory = (categoryName: string) =>
-    {
-        const newVariableFields = { ...schema.variable_fields };
-        delete newVariableFields[categoryName];
-
-        setSchema({
-            ...schema,
-            variable_fields: newVariableFields,
-        });
-    }
-
-    const handleToggleAll = () => setAllExpanded(!allExpanded);
 
     const handleSave = () => saveDocument();
 
@@ -78,6 +26,7 @@ const DynamicLegalForm = () =>
 
     return (
         <div className={styles.container}>
+            <UnsavedChangesGuard />
             {/* Header */}
             <div className={styles.headerCard}>
                 <div className={styles.headerCardHeader}>
@@ -96,19 +45,6 @@ const DynamicLegalForm = () =>
                             </div>
                         </div>
                         <div className={styles.actionButtons}>
-                            <button className={`${styles.button} ${styles.buttonSecondary}`} onClick={handleToggleAll}>
-                                {allExpanded ? (
-                                    <>
-                                        <ArrowGo className={styles.buttonIcon} />
-                                        Colapsar Todo
-                                    </>
-                                ) : (
-                                    <>
-                                        <ArrowDown className={styles.buttonIcon} />
-                                        Expandir Todo
-                                    </>
-                                )}
-                            </button>
                             <button className={`${styles.button} ${styles.buttonOutline}`} onClick={handleSave}>
                                 <Save className={styles.buttonIcon} />
                                 Guardar
@@ -153,33 +89,7 @@ const DynamicLegalForm = () =>
                </div>
            </div>
 
-           <div className={styles.dynamicContainer}>
-               <div className={styles.dynamicContainerLeft}>
-                   {/* Form Categories */}
-                   <div className={styles.categoriesContainer}>
-                       {Object.entries(schema.variable_fields).map(([categoryName, categoryConfig]) => (
-                           <FormCategory
-                               key={categoryName}
-                               categoryName={categoryName}
-                               categoryConfig={categoryConfig}
-                               formData={formData}
-                               onFieldChange={updateFormField}
-                               onAddField={handleAddField}
-                               onDeleteCategory={handleDeleteCategory}
-                               forceExpanded={allExpanded}
-                           />
-                       ))}
-                   </div>
-
-                   {/* Add Category Button */}
-                   <AddCategoryModal onAddCategory={handleAddCategory} />
-               </div>
-
-               <div className={styles.dynamicContainerRight}>
-                   {/* Document Editor */}
-                   <DocumentEditor />
-               </div>
-           </div>
+           <DocumentEditor />
 
             {/* Form Summary */}
             <div className={styles.summaryCard}>

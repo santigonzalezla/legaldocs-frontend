@@ -1,15 +1,17 @@
 'use client';
 
+import {useState} from 'react';
 import styles from './page.module.css';
 import {useParams, useRouter} from 'next/navigation';
 import {useFetch} from '@/hooks/useFetch';
 import {toast} from 'sonner';
-import {ArrowLeft, Briefcase, Building, Calendar, Edit, Trash, User} from '@/app/components/svg';
-import type {Client, LegalBranch, LegalProcess} from '@/app/interfaces/interfaces';
+import {ArrowLeft, Briefcase, Building, Calendar, DollarSign, Edit, Trash, User} from '@/app/components/svg';
+import type {Client, LegalBranch, LegalProcess, TimeEntry} from '@/app/interfaces/interfaces';
 import {useConfirm} from '@/hooks/useConfirm';
 import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
 import TimeTracker from '@/app/components/processes/timetracker/TimeTracker';
 import ProcessDocuments from '@/app/components/processes/processdocuments/ProcessDocuments';
+import BillingPanel from '@/app/components/processes/billingpanel/BillingPanel';
 import {ClientType, ProcessStatus} from '@/app/interfaces/enums';
 import {STATUS_COLOR, STATUS_LABEL} from '@/app/components/processes/processgrid/ProcessGrid';
 
@@ -32,6 +34,7 @@ const ProcessDetailPage = () =>
 {
     const {id}   = useParams<{id: string}>();
     const router = useRouter();
+    const [showBilling, setShowBilling] = useState(false);
 
     const {data: process, isLoading} =
         useFetch<LegalProcess>(`process/${id}`, {firmScoped: true});
@@ -46,6 +49,9 @@ const ProcessDetailPage = () =>
         useFetch<LegalBranch[]>('branch?isActive=true&limit=50', {firmScoped: true});
 
     const branch = branches?.find(b => b.id === process?.branchId);
+
+    const {data: entries} =
+        useFetch<TimeEntry[]>(`time-entry?processId=${id}`, {firmScoped: true});
 
     const {execute: deleteProcess} =
         useFetch<void>('', {method: 'DELETE', immediate: false, firmScoped: true});
@@ -91,6 +97,9 @@ const ProcessDetailPage = () =>
                 </div>
 
                 <div className={styles.titleActions}>
+                    <button className={styles.billingBtn} onClick={() => setShowBilling(true)}>
+                        <DollarSign /> Cuenta de cobro
+                    </button>
                     <button className={styles.editBtn} onClick={() => router.push(`/dashboard/processes/${id}/edit`)}>
                         <Edit /> Editar
                     </button>
@@ -186,6 +195,15 @@ const ProcessDetailPage = () =>
                     danger={confirmState.danger}
                     onConfirm={handleConfirm}
                     onCancel={handleCancel}
+                />
+            )}
+
+            {showBilling && (
+                <BillingPanel
+                    process={process}
+                    client={client ?? null}
+                    entries={entries ?? []}
+                    onClose={() => setShowBilling(false)}
                 />
             )}
         </div>

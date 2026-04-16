@@ -12,7 +12,7 @@ import {
     Underline
 } from "@/app/components/svg";
 import styles from "./documenteditor.module.css";
-import {CategoryConfig, FieldConfig, FormData, FormSchema} from "@/app/interfaces/types/formtypes";
+import {FormData, FormSchema} from "@/app/interfaces/types/formtypes";
 import EditorSidebar from "@/app/components/generator/editorsidebar/EditorSidebar";
 import {useFormContext} from "@/context/FormContext";
 import generateContractContent from "@/app/components/generator/documentschemas/RentalContractContent";
@@ -24,6 +24,8 @@ const DocumentEditor = ()=>
     const {
         formData,
         schema,
+        setSchema,
+        updateFormField,
         documentState,
         setDocumentContent,
         setHasCustomContent,
@@ -87,7 +89,7 @@ const DocumentEditor = ()=>
             setHasCustomContent(false)
             setHasUnsavedChanges(false)
         }
-    }, [schema]);
+    }, [schema?.document_type]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() =>
     {
@@ -162,6 +164,7 @@ const DocumentEditor = ()=>
                 pendingScrollRef.current = window.scrollY;
                 setDocumentContent(applyFieldStyles(temp.innerHTML));
                 setHasCustomContent(true);
+                setHasUnsavedChanges(true);
                 setIsEditing(true);
                 setLegalitoWorking(false);
             }, 2000);
@@ -313,6 +316,7 @@ const DocumentEditor = ()=>
                 pendingScrollRef.current = window.scrollY;
                 setDocumentContent(applyFieldStyles(temp.innerHTML));
                 setHasCustomContent(true);
+                setHasUnsavedChanges(true);
                 setIsEditing(true);
                 setLegalitoWorking(false);
             }, 2000);
@@ -826,48 +830,63 @@ const DocumentEditor = ()=>
         }, 0);
     }
 
-    const getAllFields = () =>
+    const handleSidebarAddCategory = (name: string) =>
     {
-        if (!schema) return {}
+        if (!schema) return;
+        setSchema({
+            ...schema,
+            variable_fields: { ...schema.variable_fields, [name]: {} },
+        });
+    };
 
-        const fields: { [category: string]: { path: string; label: string; type: string }[] } = {};
+    const handleSidebarAddField = (category: string, fieldName: string, type: string, options?: string[]) =>
+    {
+        if (!schema) return;
+        const newField: Record<string, any> = { type: type as any, required: false, placeholder: fieldName.replace(/_/g, ' '), default_value: '' };
+        if (options?.length) newField.options = options;
+        setSchema({
+            ...schema,
+            variable_fields: {
+                ...schema.variable_fields,
+                [category]: {
+                    ...schema.variable_fields[category],
+                    [fieldName]: newField,
+                },
+            } as any,
+        });
+    };
 
-        const processCategory = (categoryName: string, categoryConfig: CategoryConfig, parentPath = "") =>
-        {
-            Object.entries(categoryConfig).forEach(([key, value]) =>
-            {
-                const fieldPath = parentPath ? `${parentPath}.${key}` : `${categoryName}.${key}`;
+    const handleSidebarUpdateFieldOptions = (category: string, field: string, options: string[]) =>
+    {
+        if (!schema) return;
+        const existing = (schema.variable_fields[category] as Record<string, any>)?.[field] ?? {};
+        setSchema({
+            ...schema,
+            variable_fields: {
+                ...schema.variable_fields,
+                [category]: {
+                    ...schema.variable_fields[category],
+                    [field]: { ...existing, options },
+                },
+            } as any,
+        });
+    };
 
-                if (value && typeof value === "object" && "type" in value)
-                {
-                    const fieldConfig = value as FieldConfig;
-                    const categoryDisplayName = categoryName.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
-
-                    if (!fields[categoryDisplayName])
-                    {
-                        fields[categoryDisplayName] = [];
-                    }
-
-                    fields[categoryDisplayName].push({
-                        path: fieldPath,
-                        label: key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
-                        type: fieldConfig.type,
-                    });
-                }
-                else if (value && typeof value === "object")
-                {
-                    processCategory(categoryName, value as CategoryConfig, fieldPath);
-                }
-            })
-        }
-
-        Object.entries(schema.variable_fields).forEach(([categoryName, categoryConfig]) =>
-        {
-            processCategory(categoryName, categoryConfig);
-        })
-
-        return fields;
-    }
+    const handleSidebarUpdateFieldType = (category: string, field: string, newType: string) =>
+    {
+        if (!schema) return;
+        const existing = (schema.variable_fields[category] as Record<string, any>)?.[field] ?? {};
+        setSchema({
+            ...schema,
+            variable_fields: {
+                ...schema.variable_fields,
+                [category]: {
+                    ...schema.variable_fields[category],
+                    [field]: { ...existing, type: newType as any },
+                },
+            } as any,
+        });
+    };
 
     return (
         <div className={styles.container}>
@@ -1000,10 +1019,16 @@ const DocumentEditor = ()=>
                 <div className={styles.editorContainer}>
                     {showSidebar && (
                         <EditorSidebar
-                            fields={getAllFields()}
+                            variableFields={schema?.variable_fields ?? {}}
                             onInsertField={insertField}
                             onInsertComponent={insertComponent}
                             onClose={() => setShowSidebar(false)}
+                            formData={formData as Record<string, Record<string, any>>}
+                            onUpdateFieldType={handleSidebarUpdateFieldType}
+                            onUpdateFieldValue={(cat, field, value) => updateFormField(cat, field, value)}
+                            onUpdateFieldOptions={handleSidebarUpdateFieldOptions}
+                            onAddField={handleSidebarAddField}
+                            onAddCategory={handleSidebarAddCategory}
                         />
                     )}
 

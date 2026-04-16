@@ -165,7 +165,7 @@ export function FormProvider({ children, initialSchema, initialFormData, initial
 
     const setDocumentContent = (content: string) =>
     {
-        setDocumentState((prev) => ({...prev, content, hasUnsavedChanges: true}));
+        setDocumentState((prev) => ({...prev, content}));
     };
 
     const setHasCustomContent = (hasCustom: boolean) =>
@@ -198,55 +198,6 @@ export function FormProvider({ children, initialSchema, initialFormData, initial
         setDocumentState({content: "", hasCustomContent: false, hasUnsavedChanges: false});
     };
 
-    // Load saved localStorage data only when NOT editing an existing document
-    useEffect(() =>
-    {
-        if (initialDocumentId) return;
-
-        try
-        {
-            const savedData = localStorage.getItem("legal-form-data");
-
-            if (savedData)
-            {
-                const parsed = JSON.parse(savedData);
-                if (parsed.formData)  setFormData(parsed.formData);
-                if (parsed.document)
-                {
-                    setDocumentState((prev) => ({
-                        ...prev,
-                        content: parsed.document,
-                        hasCustomContent: true,
-                        hasUnsavedChanges: false,
-                    }));
-                }
-            }
-        }
-        catch (error)
-        {
-            console.error("Error loading saved data:", error);
-        }
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-    // Clear localStorage when document type changes (for new documents)
-    useEffect(() =>
-    {
-        if (!schema?.document_type || initialDocumentId) return;
-
-        try
-        {
-            const savedData = localStorage.getItem("legal-form-data");
-            if (savedData)
-            {
-                const parsed = JSON.parse(savedData);
-                if (parsed.documentType !== schema.document_type) localStorage.removeItem("legal-form-data");
-            }
-        }
-        catch (error)
-        {
-            console.error("Error checking saved data:", error);
-        }
-    }, [schema?.document_type]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const contextValue: FormContextType = {
         formData,

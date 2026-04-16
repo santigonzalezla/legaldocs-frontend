@@ -280,3 +280,86 @@
     font-size: 0.8rem;
     font-weight: 600;
 }
+
+/* ── Invitation card ──────────────────────────────────────────── */
+
+.cardInvite {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 3px #f59e0b18;
+}
+
+.firmIconInvite {
+    background: #f59e0b18;
+    color: #f59e0b;
+}
+
+.inviteBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #f59e0b;
+    background: #f59e0b18;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.inviteNote {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    padding: 0.6rem 0.85rem;
+    background: var(--page-bg);
+    border-radius: 8px;
+    border: 1px solid var(--border-light);
+    line-height: 1.5;
+}
+
+.btnAccept {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.85rem;
+    border: none;
+    border-radius: 8px;
+    background: #10b981;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.btnAccept:hover:not(:disabled) { opacity: 0.88; }
+
+.btnAccept:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btnReject {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.85rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--button-bg);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btnReject:hover:not(:disabled) {
+    background: #ef444415;
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.btnReject:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

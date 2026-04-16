@@ -108,6 +108,7 @@
     flex-shrink: 0;
 }
 
+.billingBtn,
 .editBtn,
 .deleteBtn {
     display: flex;
@@ -121,6 +122,30 @@
     transition: all 0.2s ease;
     border: none;
 }
+
+.billingBtn {
+    background: #f0fdf4;
+    color: #059669;
+    border: 1px solid #6ee7b7;
+}
+
+.billingBtn:hover {
+    background: #dcfce7;
+}
+
+[data-theme="dark"] .billingBtn {
+    background: rgba(16, 185, 129, 0.1);
+    color: #34d399;
+    border-color: rgba(110, 231, 183, 0.3);
+}
+
+[data-theme="dark"] .billingBtn:hover {
+    background: rgba(16, 185, 129, 0.18);
+}
+
+.billingBtn svg,
+.editBtn svg,
+.deleteBtn svg { width: 14px; height: 14px; }
 
 .editBtn {
     background: var(--hover-bg);

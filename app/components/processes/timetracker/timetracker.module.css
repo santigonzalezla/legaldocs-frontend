@@ -196,6 +196,28 @@
 .manualInput:focus { border-color: var(--primary-color); }
 .manualInput::placeholder { color: var(--text-secondary); opacity: 0.7; }
 
+.dateTimeRow {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.dateInput,
+.timeInput {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    background: var(--content-bg);
+    font-family: var(--font-family);
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.dateInput:focus,
+.timeInput:focus { border-color: var(--primary-color); }
+
 .durationRow {
     display: flex;
     align-items: center;

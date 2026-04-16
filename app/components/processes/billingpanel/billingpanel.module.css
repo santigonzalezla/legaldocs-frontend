@@ -1,0 +1,332 @@
+/* ── Overlay & Modal ─────────────────────────────────────────────────────────── */
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1.5rem;
+}
+
+.modal {
+    background: var(--content-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 680px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+/* ── Modal Header ────────────────────────────────────────────────────────────── */
+
+.modalHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-light);
+    flex-shrink: 0;
+}
+
+.modalHeaderLeft {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.modalIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--primary-color-alpha);
+    color: var(--primary-color);
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.modalIcon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.modalTitle {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+}
+
+.closeBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 7px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.closeBtn:hover {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+}
+
+.closeBtn svg { width: 14px; height: 14px; }
+
+/* ── Scroll area ─────────────────────────────────────────────────────────────── */
+
+.scrollArea {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+}
+
+/* ── Invoice document ────────────────────────────────────────────────────────── */
+
+.invoice {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    color: #1f2937;
+    font-family: var(--font-family), sans-serif;
+}
+
+[data-theme="dark"] .invoice {
+    background: #ffffff;
+    color: #1f2937;
+}
+
+.invoiceHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.invoiceTitle {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #1f2937;
+    margin: 0 0 0.3rem 0;
+    letter-spacing: 0.5px;
+}
+
+.invoiceDate {
+    font-size: 0.82rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+.invoiceNum {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #3b82f6;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+    padding: 0.3rem 0.75rem;
+}
+
+.divider {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 0;
+}
+
+/* Info block */
+.infoBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.infoRow {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.875rem;
+}
+
+.infoKey {
+    width: 110px;
+    flex-shrink: 0;
+    font-weight: 600;
+    color: #374151;
+}
+
+.infoVal {
+    color: #4b5563;
+    flex: 1;
+}
+
+/* Concept label */
+.conceptLabel {
+    font-size: 0.82rem;
+    color: #6b7280;
+    margin: 0;
+    font-style: italic;
+}
+
+/* ── Table ───────────────────────────────────────────────────────────────────── */
+
+.table {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.tableHead {
+    display: grid;
+    grid-template-columns: 1.8fr 0.8fr 1fr 1fr;
+    padding: 0.6rem 1rem;
+    background: #f9fafb;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    gap: 0.5rem;
+}
+
+.tableRow {
+    display: grid;
+    grid-template-columns: 1.8fr 0.8fr 1fr 1fr;
+    padding: 0.7rem 1rem;
+    border-top: 1px solid #f3f4f6;
+    font-size: 0.875rem;
+    color: #374151;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.right {
+    text-align: right;
+}
+
+.noRate {
+    font-style: italic;
+    color: #9ca3af;
+    font-size: 0.8rem;
+}
+
+.emptyRow {
+    padding: 1rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: #9ca3af;
+    border-top: 1px solid #f3f4f6;
+}
+
+/* ── Total ───────────────────────────────────────────────────────────────────── */
+
+.totalRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #1f2937;
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+}
+
+.totalLabel {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #f9fafb;
+    letter-spacing: 0.5px;
+}
+
+.totalAmount {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+/* ── Rate warning ────────────────────────────────────────────────────────────── */
+
+.rateWarning {
+    font-size: 0.78rem;
+    color: #d97706;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 6px;
+    padding: 0.6rem 0.85rem;
+    margin: 0;
+}
+
+/* ── Footer note ─────────────────────────────────────────────────────────────── */
+
+.invoiceFooter {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 1rem;
+}
+
+.invoiceFooter p {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    margin: 0;
+    text-align: center;
+    line-height: 1.5;
+}
+
+/* ── Modal Footer ────────────────────────────────────────────────────────────── */
+
+.modalFooter {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-light);
+    flex-shrink: 0;
+}
+
+.cancelBtn {
+    padding: 0.5rem 1.1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: var(--font-family);
+}
+
+.cancelBtn:hover { background: var(--hover-bg); color: var(--text-primary); }
+
+.downloadBtn {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.5rem 1.2rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary-color);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    font-family: var(--font-family);
+}
+
+.downloadBtn:hover { opacity: 0.88; }
+
+.downloadBtn svg { width: 15px; height: 15px; }

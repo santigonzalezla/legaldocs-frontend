@@ -183,6 +183,7 @@ const TemplateEditor = ({templateId, onClose, onSaved}: TemplateEditorProps) =>
         if (!result) return;
 
         toast.success(templateId ? 'Plantilla actualizada.' : 'Plantilla creada correctamente.');
+        window.dispatchEvent(new Event('template:saved'));
         onSaved();
     };
 

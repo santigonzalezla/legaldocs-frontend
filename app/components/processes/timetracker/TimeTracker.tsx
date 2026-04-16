@@ -42,6 +42,12 @@ const TimeTracker = ({processId}: TimeTrackerProps) =>
     const [manualHours,     setManualHours]      = useState('');
     const [manualMinutes,   setManualMinutes]    = useState('');
     const [manualDesc,      setManualDesc]       = useState('');
+    const [manualDate,      setManualDate]       = useState(() => new Date().toISOString().split('T')[0]);
+    const [manualTime,      setManualTime]       = useState(() =>
+    {
+        const now = new Date();
+        return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    });
 
     // Current user (to identify own active timer)
     const {data: me} = useFetch<User>('user/me');
@@ -100,8 +106,10 @@ const TimeTracker = ({processId}: TimeTrackerProps) =>
         const total = (parseInt(manualHours) || 0) * 60 + (parseInt(manualMinutes) || 0);
         if (total <= 0) return;
 
+        const startedAt = `${manualDate}T${manualTime}:00`;
+
         const result = await addManual({
-            body: {processId, durationMinutes: total, description: manualDesc || undefined},
+            body: {processId, durationMinutes: total, description: manualDesc || undefined, startedAt},
         });
 
         if (result)
@@ -110,6 +118,8 @@ const TimeTracker = ({processId}: TimeTrackerProps) =>
             setManualHours('');
             setManualMinutes('');
             setManualDesc('');
+            setManualDate(new Date().toISOString().split('T')[0]);
+            setManualTime(`${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`);
             await refetchEntries();
             toast.success('Tiempo registrado');
         }
@@ -189,6 +199,20 @@ const TimeTracker = ({processId}: TimeTrackerProps) =>
                         value={manualDesc}
                         onChange={e => setManualDesc(e.target.value)}
                     />
+                    <div className={styles.dateTimeRow}>
+                        <input
+                            className={styles.dateInput}
+                            type="date"
+                            value={manualDate}
+                            onChange={e => setManualDate(e.target.value)}
+                        />
+                        <input
+                            className={styles.timeInput}
+                            type="time"
+                            value={manualTime}
+                            onChange={e => setManualTime(e.target.value)}
+                        />
+                    </div>
                     <div className={styles.durationRow}>
                         <input
                             className={styles.durationInput}
@@ -218,7 +242,7 @@ const TimeTracker = ({processId}: TimeTrackerProps) =>
                         </button>
                         <button
                             className={styles.manualCancel}
-                            onClick={() => { setShowManualForm(false); setManualHours(''); setManualMinutes(''); setManualDesc(''); }}
+                            onClick={() => { setShowManualForm(false); setManualHours(''); setManualMinutes(''); setManualDesc(''); setManualDate(new Date().toISOString().split('T')[0]); }}
                         >
                             <X className={styles.actionIcon} />
                         </button>

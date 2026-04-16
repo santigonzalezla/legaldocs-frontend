@@ -1,0 +1,174 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.modal {
+    background: var(--content-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18), 0 4px 16px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 420px;
+    overflow: hidden;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+
+.header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 24px 24px 0 24px;
+}
+
+.iconWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: var(--primary-color-alpha);
+    border: 1px solid var(--primary-color);
+    flex-shrink: 0;
+}
+
+.icon {
+    width: 20px;
+    height: 20px;
+    color: var(--primary-color);
+}
+
+.closeBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.closeBtn:hover {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+}
+
+.closeIcon {
+    width: 16px;
+    height: 16px;
+}
+
+/* ── Body ────────────────────────────────────────────────────────────────── */
+
+.body {
+    padding: 16px 24px 24px 24px;
+}
+
+.title {
+    margin: 12px 0 8px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+}
+
+.description {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-family: var(--font-family);
+    line-height: 1.55;
+}
+
+/* ── Actions ─────────────────────────────────────────────────────────────── */
+
+.actions {
+    display: flex;
+    gap: 8px;
+    padding: 16px 24px 24px 24px;
+    border-top: 1px solid var(--border-light);
+}
+
+.btnLeave {
+    flex: 1;
+    padding: 9px 14px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btnLeave:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.06);
+}
+
+.btnCancel {
+    flex: 1;
+    padding: 9px 14px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--button-bg);
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btnCancel:hover {
+    background: var(--button-hover-bg);
+    border-color: var(--text-secondary);
+}
+
+.btnSave {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 14px;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary-color);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.btnSave:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.btnSaveIcon {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+}

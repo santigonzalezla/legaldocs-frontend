@@ -152,55 +152,439 @@
     background: var(--content-bg);
 }
 
+/* ── Field item: two-row layout ──────────────────────────────────────────── */
+
 .fieldItem {
     width: 100%;
-    padding: 12px 16px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    transition: all 0.2s ease;
-    border-bottom: 1px solid var(--border-light);
-}
-
-.fieldItem:hover {
-    background-color: var(--hover-bg);
-}
-
-.fieldItem:last-child {
-    border-bottom: none;
-}
-
-.fieldIcon {
-    width: 16px;
-    height: 16px;
-    color: var(--primary-color);
-    flex-shrink: 0;
-}
-
-.fieldInfo {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
-    flex: 1;
+    gap: 8px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-light);
+    box-sizing: border-box;
+    transition: background 0.2s ease;
+}
+
+.fieldItem:hover { background: var(--hover-bg); }
+.fieldItem:last-child { border-bottom: none; }
+
+/* Row 1: nombre + botón insertar */
+.fieldRow1 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .fieldLabel {
+    flex: 1;
+    min-width: 0;
     font-size: 13px;
     font-weight: 500;
     color: var(--text-primary);
     font-family: var(--font-family);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.fieldType {
-    font-size: 11px;
+.fieldInsertBtn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--content-bg);
+    cursor: pointer;
     color: var(--text-secondary);
-    text-transform: uppercase;
-    font-family: var(--font-family);
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
 }
+
+.fieldInsertBtn:hover {
+    background: var(--primary-color-alpha);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+.fieldInsertIcon {
+    width: 12px;
+    height: 12px;
+}
+
+/* Row 2: tipo (icon overlay select) + valor */
+.fieldRow2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ── Custom type selector ────────────────────────────────────────────────── */
+
+.typeSelect {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.typeSelectTrigger {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 8px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--button-bg);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    white-space: nowrap;
+}
+
+.typeSelectTrigger:hover,
+.typeSelectTriggerOpen {
+    border-color: var(--primary-color);
+    background: var(--primary-color-alpha);
+    box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+.typeSelectIcon {
+    width: 13px;
+    height: 13px;
+    color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+.typeSelectChevron {
+    width: 10px;
+    height: 10px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.typeSelectChevronOpen {
+    transform: rotate(180deg);
+}
+
+.typeSelectDropdown {
+    position: fixed;
+    z-index: 9999;
+    min-width: 140px;
+    background: var(--content-bg);
+    border: 1.5px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.typeSelectOption {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 12px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 12.5px;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    transition: background 0.15s;
+    border-bottom: 1px solid var(--border-light);
+    text-align: left;
+}
+
+.typeSelectOption:last-child { border-bottom: none; }
+
+.typeSelectOption:hover { background: var(--hover-bg); }
+
+.typeSelectOptionActive {
+    background: var(--primary-color-alpha);
+    color: var(--primary-color);
+}
+
+.typeSelectOptionActive:hover { background: var(--primary-color-alpha); }
+
+.typeSelectOptionIcon {
+    width: 14px;
+    height: 14px;
+    color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+.typeSelectOptionLabel {
+    flex: 1;
+    font-weight: 500;
+}
+
+.typeSelectOptionCheck {
+    font-size: 11px;
+    color: var(--primary-color);
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+/* Value controls */
+.fieldValueInput,
+.fieldValueSelect {
+    flex: 1;
+    min-width: 0;
+    padding: 6px 10px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--text-primary);
+    background: var(--content-bg);
+    font-family: var(--font-family);
+    outline: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.fieldValueInput:focus,
+.fieldValueSelect:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+.fieldValueInput:hover:not(:focus),
+.fieldValueSelect:hover:not(:focus) {
+    border-color: var(--text-secondary);
+}
+
+.fieldValueInput::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.5;
+    font-style: italic;
+}
+
+.fieldValueSelect { cursor: pointer; }
+
+.fieldValueBool {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 6px 10px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--content-bg);
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.fieldValueBool:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+.fieldValueCheckbox {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+}
+
+.fieldValueBoolLabel {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-family: var(--font-family);
+    user-select: none;
+}
+
+/* Small icon in the hint description */
+.descIcon {
+    width: 11px;
+    height: 11px;
+    display: inline-block;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+    color: var(--text-secondary);
+}
+
+/* ── Add variable (inline inside category) ───────────────────────────────── */
+
+.addVarBtn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--primary-color);
+    font-family: var(--font-family);
+    transition: background 0.15s;
+    border-top: 1px solid var(--border-light);
+}
+
+.addVarBtn:hover { background: var(--primary-color-alpha); }
+
+.addVarBtnIcon {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+}
+
+.addVarForm {
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-top: 1px solid var(--border-light);
+    background: var(--hover-bg);
+}
+
+.addVarInput,
+.addVarSelect {
+    padding: 7px 10px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--text-primary);
+    background: var(--content-bg);
+    outline: none;
+    font-family: var(--font-family);
+    transition: all 0.2s ease;
+    width: 100%;
+    box-sizing: border-box;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.addVarInput:focus,
+.addVarSelect:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+.addVarInput:hover:not(:focus),
+.addVarSelect:hover:not(:focus) { border-color: var(--text-secondary); }
+
+.addVarInput::placeholder { color: var(--text-secondary); opacity: 0.55; font-style: italic; }
+.addVarSelect { cursor: pointer; }
+
+.addVarActions {
+    display: flex;
+    gap: 8px;
+}
+
+.addVarConfirm {
+    flex: 1;
+    padding: 7px;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary-color);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-family);
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+.addVarConfirm:hover:not(:disabled) {
+    opacity: 0.88;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+}
+.addVarConfirm:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.addVarCancel {
+    flex: 1;
+    padding: 7px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--content-bg);
+    color: var(--text-secondary);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: var(--font-family);
+    transition: all 0.2s ease;
+}
+
+.addVarCancel:hover {
+    border-color: var(--text-secondary);
+    background: var(--button-hover-bg);
+    color: var(--text-primary);
+}
+
+/* ── Add category ────────────────────────────────────────────────────────── */
+
+.addCatBtn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px;
+    margin-top: 4px;
+    border: 1.5px dashed var(--border-color);
+    border-radius: 8px;
+    background: transparent;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-family: var(--font-family);
+    transition: all 0.2s ease;
+}
+
+.addCatBtn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: var(--primary-color-alpha);
+}
+
+.addCatBtnIcon {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+}
+
+.addCatForm {
+    margin-top: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--hover-bg);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.addCatInput {
+    padding: 7px 10px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--text-primary);
+    background: var(--content-bg);
+    outline: none;
+    font-family: var(--font-family);
+    transition: all 0.2s ease;
+    width: 100%;
+    box-sizing: border-box;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.addCatInput:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+.addCatInput:hover:not(:focus) { border-color: var(--text-secondary); }
+.addCatInput::placeholder { color: var(--text-secondary); opacity: 0.55; font-style: italic; }
 
 /* Components Section */
 .componentsSection {
@@ -254,6 +638,270 @@
     font-size: 12px;
     color: var(--text-secondary);
     line-height: 1.3;
+}
+
+/* ── "Sin opciones" placeholder ─────────────────────────────────────────── */
+
+.fieldValueNoOptions {
+    flex: 1;
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    font-style: italic;
+    font-family: var(--font-family);
+    padding: 6px 10px;
+    border: 1.5px dashed var(--border-color);
+    border-radius: 8px;
+    opacity: 0.7;
+}
+
+/* ── Row 3: opciones de seleccion (campo existente) ──────────────────────── */
+
+.fieldOptionsRow {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 4px;
+    border-top: 1px dashed var(--border-light);
+}
+
+.fieldOptionsAdd {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.fieldOptionsInput {
+    flex: 1;
+    min-width: 0;
+    padding: 5px 9px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 11.5px;
+    color: var(--text-primary);
+    background: var(--content-bg);
+    font-family: var(--font-family);
+    outline: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.fieldOptionsInput:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+.fieldOptionsInput::placeholder { color: var(--text-secondary); opacity: 0.55; font-style: italic; }
+
+.fieldOptionsAddBtn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--content-bg);
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+}
+
+.fieldOptionsAddBtn:hover:not(:disabled) {
+    background: var(--primary-color-alpha);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.fieldOptionsAddBtn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.fieldOptionsAddBtnIcon {
+    width: 11px;
+    height: 11px;
+}
+
+.fieldOptionsTags {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 4px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+}
+
+.fieldOptionsTags::-webkit-scrollbar {
+    height: 3px;
+}
+
+.fieldOptionsTags::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.fieldOptionsTags::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 2px;
+}
+
+.fieldOptionsTag {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 3px;
+    padding: 1px 6px 1px 7px;
+    background: var(--primary-color-alpha);
+    border: 1px solid var(--primary-color);
+    border-radius: 20px;
+    font-size: 10px;
+    color: var(--primary-color);
+    font-family: var(--font-family);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.fieldOptionsTagRemove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 11px;
+    height: 11px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--primary-color);
+    padding: 0;
+    border-radius: 50%;
+    transition: all 0.15s;
+    opacity: 0.7;
+}
+
+.fieldOptionsTagRemove:hover { opacity: 1; background: rgba(0,0,0,0.08); }
+
+.fieldOptionsTagX {
+    width: 7px;
+    height: 7px;
+}
+
+/* ── Options builder inside add-var form ─────────────────────────────────── */
+
+.addVarOptionsBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px;
+    background: var(--content-bg);
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+}
+
+.addVarOptionsLabel {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-family: var(--font-family);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.addVarOptionRow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.addVarOptionInput {
+    flex: 1;
+    min-width: 0;
+    padding: 5px 9px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 11.5px;
+    color: var(--text-primary);
+    background: var(--button-bg);
+    font-family: var(--font-family);
+    outline: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.addVarOptionInput:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color-alpha);
+    background: var(--content-bg);
+}
+
+.addVarOptionInput::placeholder { color: var(--text-secondary); opacity: 0.55; font-style: italic; }
+
+.addVarOptionBtn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--content-bg);
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+}
+
+.addVarOptionBtn:hover:not(:disabled) {
+    background: var(--primary-color-alpha);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.addVarOptionBtn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.addVarOptionBtnIcon {
+    width: 11px;
+    height: 11px;
+}
+
+.addVarOptionTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.addVarOptionTag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px 3px 9px;
+    background: var(--primary-color-alpha);
+    border: 1px solid var(--primary-color);
+    border-radius: 20px;
+    font-size: 11px;
+    color: var(--primary-color);
+    font-family: var(--font-family);
+    font-weight: 500;
+}
+
+.addVarOptionTagRemove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--primary-color);
+    padding: 0;
+    border-radius: 50%;
+    transition: all 0.15s;
+    opacity: 0.7;
+}
+
+.addVarOptionTagRemove:hover { opacity: 1; background: rgba(0,0,0,0.08); }
+
+.addVarOptionTagX {
+    width: 9px;
+    height: 9px;
 }
 
 /* Responsive Design */

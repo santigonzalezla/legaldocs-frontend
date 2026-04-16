@@ -1,10 +1,18 @@
 .page {
     display: flex;
     flex-direction: column;
-    gap: 1.75rem;
+    gap: 1.5rem;
 }
 
-.header h1 {
+.header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.headerLeft h1 {
     font-size: 20px;
     font-weight: 600;
     color: var(--text-primary);
@@ -12,9 +20,60 @@
     font-family: var(--font-family);
 }
 
-.header p {
+.headerLeft p {
     font-size: 0.9rem;
     color: var(--text-secondary);
     margin: 0;
     font-family: var(--font-family);
+}
+
+/* ── Tab toggle ──────────────────────────────────────────────────────────── */
+
+.tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--button-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 4px;
+    flex-shrink: 0;
+}
+
+.tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.tab:hover {
+    color: var(--text-primary);
+    background: var(--hover-bg);
+}
+
+.tabActive {
+    background: var(--content-bg);
+    color: var(--primary-color);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.tabActive:hover {
+    background: var(--content-bg);
+    color: var(--primary-color);
+}
+
+.tabIcon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
 }
