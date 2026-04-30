@@ -49,11 +49,11 @@ interface DetailModal
 
 interface TooltipState
 {
-    title:    string;
-    user:     string;
+    title: string;
+    user: string;
     duration: string;
-    x:        number;
-    y:        number;
+    x: number;
+    y: number;
 }
 
 const getMonday = (date: Date): Date =>
@@ -108,15 +108,12 @@ const calcDuration = (start: string, end: string): number =>
     return (eh * 60 + em) - (sh * 60 + sm);
 };
 
-// ── Overlap layout ───────────────────────────────────────────────────────────
-// Returns each entry with its column index and total concurrent columns so
-// overlapping entries can be rendered side-by-side instead of stacked.
-
-interface EntryLayout {
-    entry:     TimeEntry;
+interface EntryLayout
+{
+    entry: TimeEntry;
     startSlot: number;
-    endSlot:   number;
-    col:       number;
+    endSlot: number;
+    col: number;
     totalCols: number;
 }
 
@@ -128,21 +125,22 @@ const layoutDayEntries = (dayEntries: TimeEntry[]): EntryLayout[] =>
     {
         const s = Math.max(0, isoToSlot(e.startedAt));
         const d = e.durationMinutes ?? SLOT_MINS;
-        return { entry: e, startSlot: s, endSlot: Math.min(TOTAL_SLOTS, s + d / SLOT_MINS), col: 0, totalCols: 1 };
+        return {entry: e, startSlot: s, endSlot: Math.min(TOTAL_SLOTS, s + d / SLOT_MINS), col: 0, totalCols: 1};
     }).sort((a, b) => a.startSlot - b.startSlot);
 
-    // Greedy column assignment: place each entry in the first column it fits
     const colEnds: number[] = []; // latest endSlot for each column
-    for (const item of items)
-    {
+    for (const item of items) {
         const c = colEnds.findIndex(end => item.startSlot >= end);
-        if (c === -1) { item.col = colEnds.length; colEnds.push(item.endSlot); }
-        else          { item.col = c;               colEnds[c] = item.endSlot; }
+        if (c === -1) {
+            item.col = colEnds.length;
+            colEnds.push(item.endSlot);
+        } else {
+            item.col = c;
+            colEnds[c] = item.endSlot;
+        }
     }
 
-    // For each entry, find the max column index of any concurrent entry → totalCols
-    for (const item of items)
-    {
+    for (const item of items) {
         let maxCol = item.col;
         for (const other of items)
             if (other !== item && other.startSlot < item.endSlot && other.endSlot > item.startSlot)
@@ -155,11 +153,11 @@ const layoutDayEntries = (dayEntries: TimeEntry[]): EntryLayout[] =>
 
 const TimeCalendar = () =>
 {
-    const [weekStart,   setWeekStart]   = useState<Date>(() => getMonday(new Date()));
-    const [drag,        setDrag]        = useState<DragState | null>(null);
+    const [weekStart, setWeekStart] = useState<Date>(() => getMonday(new Date()));
+    const [drag, setDrag] = useState<DragState | null>(null);
     const [createModal, setCreateModal] = useState<CreateModal | null>(null);
     const [detailModal, setDetailModal] = useState<DetailModal | null>(null);
-    const [tooltip,     setTooltip]     = useState<TooltipState | null>(null);
+    const [tooltip, setTooltip] = useState<TooltipState | null>(null);
     const isDragging = useRef(false);
 
     const {data: rawEntries, execute: refetch} = useFetch<TimeEntry[]>('time-entry', {firmScoped: true});
@@ -187,8 +185,6 @@ const TimeCalendar = () =>
         return map;
     }, [processes]);
 
-    // ── Week ──────────────────────────────────────────────────────────────
-
     const weekDays = useMemo(
         () => Array.from({length: 7}, (_, i) => addDays(weekStart, i)),
         [weekStart]
@@ -215,8 +211,6 @@ const TimeCalendar = () =>
         return `${s.getDate()} ${MONTH_SHORT[s.getMonth()]} – ${e.getDate()} ${MONTH_SHORT[e.getMonth()]} ${e.getFullYear()}`;
     }, [weekStart]);
 
-    // ── Drag (column-level, calculates slot from Y position) ─────────────
-
     const slotFromY = (e: React.MouseEvent<HTMLDivElement>): number =>
     {
         const rect = e.currentTarget.getBoundingClientRect();
@@ -225,7 +219,6 @@ const TimeCalendar = () =>
 
     const onColMouseDown = (dayIdx: number, e: React.MouseEvent<HTMLDivElement>) =>
     {
-        // Don't start drag when clicking directly on an existing entry
         if ((e.target as HTMLElement).closest('[data-entry]')) return;
         e.preventDefault();
         const slot = slotFromY(e);
@@ -315,15 +308,15 @@ const TimeCalendar = () =>
 
     const entryStyle = (layout: EntryLayout, color: string): React.CSSProperties =>
     {
-        const GAP  = 2; // px gap between side-by-side entries
-        const pct  = 100 / layout.totalCols;
+        const GAP = 2; // px gap between side-by-side entries
+        const pct = 100 / layout.totalCols;
         return {
-            top:             `${layout.startSlot * SLOT_H}px`,
-            height:          `${Math.max(SLOT_H * 0.6, (layout.endSlot - layout.startSlot) * SLOT_H - 2)}px`,
-            left:            `calc(${layout.col * pct}% + ${GAP}px)`,
-            right:           `calc(${(layout.totalCols - layout.col - 1) * pct}% + ${GAP}px)`,
-            width:           'auto',
-            backgroundColor: color,
+            top: `${layout.startSlot * SLOT_H}px`,
+            height: `${Math.max(SLOT_H * 0.6, (layout.endSlot - layout.startSlot) * SLOT_H - 2)}px`,
+            left: `calc(${layout.col * pct}% + ${GAP}px)`,
+            right: `calc(${(layout.totalCols - layout.col - 1) * pct}% + ${GAP}px)`,
+            width: 'auto',
+            backgroundColor: color
         };
     };
 
@@ -334,11 +327,11 @@ const TimeCalendar = () =>
             ? `${item.entry.user.firstName} ${item.entry.user.lastName}`
             : '—';
         setTooltip({
-            title:    processTitle[item.entry.processId] ?? '—',
+            title: processTitle[item.entry.processId] ?? '—',
             user,
             duration: fmtDuration(item.entry.durationMinutes ?? 0),
-            x:        e.clientX,
-            y:        e.clientY,
+            x: e.clientX,
+            y: e.clientY
         });
     };
 
@@ -415,10 +408,10 @@ const TimeCalendar = () =>
                         {/* Day columns */}
                         {weekDays.map((day, dayIdx) =>
                         {
-                            const ds         = toDateStr(day);
+                            const ds = toDateStr(day);
                             const dayEntries = entriesPerDay[ds] ?? [];
-                            const isToday    = isSameDay(day, today);
-                            const layout     = layoutDayEntries(dayEntries);
+                            const isToday = isSameDay(day, today);
+                            const layout = layoutDayEntries(dayEntries);
 
                             return (
                                 <div
@@ -450,7 +443,12 @@ const TimeCalendar = () =>
                                             data-entry="true"
                                             className={styles.entry}
                                             style={entryStyle(item, processColor[item.entry.processId] ?? '#3B82F6')}
-                                            onClick={e => { e.stopPropagation(); hideTooltip(); setDetailModal({entry: item.entry}); }}
+                                            onClick={e =>
+                                            {
+                                                e.stopPropagation();
+                                                hideTooltip();
+                                                setDetailModal({entry: item.entry});
+                                            }}
                                             onMouseEnter={e => showTooltip(e, item)}
                                             onMouseMove={moveTooltip}
                                             onMouseLeave={hideTooltip}
@@ -665,15 +663,15 @@ const TimeCalendar = () =>
                 <div
                     className={styles.tooltip}
                     style={{
-                        top:  tooltip.y + 16,
-                        left: tooltip.x + 12,
+                        top: tooltip.y + 16,
+                        left: tooltip.x + 12
                     }}
                 >
                     <span className={styles.tooltipTitle}>{tooltip.title}</span>
                     <span className={styles.tooltipUser}>{tooltip.user}</span>
                     <span className={styles.tooltipDur}>{tooltip.duration}</span>
                 </div>,
-                document.body,
+                document.body
             )}
         </div>
     );
