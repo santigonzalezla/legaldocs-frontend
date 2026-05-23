@@ -43,7 +43,7 @@ const GeneratorPage = () =>
     const templates = templatesRes?.data ?? [];
 
     const countFor = (branchId: string) =>
-        templates.filter(t => t.branchId === branchId).length;
+        templates.filter(t => t.branches.some(b => b.id === branchId)).length;
 
     const activeBranches = branches.filter(b => countFor(b.id) > 0);
 

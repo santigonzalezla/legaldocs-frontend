@@ -3,25 +3,13 @@
 import {useState, useRef} from 'react';
 import styles from './uploaddocumentmodal.module.css';
 import {X, Upload, File, Plus, Check} from '@/app/components/svg';
-import {LibraryDocumentType} from '@/app/interfaces/enums';
+import {LibraryDocumentType, LIBRARY_DOCUMENT_TYPE_LABELS} from '@/app/interfaces/enums';
 import {API_BASE_URL} from '@/lib/constants';
 import {useAuth} from '@/context/AuthContext';
 import {useFirmId} from '@/hooks/useFirmId';
 import {useFetch} from '@/hooks/useFetch';
 import {toast} from 'sonner';
 import type {LegalBranch} from '@/app/interfaces/interfaces';
-
-const TYPE_LABELS: Record<LibraryDocumentType, string> = {
-    [LibraryDocumentType.LAW]:           'Ley',
-    [LibraryDocumentType.DECREE]:        'Decreto',
-    [LibraryDocumentType.RESOLUTION]:    'Resolución',
-    [LibraryDocumentType.CIRCULAR]:      'Circular',
-    [LibraryDocumentType.RULING]:        'Sentencia',
-    [LibraryDocumentType.JURISPRUDENCE]: 'Jurisprudencia',
-    [LibraryDocumentType.DOCTRINE]:      'Doctrina',
-    [LibraryDocumentType.CONTRACT]:      'Contrato',
-    [LibraryDocumentType.OTHER]:         'Otro',
-};
 
 const PRESET_COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f97316', '#ef4444', '#f59e0b', '#0ea5e9', '#ec4899'];
 
@@ -177,7 +165,7 @@ const UploadDocumentModal = ({branches, onClose, onSuccess, onBranchCreated}: Up
                                 value={type}
                                 onChange={e => setType(e.target.value as LibraryDocumentType)}
                             >
-                                {Object.entries(TYPE_LABELS).map(([val, label]) => (
+                                {Object.entries(LIBRARY_DOCUMENT_TYPE_LABELS).map(([val, label]) => (
                                     <option key={val} value={val}>{label}</option>
                                 ))}
                             </select>

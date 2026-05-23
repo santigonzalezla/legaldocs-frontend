@@ -4,30 +4,7 @@ import {useEffect, useRef, useState} from 'react';
 import styles from './librarydocumentlist.module.css';
 import {BookOpen, Check, Clock, ExternalLink, File, Options, Tag, Trash} from '@/app/components/svg';
 import type {LegalBranch, LibraryDocument} from '@/app/interfaces/interfaces';
-
-const TYPE_LABELS: Record<string, string> = {
-    LAW: 'Ley',
-    DECREE: 'Decreto',
-    RESOLUTION: 'Resolución',
-    CIRCULAR: 'Circular',
-    RULING: 'Sentencia',
-    JURISPRUDENCE: 'Jurisprudencia',
-    DOCTRINE: 'Doctrina',
-    CONTRACT: 'Contrato',
-    OTHER: 'Otro'
-};
-
-const TYPE_COLORS: Record<string, { bg: string; color: string }> = {
-    LAW: {bg: '#EFF6FF', color: '#3B82F6'},
-    DECREE: {bg: '#FDF4FF', color: '#A855F7'},
-    RESOLUTION: {bg: '#F0FDF4', color: '#22C55E'},
-    CIRCULAR: {bg: '#FFF7ED', color: '#F97316'},
-    RULING: {bg: '#FEF2F2', color: '#EF4444'},
-    JURISPRUDENCE: {bg: '#FEF9C3', color: '#CA8A04'},
-    DOCTRINE: {bg: '#F0F9FF', color: '#0EA5E9'},
-    CONTRACT: {bg: '#FDF4FF', color: '#D946EF'},
-    OTHER: {bg: '#F8FAFC', color: '#64748B'}
-};
+import {LibraryDocumentType, LIBRARY_DOCUMENT_TYPE_LABELS as TYPE_LABELS, LIBRARY_DOCUMENT_TYPE_COLORS as TYPE_COLORS} from '@/app/interfaces/enums';
 
 const formatDate = (d: string) =>
     new Date(d).toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric'});
@@ -176,7 +153,7 @@ const OptionsMenu = ({doc, branches, onDelete, onAssign}: OptionsMenuProps) =>
 
 const DocumentCard = ({doc, branches, onDelete, onAssign}: CardProps) =>
 {
-    const typeStyle = TYPE_COLORS[doc.type] ?? TYPE_COLORS.OTHER;
+    const typeStyle = TYPE_COLORS[doc.type as LibraryDocumentType] ?? TYPE_COLORS[LibraryDocumentType.OTHER];
 
     return (
         <div className={styles.card}>
@@ -193,7 +170,7 @@ const DocumentCard = ({doc, branches, onDelete, onAssign}: CardProps) =>
                                 className={styles.typeBadge}
                                 style={{backgroundColor: typeStyle.bg, color: typeStyle.color}}
                             >
-                                {TYPE_LABELS[doc.type] ?? doc.type}
+                                {TYPE_LABELS[doc.type as LibraryDocumentType] ?? doc.type}
                             </span>
                             {doc.branch && (
                                 <span

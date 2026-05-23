@@ -4,6 +4,7 @@ import styles from './dynamiclegalform.module.css';
 import {Briefcase, Download, File, Save} from "@/app/components/svg";
 import DocumentEditor from "@/app/components/generator/documenteditor/DocumentEditor";
 import UnsavedChangesGuard from "@/app/components/generator/unsavedchangesguard/UnsavedChangesGuard";
+import LibraryDocSelector from '@/app/components/generator/librarydocselector/LibraryDocSelector';
 import { useFormContext } from '@/context/FormContext';
 import { useFetch } from '@/hooks/useFetch';
 import type { LegalProcess, PaginatedResponse } from '@/app/interfaces/interfaces';
@@ -64,6 +65,7 @@ const DynamicLegalForm = () =>
                                 <li key={index}>{reg}</li>
                             ))}
                         </ul>
+                        <LibraryDocSelector />
                     </div>
                 </div>
             </div>

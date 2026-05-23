@@ -43,12 +43,11 @@ const TemplateList = ({onCreateNew, onEditTemplate, onSaved}: TemplateListProps)
 
     const {confirm, confirmState, handleConfirm, handleCancel} = useConfirm();
 
-    const branchMap = Object.fromEntries((branches ?? []).map(b => [b.id, b]));
     const templates = templatesRes?.data ?? [];
 
     const filtered = templates.filter(t =>
     {
-        const branchOk = selectedBranch === 'all' || t.branchId === selectedBranch;
+        const branchOk = selectedBranch === 'all' || t.branches.some(b => b.id === selectedBranch);
         const originOk = selectedOrigin === 'all'
             || (selectedOrigin === 'custom' && t.origin !== TemplateOrigin.SYSTEM)
             || (selectedOrigin === 'system' && t.origin === TemplateOrigin.SYSTEM);
@@ -165,7 +164,6 @@ const TemplateList = ({onCreateNew, onEditTemplate, onSaved}: TemplateListProps)
                 <div className={styles.templatesGrid}>
                     {filtered.map(template =>
                     {
-                        const branch     = branchMap[template.branchId];
                         const isEditable = template.origin !== TemplateOrigin.SYSTEM;
 
                         return (
@@ -174,17 +172,18 @@ const TemplateList = ({onCreateNew, onEditTemplate, onSaved}: TemplateListProps)
                                     <div className={styles.templateInfo}>
                                         <h4 className={styles.templateName}>{template.title}</h4>
                                         <div className={styles.templateMeta}>
-                                            {branch && (
+                                            {template.branches.map(b => (
                                                 <span
+                                                    key={b.id}
                                                     className={styles.categoryBadge}
                                                     style={{
-                                                        backgroundColor: `${branch.color ?? '#6b7280'}15`,
-                                                        color: branch.color ?? '#6b7280',
+                                                        backgroundColor: `${b.color ?? '#6b7280'}15`,
+                                                        color: b.color ?? '#6b7280',
                                                     }}
                                                 >
-                                                    {branch.name}
+                                                    {b.name}
                                                 </span>
-                                            )}
+                                            ))}
                                             <span
                                                 className={styles.originBadge}
                                                 style={{

@@ -82,7 +82,7 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({children}) =>
 
     const buildTemplateLink = useCallback((tpl: DocumentTemplate): string | null =>
     {
-        const branch = (branches ?? []).find(b => b.id === tpl.branchId);
+        const branch = (branches ?? []).find(b => tpl.branches?.some(tb => tb.id === b.id));
         if (!branch) return null;
         return `/dashboard/generator/${branch.slug}/${tpl.documentType}`;
     }, [branches]);

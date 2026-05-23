@@ -98,3 +98,27 @@ export enum LibraryDocumentType
     CONTRACT      = 'CONTRACT',
     OTHER         = 'OTHER',
 }
+
+export const LIBRARY_DOCUMENT_TYPE_COLORS: Record<LibraryDocumentType, {bg: string; color: string}> = {
+    [LibraryDocumentType.LAW]:           {bg: '#EFF6FF', color: '#3B82F6'},
+    [LibraryDocumentType.DECREE]:        {bg: '#FDF4FF', color: '#A855F7'},
+    [LibraryDocumentType.RESOLUTION]:    {bg: '#F0FDF4', color: '#22C55E'},
+    [LibraryDocumentType.CIRCULAR]:      {bg: '#FFF7ED', color: '#F97316'},
+    [LibraryDocumentType.RULING]:        {bg: '#FEF2F2', color: '#EF4444'},
+    [LibraryDocumentType.JURISPRUDENCE]: {bg: '#FEF9C3', color: '#CA8A04'},
+    [LibraryDocumentType.DOCTRINE]:      {bg: '#F0F9FF', color: '#0EA5E9'},
+    [LibraryDocumentType.CONTRACT]:      {bg: '#FDF4FF', color: '#D946EF'},
+    [LibraryDocumentType.OTHER]:         {bg: '#F8FAFC', color: '#64748B'},
+};
+
+export const LIBRARY_DOCUMENT_TYPE_LABELS: Record<LibraryDocumentType, string> = {
+    [LibraryDocumentType.LAW]:           'Ley',
+    [LibraryDocumentType.DECREE]:        'Decreto',
+    [LibraryDocumentType.RESOLUTION]:    'Resolución',
+    [LibraryDocumentType.CIRCULAR]:      'Circular',
+    [LibraryDocumentType.RULING]:        'Sentencia',
+    [LibraryDocumentType.JURISPRUDENCE]: 'Jurisprudencia',
+    [LibraryDocumentType.DOCTRINE]:      'Doctrina',
+    [LibraryDocumentType.CONTRACT]:      'Contrato',
+    [LibraryDocumentType.OTHER]:         'Otro',
+};

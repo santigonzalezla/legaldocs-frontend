@@ -29,7 +29,7 @@ const TemplateEditor = ({templateId, onClose, onSaved}: TemplateEditorProps) =>
     const [form, setForm] = useState({
         title:          '',
         documentType:   '',
-        branchId:       '',
+        branchIds:      [] as string[],
         subcategory:    '',
         textTemplate:   '',
         variableFields: {} as Record<string, any>,
@@ -55,7 +55,7 @@ const TemplateEditor = ({templateId, onClose, onSaved}: TemplateEditorProps) =>
         setForm({
             title:          existingTemplate.title,
             documentType:   existingTemplate.documentType,
-            branchId:       existingTemplate.branchId,
+            branchIds:      existingTemplate.branches.map(b => b.id),
             subcategory:    existingTemplate.subcategory ?? '',
             textTemplate:   existingTemplate.textTemplate ?? '',
             variableFields: (existingTemplate.variableFields as Record<string, any>) ?? {},
@@ -154,9 +154,9 @@ const TemplateEditor = ({templateId, onClose, onSaved}: TemplateEditorProps) =>
     // ── Save ──────────────────────────────────────────────────────────────────
     const handleSave = async () =>
     {
-        if (!form.title.trim() || !form.branchId || !form.documentType.trim())
+        if (!form.title.trim() || form.branchIds.length === 0)
         {
-            toast.error('Título, tipo de documento y rama jurídica son obligatorios.');
+            toast.error('Título y al menos una rama jurídica son obligatorios.');
             return;
         }
 
@@ -166,10 +166,14 @@ const TemplateEditor = ({templateId, onClose, onSaved}: TemplateEditorProps) =>
         const builtFields    = buildVariableFields(detectedVariables);
         const variableFields = mergeVariableFields(builtFields, form.variableFields);
 
+        const documentType = templateId
+            ? form.documentType
+            : toSlug(form.title.trim());
+
         const payload: Record<string, any> = {
             title:        form.title.trim(),
-            documentType: form.documentType.trim(),
-            branchId:     form.branchId,
+            documentType,
+            branchIds:    form.branchIds,
         };
 
         if (form.subcategory.trim()) payload.subcategory    = form.subcategory.trim();
@@ -187,8 +191,25 @@ const TemplateEditor = ({templateId, onClose, onSaved}: TemplateEditorProps) =>
         onSaved();
     };
 
+    const addBranch = (value: string) =>
+    {
+        if (value === '__all__')
+        {
+            setForm(prev => ({...prev, branchIds: (branches ?? []).map(b => b.id)}));
+            return;
+        }
+        if (!value) return;
+        setForm(prev => prev.branchIds.includes(value)
+            ? prev
+            : {...prev, branchIds: [...prev.branchIds, value]},
+        );
+    };
+
+    const removeBranch = (id: string) =>
+        setForm(prev => ({...prev, branchIds: prev.branchIds.filter(b => b !== id)}));
+
     const isSaving = isCreating || isUpdating;
-    const canSave  = form.title.trim() && form.branchId && form.documentType.trim();
+    const canSave  = form.title.trim() && form.branchIds.length > 0;
 
     return (
         <div className={styles.templateEditor}>
@@ -201,6 +222,7 @@ const TemplateEditor = ({templateId, onClose, onSaved}: TemplateEditorProps) =>
 
             {/* Metadata */}
             <div className={styles.form}>
+                {/* Row 1: Título + Descripción */}
                 <div className={styles.formRow}>
                     <div className={styles.formGroup}>
                         <label className={styles.label}>
@@ -215,44 +237,69 @@ const TemplateEditor = ({templateId, onClose, onSaved}: TemplateEditorProps) =>
                         />
                     </div>
                     <div className={styles.formGroup}>
-                        <label className={styles.label}>
-                            Tipo de documento <span className={styles.required}>*</span>
-                        </label>
+                        <label className={styles.label}>Descripción</label>
                         <input
                             className={styles.input}
                             type="text"
-                            placeholder="Ej: rental-contract"
-                            value={form.documentType}
-                            onChange={e => handleField('documentType', e.target.value)}
-                        />
-                    </div>
-                </div>
-                <div className={styles.formRow}>
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}>
-                            Rama Jurídica <span className={styles.required}>*</span>
-                        </label>
-                        <select
-                            className={styles.select}
-                            value={form.branchId}
-                            onChange={e => handleField('branchId', e.target.value)}
-                            disabled={loadingBranches}
-                        >
-                            <option value="">Seleccionar rama</option>
-                            {(branches ?? []).map(b => (
-                                <option key={b.id} value={b.id}>{b.name}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}>Subcategoría</label>
-                        <input
-                            className={styles.input}
-                            type="text"
-                            placeholder="Ej: Arrendamiento de vivienda urbana"
+                            placeholder="Ej: Arrendamiento de vivienda urbana (opcional)"
                             value={form.subcategory}
                             onChange={e => handleField('subcategory', e.target.value)}
                         />
+                    </div>
+                </div>
+
+                {/* Row 2: Ramas (full width) */}
+                <div className={styles.formRow}>
+                    <div className={`${styles.formGroup} ${styles.formGroupFull}`}>
+                        <label className={styles.label}>
+                            Ramas Jurídicas <span className={styles.required}>*</span>
+                        </label>
+                        <div className={styles.branchRow}>
+                            <select
+                                className={styles.branchSelect}
+                                value=""
+                                onChange={e => { addBranch(e.target.value); e.target.value = ''; }}
+                                disabled={loadingBranches}
+                            >
+                                <option value="">Agregar rama...</option>
+                                <option value="__all__">✦ Todas las ramas</option>
+                                {(branches ?? [])
+                                    .filter(b => !form.branchIds.includes(b.id))
+                                    .map(b => (
+                                        <option key={b.id} value={b.id}>{b.name}</option>
+                                    ))
+                                }
+                            </select>
+                            {form.branchIds.map(id =>
+                            {
+                                const b = (branches ?? []).find(x => x.id === id);
+                                if (!b) return null;
+                                return (
+                                    <span
+                                        key={id}
+                                        className={styles.branchChip}
+                                        style={{
+                                            backgroundColor: `${b.color ?? '#6b7280'}15`,
+                                            borderColor:      `${b.color ?? '#6b7280'}40`,
+                                            color:             b.color ?? '#6b7280',
+                                        }}
+                                    >
+                                        <span
+                                            className={styles.branchDot}
+                                            style={{backgroundColor: b.color ?? '#6b7280'}}
+                                        />
+                                        {b.name}
+                                        <button
+                                            type="button"
+                                            className={styles.branchRemove}
+                                            onClick={() => removeBranch(id)}
+                                        >
+                                            ×
+                                        </button>
+                                    </span>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -301,6 +348,18 @@ const TemplateEditor = ({templateId, onClose, onSaved}: TemplateEditorProps) =>
 };
 
 export default TemplateEditor;
+
+function toSlug(s: string): string
+{
+    return s
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '')
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+}
 
 function buildVariableFields(
     vars: {full: string; category: string; field: string; type: string; options?: string[]}[],

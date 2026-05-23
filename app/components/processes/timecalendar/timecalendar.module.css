@@ -193,8 +193,8 @@
     font-family: var(--font-family);
     font-weight: 500;
     white-space: nowrap;
-    transform: translateY(-6px);
     letter-spacing: 0.02em;
+    padding-top: 3px;
 }
 
 /* ── Day column ──────────────────────────────────────────────────────────── */

@@ -159,7 +159,6 @@ export interface DocumentTemplate
     documentType: string;
     version: string;
     title: string;
-    branchId: string;
     subcategory: string | null;
     applicableRegulations: any;
     requiresRegistration: boolean;
@@ -174,6 +173,7 @@ export interface DocumentTemplate
     deletedAt: string | null;
     createdAt: string;
     updatedAt: string;
+    branches: {id: string; name: string; color: string | null; icon: string | null; slug: string}[];
 }
 
 // ─── Digital Signature ───────────────────────────────────────────────────────

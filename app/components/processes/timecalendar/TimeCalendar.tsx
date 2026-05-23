@@ -9,7 +9,7 @@ import type {TimeEntry, LegalProcess, PaginatedResponse} from '@/app/interfaces/
 import {toast} from 'sonner';
 
 const HOUR_START = 6;
-const HOUR_END = 22;
+const HOUR_END = 21;
 const SLOT_MINS = 30;
 const SLOT_H = 44; // px per slot
 const TOTAL_SLOTS = (HOUR_END - HOUR_START) * (60 / SLOT_MINS); // 32

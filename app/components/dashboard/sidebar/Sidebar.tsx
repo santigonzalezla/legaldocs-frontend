@@ -99,14 +99,14 @@ const Sidebar = () =>
 
     const generatorOptions: SidebarOptionType[] = [...branches]
         .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-        .filter(b => templates.some(t => t.branchId === b.id))
+        .filter(b => templates.some(t => t.branches.some(br => br.id === b.id)))
         .map(b => ({
             item: b.name,
             icon: BRANCH_ICONS[b.slug] ?? <File/>,
             link: `/dashboard/generator/${b.slug}`,
             category: 'generator',
             suboptions: templates
-                .filter(t => t.branchId === b.id)
+                .filter(t => t.branches.some(br => br.id === b.id))
                 .map(t => ({
                     item: t.title,
                     link: `/dashboard/generator/${b.slug}/${t.documentType}`

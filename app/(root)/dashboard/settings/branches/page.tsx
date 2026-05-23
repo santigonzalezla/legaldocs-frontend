@@ -74,7 +74,7 @@ const BranchesPage = () =>
     const firmBranches = branches.filter(b => !b.isSystem);
 
     const templateCountFor = (branchId: string) =>
-        templates.filter(t => t.branchId === branchId).length;
+        templates.filter(t => t.branches.some(b => b.id === branchId)).length;
 
     const openModal = () => setShowModal(true);
 

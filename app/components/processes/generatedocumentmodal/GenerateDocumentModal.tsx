@@ -43,7 +43,8 @@ const GenerateDocumentModal = ({open, processId, onClose}: GenerateDocumentModal
 
     const handleSelect = (tpl: DocumentTemplate) =>
     {
-        const branchSlug = branchMap[tpl.branchId];
+        const firstBranchId = tpl.branches?.[0]?.id;
+        const branchSlug    = firstBranchId ? branchMap[firstBranchId] : undefined;
         if (!branchSlug) return;
         router.push(`/dashboard/generator/${branchSlug}/${tpl.documentType}?processId=${processId}`);
         onClose();
@@ -92,19 +93,19 @@ const GenerateDocumentModal = ({open, processId, onClose}: GenerateDocumentModal
                         <div className={styles.list}>
                             {templates.map(tpl =>
                             {
-                                const branch = branchList.find(b => b.id === tpl.branchId);
+                                const firstBranch = tpl.branches?.[0];
                                 return (
                                     <button
                                         key={tpl.id}
                                         className={styles.templateRow}
                                         onClick={() => handleSelect(tpl)}
-                                        disabled={!branchMap[tpl.branchId]}
+                                        disabled={!firstBranch || !branchMap[firstBranch.id]}
                                     >
                                         <div className={styles.templateIcon}><File /></div>
                                         <div className={styles.templateInfo}>
                                             <span className={styles.templateTitle}>{tpl.title}</span>
-                                            {branch && (
-                                                <span className={styles.templateBranch}>{branch.name}</span>
+                                            {firstBranch && (
+                                                <span className={styles.templateBranch}>{firstBranch.name}</span>
                                             )}
                                         </div>
                                     </button>

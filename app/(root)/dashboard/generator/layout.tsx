@@ -70,7 +70,7 @@ function templateToFormSchema(tpl: DocumentTemplate): FormSchema
         creation_date:  tpl.createdAt,
         metadata: {
             title:                   tpl.title,
-            category:                tpl.branchId ?? '',
+            category:                tpl.branches?.[0]?.name ?? '',
             subcategory:             tpl.subcategory ?? '',
             applicable_regulations:  (tpl.applicableRegulations as string[]) ?? [],
             requires_registration:   tpl.requiresRegistration ?? false,

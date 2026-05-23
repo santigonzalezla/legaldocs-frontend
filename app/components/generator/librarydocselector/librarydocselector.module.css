@@ -1,0 +1,224 @@
+.root {
+    padding-top: 16px;
+    border-top: 1px solid var(--border-light);
+    margin-top: 16px;
+}
+
+/* ── Label ───────────────────────────────────────────────────────────────── */
+
+.label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 10px 0;
+    font-family: var(--font-family), sans-serif;
+}
+
+.labelIcon {
+    width: 14px;
+    height: 14px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+/* ── Chips ───────────────────────────────────────────────────────────────── */
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px 3px 6px;
+    background: var(--hover-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    font-size: 11px;
+    color: var(--text-primary);
+    font-family: var(--font-family), sans-serif;
+    max-width: 260px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chipDot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.chipRemove {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+    margin-left: 2px;
+}
+
+.chipRemove:hover { color: var(--text-primary); }
+
+.chipX {
+    width: 11px;
+    height: 11px;
+}
+
+/* ── Selector wrapper ────────────────────────────────────────────────────── */
+
+.selectorWrap {
+    position: relative;
+}
+
+.inputRow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--input-bg, var(--content-bg));
+    overflow: hidden;
+    transition: border-color 0.15s;
+}
+
+.inputRow:focus-within {
+    border-color: var(--primary-color, #3b82f6);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.12);
+}
+
+.searchIcon {
+    width: 14px;
+    height: 14px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+    margin-left: 10px;
+}
+
+.searchInput {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 13px;
+    color: var(--text-primary);
+    font-family: var(--font-family), sans-serif;
+    padding: 8px 10px;
+    min-width: 0;
+}
+
+.searchInput::placeholder { color: var(--text-secondary); }
+
+.branchSelect {
+    border: none;
+    border-left: 1px solid var(--border-light);
+    outline: none;
+    background: var(--hover-bg);
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-family: var(--font-family), sans-serif;
+    padding: 8px 10px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    max-width: 160px;
+}
+
+.branchSelect:hover { color: var(--text-primary); }
+
+/* ── Dropdown ────────────────────────────────────────────────────────────── */
+
+.dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    max-width: 480px;
+    z-index: 100;
+    background: var(--content-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+}
+
+.empty {
+    padding: 16px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0;
+    font-family: var(--font-family), sans-serif;
+}
+
+.list {
+    list-style: none;
+    margin: 0;
+    padding: 4px 0;
+    max-height: 220px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background 0.12s;
+}
+
+.item:hover { background: var(--hover-bg); }
+
+.itemMain {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+}
+
+.itemTitle {
+    font-size: 13px;
+    color: var(--text-primary);
+    font-family: var(--font-family), sans-serif;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.itemType {
+    display: inline-block;
+    align-self: flex-start;
+    font-size: 10px;
+    font-family: var(--font-family), sans-serif;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    text-transform: lowercase;
+    letter-spacing: 0.01em;
+}
+
+.itemBranch {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 10px;
+    white-space: nowrap;
+    font-family: var(--font-family), sans-serif;
+    flex-shrink: 0;
+}
