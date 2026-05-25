@@ -4,7 +4,7 @@ import {useEffect, useMemo, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
 import styles from './timecalendar.module.css';
 import {useFetch} from '@/hooks/useFetch';
-import {ArrowLeft, ArrowGo, Briefcase, Clock, Trash, X} from '@/app/components/svg';
+import {ArrowLeft, ArrowGo, Briefcase, Clock, Plus, Trash, X} from '@/app/components/svg';
 import type {TimeEntry, LegalProcess, PaginatedResponse} from '@/app/interfaces/interfaces';
 import {toast} from 'sonner';
 
@@ -344,6 +344,23 @@ const TimeCalendar = () =>
     const nowSlot = (today.getHours() - HOUR_START) * (60 / SLOT_MINS) + today.getMinutes() / SLOT_MINS;
     const nowVisible = nowSlot >= 0 && nowSlot < TOTAL_SLOTS;
 
+    const openQuickEntry = () =>
+    {
+        const now        = new Date();
+        const rawSlot    = (now.getHours() - HOUR_START) * (60 / SLOT_MINS) + Math.floor(now.getMinutes() / SLOT_MINS);
+        const startSlot  = Math.max(0, Math.min(TOTAL_SLOTS - 2, rawSlot));
+        const endSlot    = Math.min(TOTAL_SLOTS, startSlot + 2);
+        setCreateModal({
+            date:        now,
+            startSlot,
+            endSlot,
+            startTime:   slotToTime(startSlot),
+            endTime:     slotToTime(endSlot),
+            processId:   '',
+            description: '',
+        });
+    };
+
     return (
         <div className={styles.root}>
 
@@ -358,9 +375,15 @@ const TimeCalendar = () =>
                         <ArrowGo className={styles.navIcon}/>
                     </button>
                 </div>
-                <button className={styles.todayBtn} onClick={() => setWeekStart(getMonday(new Date()))}>
-                    Hoy
-                </button>
+                <div className={styles.toolbarRight}>
+                    <button className={styles.todayBtn} onClick={() => setWeekStart(getMonday(new Date()))}>
+                        Hoy
+                    </button>
+                    <button className={styles.addEntryBtn} onClick={openQuickEntry}>
+                        <Plus className={styles.addEntryIcon}/>
+                        Registrar tiempo
+                    </button>
+                </div>
             </div>
 
             {/* Calendar */}
@@ -496,6 +519,21 @@ const TimeCalendar = () =>
                         </div>
 
                         <div className={styles.modalBody}>
+
+                            {/* Date */}
+                            <div className={styles.fieldGroup}>
+                                <label className={styles.fieldLabel}>Fecha</label>
+                                <input
+                                    type="date"
+                                    className={styles.timeInput}
+                                    value={toDateStr(createModal.date)}
+                                    onChange={e =>
+                                    {
+                                        const d = new Date(e.target.value + 'T12:00:00');
+                                        setCreateModal(m => m ? {...m, date: d} : m);
+                                    }}
+                                />
+                            </div>
 
                             {/* Time range */}
                             <div className={styles.fieldGroup}>
