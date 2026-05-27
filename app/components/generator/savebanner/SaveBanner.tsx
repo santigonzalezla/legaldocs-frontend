@@ -7,7 +7,7 @@ import { Save, Loader } from '@/app/components/svg';
 import { useFormContext } from '@/context/FormContext';
 import { useFetch } from '@/hooks/useFetch';
 import { toast } from 'sonner';
-import type { LegalProcess, PaginatedResponse } from '@/app/interfaces/interfaces';
+import type { LegalBranch, LegalProcess, PaginatedResponse } from '@/app/interfaces/interfaces';
 
 const SaveBanner = () =>
 {
@@ -29,6 +29,9 @@ const SaveBanner = () =>
         'process?limit=100',
         { firmScoped: true },
     );
+
+    const { data: branchList } = useFetch<LegalBranch[]>('branch', { firmScoped: true });
+    const resolvedBranchId = branchList?.find(b => b.slug === branchSlug)?.id;
 
     const { execute: createDocument } = useFetch<any>(
         'document',
@@ -61,7 +64,7 @@ const SaveBanner = () =>
         const body = {
             title:            docTitle.trim() || schema?.metadata?.title || 'Documento sin título',
             documentType:     schema?.document_type ?? '',
-            branchId:         schema?.metadata?.category || undefined,
+            branchId:         resolvedBranchId || undefined,
             processId:        selectedProcessId || null,
             formData: {
                 ...cleanFormData,
