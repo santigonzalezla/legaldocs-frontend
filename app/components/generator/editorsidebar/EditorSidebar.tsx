@@ -9,13 +9,16 @@ import {
     Calendar,
     Check,
     Create,
+    Edit,
     File,
     Hash,
     List,
     Mail,
+    Options,
     PenTool,
     Plus,
     Table,
+    Trash,
     Type,
     X,
 } from "@/app/components/svg"
@@ -31,6 +34,9 @@ interface EditorSidebarProps {
     onUpdateFieldOptions: (category: string, field: string, options: string[]) => void
     onAddField: (category: string, fieldName: string, type: string, options?: string[]) => void
     onAddCategory: (name: string) => void
+    onDeleteField: (category: string, field: string) => void
+    onRenameField: (category: string, oldField: string, newField: string) => void
+    hideFields?: boolean
 }
 
 interface VarFormState {
@@ -169,14 +175,47 @@ const EditorSidebar = ({
     onUpdateFieldOptions,
     onAddField,
     onAddCategory,
+    onDeleteField,
+    onRenameField,
+    hideFields = false,
 }: EditorSidebarProps) =>
 {
     const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({})
-    const [activeTab,          setActiveTab]          = useState<"fields" | "components">("fields")
+    const [activeTab,          setActiveTab]          = useState<"fields" | "components">(hideFields ? "components" : "fields")
     const [varForms,           setVarForms]           = useState<Record<string, VarFormState>>({})
     const [addCat,             setAddCat]             = useState({ open: false, name: "" })
-    // Per-field option inputs for existing seleccion fields (keyed by "cat.field")
     const [optionInputs,       setOptionInputs]       = useState<Record<string, string>>({})
+    const [renamingField,      setRenamingField]      = useState<{cat: string; field: string; value: string} | null>(null)
+    const [openMenuKey,        setOpenMenuKey]        = useState<string | null>(null)
+    const [menuPos,            setMenuPos]            = useState({ top: 0, left: 0 })
+    const menuRef = useRef<HTMLDivElement>(null)
+
+    // Close field menu on outside click or scroll
+    useEffect(() =>
+    {
+        if (!openMenuKey) return;
+        const close = () => setOpenMenuKey(null);
+        const handleClick = (e: MouseEvent) =>
+        {
+            if (menuRef.current && !menuRef.current.contains(e.target as Node)) close();
+        };
+        document.addEventListener('mousedown', handleClick);
+        window.addEventListener('scroll', close, true);
+        return () =>
+        {
+            document.removeEventListener('mousedown', handleClick);
+            window.removeEventListener('scroll', close, true);
+        };
+    }, [openMenuKey]);
+
+    const commitRename = () =>
+    {
+        if (!renamingField) return;
+        const { cat, field, value } = renamingField;
+        const slug = value.trim().replace(/\s+/g, '_');
+        if (slug && slug !== field) onRenameField(cat, field, slug);
+        setRenamingField(null);
+    };
 
     const toggleCategory = (cat: string) =>
         setExpandedCategories(prev => ({ ...prev, [cat]: !prev[cat] }))
@@ -338,9 +377,21 @@ const EditorSidebar = ({
                                                 return (
                                                     <div key={field} className={styles.fieldItem}>
 
-                                                        {/* Row 1: nombre + botón insertar */}
+                                                        {/* Row 1: nombre + botones */}
                                                         <div className={styles.fieldRow1}>
-                                                            <span className={styles.fieldLabel}>{label}</span>
+                                                            {renamingField?.cat === cat && renamingField?.field === field ? (
+                                                                <input
+                                                                    className={styles.fieldRenameInput}
+                                                                    value={renamingField.value}
+                                                                    autoFocus
+                                                                    onChange={e => setRenamingField(prev => prev ? {...prev, value: e.target.value} : null)}
+                                                                    onKeyDown={e => { e.stopPropagation(); if (e.key === 'Enter') commitRename(); if (e.key === 'Escape') setRenamingField(null); }}
+                                                                    onClick={e => e.stopPropagation()}
+                                                                    onBlur={commitRename}
+                                                                />
+                                                            ) : (
+                                                                <span className={styles.fieldLabel}>{label}</span>
+                                                            )}
                                                             <button
                                                                 className={styles.fieldInsertBtn}
                                                                 onClick={() => onInsertField(path, label)}
@@ -348,6 +399,34 @@ const EditorSidebar = ({
                                                             >
                                                                 <Create className={styles.fieldInsertIcon} />
                                                             </button>
+                                                            <button
+                                                                className={styles.fieldOptionsBtn}
+                                                                title="Opciones"
+                                                                onClick={e =>
+                                                                {
+                                                                    e.stopPropagation();
+                                                                    const key = `${cat}.${field}`;
+                                                                    if (openMenuKey === key) { setOpenMenuKey(null); return; }
+                                                                    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                                                                    setMenuPos({ top: rect.bottom + 4, left: rect.right - 140 });
+                                                                    setOpenMenuKey(key);
+                                                                }}
+                                                            >
+                                                                <Options className={styles.fieldOptionsBtnIcon} />
+                                                            </button>
+                                                            {openMenuKey === `${cat}.${field}` && typeof document !== 'undefined' && createPortal(
+                                                                <div ref={menuRef} className={styles.fieldMenu} style={{top: menuPos.top, left: menuPos.left}}>
+                                                                    <button className={styles.fieldMenuItem} onClick={() => { setRenamingField({cat, field, value: field}); setOpenMenuKey(null); }}>
+                                                                        <Edit className={styles.fieldMenuIcon} />
+                                                                        Renombrar
+                                                                    </button>
+                                                                    <button className={`${styles.fieldMenuItem} ${styles.fieldMenuItemDelete}`} onClick={() => { onDeleteField(cat, field); setOpenMenuKey(null); }}>
+                                                                        <Trash className={styles.fieldMenuIcon} />
+                                                                        Eliminar
+                                                                    </button>
+                                                                </div>,
+                                                                document.body,
+                                                            )}
                                                         </div>
 
                                                         {/* Row 2: tipo (selector custom) + valor */}

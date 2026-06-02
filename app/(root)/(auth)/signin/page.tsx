@@ -1,7 +1,7 @@
 'use client';
 
-import {useEffect, useState} from 'react';
-import {useRouter} from 'next/navigation';
+import {Suspense, useEffect, useState} from 'react';
+import {useRouter, useSearchParams} from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import {toast} from 'sonner';
@@ -16,11 +16,15 @@ interface LoginResponse
     refreshToken: string;
 }
 
-const SignInPage = () =>
+const SignInForm = () =>
 {
-    const router = useRouter();
+    const router       = useRouter();
+    const searchParams = useSearchParams();
+    const inviteToken  = searchParams.get('invite') ?? '';
+    const inviteEmail  = searchParams.get('email') ?? '';
+
     const {login, isAuthenticated, isHydrated} = useAuth();
-    const [email,        setEmail]        = useState('');
+    const [email,        setEmail]        = useState(inviteEmail);
     const [password,     setPassword]     = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
@@ -29,11 +33,11 @@ const SignInPage = () =>
         immediate: false,
     });
 
-    // Redirigir si ya tiene sesión
     useEffect(() =>
     {
-        if (isHydrated && isAuthenticated) router.replace('/dashboard');
-    }, [isHydrated, isAuthenticated, router]);
+        if (!isHydrated || !isAuthenticated) return;
+        router.replace(inviteToken ? `/invite?token=${inviteToken}` : '/dashboard');
+    }, [isHydrated, isAuthenticated, router, inviteToken]);
 
     useEffect(() => { if (error) toast.error(error); }, [error]);
 
@@ -45,7 +49,8 @@ const SignInPage = () =>
 
         login(result.accessToken, result.refreshToken);
         toast.success('¡Bienvenido de nuevo!');
-        router.push('/dashboard');
+        // If came from an invite link, go back to it so it auto-accepts
+        router.push(inviteToken ? `/invite?token=${inviteToken}` : '/dashboard');
     };
 
     return (
@@ -77,6 +82,8 @@ const SignInPage = () =>
                             onChange={(e) => setEmail(e.target.value)}
                             required
                             autoComplete="email"
+                            readOnly={!!inviteEmail}
+                            style={inviteEmail ? {opacity: 0.7, cursor: 'default'} : undefined}
                         />
                     </div>
                 </div>
@@ -113,10 +120,18 @@ const SignInPage = () =>
 
             <p className={styles.footer}>
                 ¿No tienes cuenta?
-                <Link href="/signup" className={styles.footerLink}>Regístrate</Link>
+                <Link href={inviteToken ? `/signup?invite=${inviteToken}` : '/signup'} className={styles.footerLink}>
+                    Regístrate
+                </Link>
             </p>
         </div>
     );
 };
+
+const SignInPage = () => (
+    <Suspense fallback={null}>
+        <SignInForm />
+    </Suspense>
+);
 
 export default SignInPage;

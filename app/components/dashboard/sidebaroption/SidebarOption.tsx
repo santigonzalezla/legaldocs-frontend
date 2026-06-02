@@ -2,8 +2,44 @@
 import styles from "./sidebaroption.module.css"
 import type React from "react"
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import {ArrowDown, ArrowGo} from "@/app/components/svg";
+
+const toTitleCase = (str: string) =>
+    str.toLowerCase().replace(/(?:^|\s)\S/g, c => c.toUpperCase());
+
+const MarqueeText = ({text, className, wrapClass}: {text: string; className: string; wrapClass: string}) =>
+{
+    const spanRef = useRef<HTMLSpanElement>(null);
+    const wrapRef = useRef<HTMLSpanElement>(null);
+    const [overflows, setOverflows] = useState(false);
+
+    useEffect(() =>
+    {
+        const el = spanRef.current;
+        const wrap = wrapRef.current;
+        if (!el || !wrap) return;
+        // Observe the wrapper — not the inner span — so that applying .marquee
+        // (which makes the inner span expand to text width) doesn't re-trigger
+        // the check and immediately remove the class.
+        const check = () => setOverflows(el.scrollWidth > wrap.offsetWidth + 1);
+        check();
+        const ro = new ResizeObserver(check);
+        ro.observe(wrap);
+        return () => ro.disconnect();
+    }, [text]);
+
+    return (
+        <span ref={wrapRef} className={wrapClass} title={text}>
+            <span
+                ref={spanRef}
+                className={`${className}${overflows ? ' ' + styles.marquee : ''}`}
+            >
+                {text}
+            </span>
+        </span>
+    );
+};
 
 interface SubOption {
     item: string
@@ -38,7 +74,7 @@ const SidebarOption: React.FC<SidebarOptionProps> = ({ item, icon, link, isColla
                 >
                     <Link href={link} className={styles.optionLink}>
                         <div className={styles.iconContainer}>{icon}</div>
-                        {!isCollapsed && <span className={styles.text}>{item}</span>}
+                        {!isCollapsed && <MarqueeText text={toTitleCase(item)} className={styles.text} wrapClass={styles.textWrap} />}
                     </Link>
                     {!isCollapsed && (
                         <div className={styles.chevron} onClick={handleToggle}>
@@ -52,7 +88,7 @@ const SidebarOption: React.FC<SidebarOptionProps> = ({ item, icon, link, isColla
                         {suboptions.map((suboption, index) => (
                             <Link key={index} href={suboption.link} className={styles.suboption}>
                                 <div className={styles.suboptionDot}></div>
-                                <span className={styles.suboptionText}>{suboption.item}</span>
+                                <MarqueeText text={toTitleCase(suboption.item)} className={styles.suboptionText} wrapClass={styles.suboptionTextWrap} />
                             </Link>
                         ))}
                     </div>
@@ -64,7 +100,7 @@ const SidebarOption: React.FC<SidebarOptionProps> = ({ item, icon, link, isColla
     return (
         <Link href={link} className={styles.option} data-category={category}>
             <div className={styles.iconContainer}>{icon}</div>
-            {!isCollapsed && <span className={styles.text}>{item}</span>}
+            {!isCollapsed && <MarqueeText text={toTitleCase(item)} className={styles.text} wrapClass={styles.textWrap} />}
         </Link>
     )
 }

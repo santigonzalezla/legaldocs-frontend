@@ -50,6 +50,7 @@ const formatDate = (d: string | null) =>
 const TeamManagement = () =>
 {
     const [openMenuId,     setOpenMenuId]     = useState<string | null>(null);
+    const [menuUp,         setMenuUp]         = useState(false);
     const [showInvite,     setShowInvite]     = useState(false);
     const [inviteEmail,    setInviteEmail]    = useState('');
     const [inviteRole,     setInviteRole]     = useState<FirmMemberRole>(FirmMemberRole.LAWYER);
@@ -229,11 +230,17 @@ const TeamManagement = () =>
                                 <div className={styles.memberActions}>
                                     <div className={styles.menuWrapper}>
                                         <button className={styles.actionButton}
-                                            onClick={() => setOpenMenuId(isMenuOpen ? null : member.id)}>
+                                            onClick={e =>
+                                            {
+                                                if (isMenuOpen) { setOpenMenuId(null); return; }
+                                                const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                                                setMenuUp(rect.bottom + 110 > window.innerHeight);
+                                                setOpenMenuId(member.id);
+                                            }}>
                                             <MoreHorizontal />
                                         </button>
                                         {isMenuOpen && (
-                                            <div className={styles.dropdownMenu}>
+                                            <div className={`${styles.dropdownMenu} ${menuUp ? styles.dropdownMenuUp : ''}`}>
                                                 <button className={styles.dropdownItem}
                                                     onClick={() =>
                                                     {

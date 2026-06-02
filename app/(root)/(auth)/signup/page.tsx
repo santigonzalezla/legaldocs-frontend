@@ -1,13 +1,14 @@
 'use client';
 
-import {useEffect, useState} from 'react';
-import {useRouter} from 'next/navigation';
+import {Suspense, useEffect, useRef, useState} from 'react';
+import {useRouter, useSearchParams} from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import {toast} from 'sonner';
 import {useFetch} from '@/hooks/useFetch';
 import {useAuth} from '@/context/AuthContext';
 import {Eye, EyeClosed, Lock, Mail, User} from '@/app/components/svg';
+import {API_BASE_URL} from '@/lib/constants';
 import styles from '../form.module.css';
 
 interface RegisterResponse
@@ -16,13 +17,18 @@ interface RegisterResponse
     refreshToken: string;
 }
 
-const SignUpPage = () =>
+const SignUpForm = () =>
 {
-    const router = useRouter();
+    const router       = useRouter();
+    const searchParams = useSearchParams();
+    const inviteToken  = searchParams.get('invite') ?? '';
+    const inviteEmail  = searchParams.get('email') ?? '';
+
     const {login, isAuthenticated, isHydrated} = useAuth();
+    const justRegistered = useRef(false);
     const [firstName,    setFirstName]    = useState('');
     const [lastName,     setLastName]     = useState('');
-    const [email,        setEmail]        = useState('');
+    const [email,        setEmail]        = useState(inviteEmail);
     const [password,     setPassword]     = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
@@ -33,8 +39,10 @@ const SignUpPage = () =>
 
     useEffect(() =>
     {
-        if (isHydrated && isAuthenticated) router.replace('/dashboard');
-    }, [isHydrated, isAuthenticated, router]);
+        // Skip redirect if we just registered — navigation is handled in handleSubmit
+        if (!isHydrated || !isAuthenticated || justRegistered.current) return;
+        router.replace(inviteToken ? `/invite?token=${inviteToken}&email=${encodeURIComponent(inviteEmail)}` : '/dashboard');
+    }, [isHydrated, isAuthenticated, router, inviteToken, inviteEmail]);
 
     useEffect(() => { if (error) toast.error(error); }, [error]);
 
@@ -44,7 +52,25 @@ const SignUpPage = () =>
         const result = await execute({body: {firstName, lastName, email, password}});
         if (!result) return;
 
+        justRegistered.current = true;
         login(result.accessToken, result.refreshToken);
+
+        // If registration came from an invitation, accept it immediately
+        if (inviteToken)
+        {
+            try
+            {
+                await fetch(`${API_BASE_URL}/firm/me/members/accept?token=${inviteToken}`, {
+                    method:  'POST',
+                    headers: {Authorization: `Bearer ${result.accessToken}`},
+                });
+            }
+            catch
+            {
+                // Accept failed — user can accept later from the firms settings page
+            }
+        }
+
         toast.success('¡Cuenta creada! Revisa tu correo para verificarla.');
         router.push('/dashboard');
     };
@@ -62,7 +88,9 @@ const SignUpPage = () =>
                     priority
                 />
                 <h1 className={styles.title}>Crea tu cuenta</h1>
-                <p className={styles.subtitle}>Empieza a automatizar tu práctica legal</p>
+                <p className={styles.subtitle}>
+                    {inviteToken ? 'Crea tu cuenta para unirte al despacho' : 'Empieza a automatizar tu práctica legal'}
+                </p>
             </div>
 
             <form className={styles.form} onSubmit={handleSubmit}>
@@ -111,6 +139,8 @@ const SignUpPage = () =>
                             onChange={(e) => setEmail(e.target.value)}
                             required
                             autoComplete="email"
+                            readOnly={!!inviteEmail}
+                            style={inviteEmail ? {opacity: 0.7, cursor: 'default'} : undefined}
                         />
                     </div>
                 </div>
@@ -143,10 +173,18 @@ const SignUpPage = () =>
 
             <p className={styles.footer}>
                 ¿Ya tienes cuenta?{' '}
-                <Link href="/signin" className={styles.footerLink}>Inicia sesión</Link>
+                <Link href={inviteToken ? `/signin?invite=${inviteToken}` : '/signin'} className={styles.footerLink}>
+                    Inicia sesión
+                </Link>
             </p>
         </div>
     );
 };
+
+const SignUpPage = () => (
+    <Suspense fallback={null}>
+        <SignUpForm />
+    </Suspense>
+);
 
 export default SignUpPage;

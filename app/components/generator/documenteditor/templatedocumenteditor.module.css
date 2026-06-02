@@ -251,48 +251,225 @@
 
 .fieldItem {
     width: 100%;
-    padding: 10px 16px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    transition: all 0.2s ease;
-    border-bottom: 1px solid var(--border-light);
-}
-
-.fieldItem:hover { background-color: var(--hover-bg); }
-.fieldItem:last-child { border-bottom: none; }
-
-.fieldIcon {
-    width: 16px;
-    height: 16px;
-    color: var(--primary-color);
-    flex-shrink: 0;
-}
-
-.fieldInfo {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-light);
+    box-sizing: border-box;
+    transition: background 0.2s ease;
+}
+
+.fieldItem:hover { background: var(--hover-bg); }
+.fieldItem:last-child { border-bottom: none; }
+
+/* Row 1: nombre + botones */
+.fieldRow1 {
+    display: flex;
+    align-items: center;
     gap: 2px;
+}
+
+/* Wrapper clips; inner span animates when text overflows */
+.fieldLabelWrap {
     flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    margin-right: 4px;
 }
 
 .fieldLabel {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     font-size: 13px;
     font-weight: 500;
     color: var(--text-primary);
     font-family: var(--font-family);
 }
 
-.fieldType {
-    font-size: 11px;
+
+.fieldInsertBtn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
     color: var(--text-secondary);
-    text-transform: uppercase;
-    font-family: var(--font-family);
+    transition: all 0.2s ease;
 }
+
+.fieldInsertBtn:hover {
+    background: var(--primary-color-alpha);
+    color: var(--primary-color);
+}
+
+.fieldInsertIcon { width: 12px; height: 12px; }
+
+.fieldOptionsBtn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+}
+
+.fieldOptionsBtn:hover {
+    background: var(--primary-color-alpha);
+    color: var(--primary-color);
+}
+
+.fieldOptionsBtnIcon { width: 14px; height: 14px; }
+
+/* Field context menu (portal) */
+.fieldMenu {
+    position: fixed;
+    z-index: 9999;
+    background: var(--content-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    padding: 4px;
+    min-width: 140px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.fieldMenuItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    text-align: left;
+    width: 100%;
+    transition: background 0.15s ease;
+}
+
+.fieldMenuItem:hover { background: var(--hover-bg); }
+
+.fieldMenuItemDelete { color: #ef4444; }
+.fieldMenuItemDelete:hover { background: #fee2e2; }
+
+.fieldMenuIcon { width: 13px; height: 13px; flex-shrink: 0; }
+
+.fieldRenameInput {
+    flex: 1;
+    min-width: 0;
+    padding: 3px 7px;
+    border: 1.5px solid var(--primary-color);
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--font-family);
+    color: var(--text-primary);
+    background: var(--content-bg);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+/* Row 2: type selector */
+.fieldRow2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ── Variable type selector ───────────────────────────────────────────────── */
+
+.typeSelect { position: relative; flex-shrink: 0; }
+
+.typeSelectTrigger {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 8px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--button-bg);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    white-space: nowrap;
+}
+
+.typeSelectTrigger:hover,
+.typeSelectTriggerOpen {
+    border-color: var(--primary-color);
+    background: var(--primary-color-alpha);
+    box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+.typeSelectIcon { width: 13px; height: 13px; color: var(--primary-color); flex-shrink: 0; }
+
+.typeSelectChevron {
+    width: 10px;
+    height: 10px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.typeSelectChevronOpen { transform: rotate(180deg); }
+
+.typeSelectDropdown {
+    position: fixed;
+    z-index: 9999;
+    min-width: 140px;
+    background: var(--content-bg);
+    border: 1.5px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.typeSelectOption {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 12px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 12.5px;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    transition: background 0.15s;
+    border-bottom: 1px solid var(--border-light);
+    text-align: left;
+}
+
+.typeSelectOption:last-child { border-bottom: none; }
+.typeSelectOption:hover { background: var(--hover-bg); }
+
+.typeSelectOptionActive { background: var(--primary-color-alpha); color: var(--primary-color); }
+.typeSelectOptionActive:hover { background: var(--primary-color-alpha); }
+
+.typeSelectOptionIcon { width: 14px; height: 14px; color: var(--primary-color); flex-shrink: 0; }
+.typeSelectOptionLabel { flex: 1; font-weight: 500; }
+.typeSelectOptionCheck { font-size: 11px; color: var(--primary-color); font-weight: 700; flex-shrink: 0; }
 
 /* ── Components (same as EditorSidebar) ───────────────────────────────────── */
 
@@ -521,6 +698,218 @@
 
 .addCatInput:focus { border-color: var(--primary-color); }
 .addCatInput::placeholder { color: var(--text-secondary); opacity: 0.65; }
+
+/* ── Row 3: opciones de seleccion (variable existente) ───────────────────── */
+
+.fieldOptionsRow {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 4px;
+    border-top: 1px dashed var(--border-light);
+}
+
+.fieldOptionsAdd {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.fieldOptionsInput {
+    flex: 1;
+    min-width: 0;
+    padding: 5px 9px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 11.5px;
+    color: var(--text-primary);
+    background: var(--content-bg);
+    font-family: var(--font-family);
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.fieldOptionsInput:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px var(--primary-color-alpha); }
+.fieldOptionsInput::placeholder { color: var(--text-secondary); opacity: 0.55; font-style: italic; }
+
+.fieldOptionsAddBtn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--content-bg);
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+}
+
+.fieldOptionsAddBtn:hover:not(:disabled) {
+    background: var(--primary-color-alpha);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.fieldOptionsAddBtn:disabled { opacity: 0.35; cursor: not-allowed; }
+.fieldOptionsAddBtnIcon { width: 11px; height: 11px; }
+
+.fieldOptionsTags {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 4px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: thin;
+}
+
+.fieldOptionsTags::-webkit-scrollbar { height: 3px; }
+.fieldOptionsTags::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+
+.fieldOptionsTag {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 3px;
+    padding: 1px 6px 1px 7px;
+    background: var(--primary-color-alpha);
+    border: 1px solid var(--primary-color);
+    border-radius: 20px;
+    font-size: 10px;
+    color: var(--primary-color);
+    font-family: var(--font-family);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.fieldOptionsTagRemove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 11px;
+    height: 11px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--primary-color);
+    padding: 0;
+    border-radius: 50%;
+    transition: all 0.15s;
+    opacity: 0.7;
+}
+
+.fieldOptionsTagRemove:hover { opacity: 1; background: rgba(0,0,0,0.08); }
+.fieldOptionsTagX { width: 7px; height: 7px; }
+
+/* ── Options builder inside add-var form ─────────────────────────────────── */
+
+.addVarOptionsBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px;
+    background: var(--content-bg);
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+}
+
+.addVarOptionsLabel {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-family: var(--font-family);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.addVarOptionRow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.addVarOptionInput {
+    flex: 1;
+    min-width: 0;
+    padding: 5px 9px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--text-primary);
+    background: var(--button-bg);
+    font-family: var(--font-family);
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.addVarOptionInput:focus { border-color: var(--primary-color); }
+.addVarOptionInput::placeholder { color: var(--text-secondary); opacity: 0.55; font-style: italic; }
+
+.addVarOptionBtn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--content-bg);
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+}
+
+.addVarOptionBtn:hover:not(:disabled) {
+    background: var(--primary-color-alpha);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.addVarOptionBtn:disabled { opacity: 0.35; cursor: not-allowed; }
+.addVarOptionBtnIcon { width: 11px; height: 11px; }
+
+.addVarOptionTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.addVarOptionTag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px 3px 9px;
+    background: var(--primary-color-alpha);
+    border: 1px solid var(--primary-color);
+    border-radius: 20px;
+    font-size: 11px;
+    color: var(--primary-color);
+    font-family: var(--font-family);
+    font-weight: 500;
+}
+
+.addVarOptionTagRemove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--primary-color);
+    padding: 0;
+    border-radius: 50%;
+    transition: all 0.15s;
+    opacity: 0.7;
+}
+
+.addVarOptionTagRemove:hover { opacity: 1; background: rgba(0,0,0,0.08); }
+.addVarOptionTagX { width: 9px; height: 9px; }
 
 /* ── Import button (sits in toolbar) ─────────────────────────────────────── */
 

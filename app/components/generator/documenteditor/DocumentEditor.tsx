@@ -19,7 +19,11 @@ import generateContractContent from "@/app/components/generator/documentschemas/
 import generatePetitionContent from "@/app/components/generator/documentschemas/RightRequestContent";
 import {usePathname} from "next/navigation";
 
-const DocumentEditor = ()=>
+interface DocumentEditorProps {
+    hideVariablesSidebar?: boolean;
+}
+
+const DocumentEditor = ({hideVariablesSidebar = false}: DocumentEditorProps) =>
 {
     const {
         formData,
@@ -839,6 +843,35 @@ const DocumentEditor = ()=>
         });
     };
 
+    const handleSidebarDeleteField = (category: string, field: string) =>
+    {
+        if (!schema) return;
+        const { [field]: _, ...rest } = (schema.variable_fields[category] as Record<string, any>) ?? {};
+        setSchema({
+            ...schema,
+            variable_fields: { ...schema.variable_fields, [category]: rest } as any,
+        });
+    };
+
+    const handleSidebarRenameField = (category: string, oldField: string, newField: string) =>
+    {
+        if (!schema) return;
+        const catFields = (schema.variable_fields[category] as Record<string, any>) ?? {};
+        const { [oldField]: fieldConfig, ...rest } = catFields;
+        setSchema({
+            ...schema,
+            variable_fields: { ...schema.variable_fields, [category]: { ...rest, [newField]: fieldConfig } } as any,
+        });
+        // Update data-field attributes in the live document
+        if (editorRef.current)
+        {
+            editorRef.current.querySelectorAll(`[data-field="${category}.${oldField}"]`).forEach(el =>
+                el.setAttribute('data-field', `${category}.${newField}`)
+            );
+            setDocumentContent(editorRef.current.innerHTML);
+        }
+    };
+
     const handleSidebarAddField = (category: string, fieldName: string, type: string, options?: string[]) =>
     {
         if (!schema) return;
@@ -1019,6 +1052,7 @@ const DocumentEditor = ()=>
                 <div className={styles.editorContainer}>
                     {showSidebar && (
                         <EditorSidebar
+                            hideFields={hideVariablesSidebar}
                             variableFields={schema?.variable_fields ?? {}}
                             onInsertField={insertField}
                             onInsertComponent={insertComponent}
@@ -1029,6 +1063,8 @@ const DocumentEditor = ()=>
                             onUpdateFieldOptions={handleSidebarUpdateFieldOptions}
                             onAddField={handleSidebarAddField}
                             onAddCategory={handleSidebarAddCategory}
+                            onDeleteField={handleSidebarDeleteField}
+                            onRenameField={handleSidebarRenameField}
                         />
                     )}
 

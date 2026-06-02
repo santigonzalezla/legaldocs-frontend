@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {useFetch} from '@/hooks/useFetch';
 import {useAuth} from '@/context/AuthContext';
+import {API_BASE_URL} from '@/lib/constants';
 import {ArrowBack, Briefcase, Check} from '@/app/components/svg';
 import styles from '../form.module.css';
 
@@ -14,15 +15,18 @@ const InviteForm = () =>
     const router       = useRouter();
     const searchParams = useSearchParams();
     const token        = searchParams.get('token') ?? '';
+    const email        = searchParams.get('email') ?? '';
 
     const {isAuthenticated, isHydrated} = useAuth();
     const [accepted, setAccepted]       = useState(false);
+    const [checking, setChecking]       = useState(false);
 
     const {execute, isLoading, error} = useFetch<{message: string}>(
         `firm/me/members/accept?token=${token}`,
         {method: 'POST', immediate: false},
     );
 
+    // Auto-accept when already authenticated
     useEffect(() =>
     {
         if (!isHydrated || !isAuthenticated || !token || accepted) return;
@@ -34,6 +38,24 @@ const InviteForm = () =>
             setTimeout(() => router.push('/dashboard'), 3000);
         });
     }, [isHydrated, isAuthenticated]);
+
+    // Auto-detect account and redirect to the right page
+    useEffect(() =>
+    {
+        if (!isHydrated || isAuthenticated || !token || !email) return;
+
+        setChecking(true);
+        fetch(`${API_BASE_URL}/auth/check-email?email=${encodeURIComponent(email)}`)
+            .then(r => r.json())
+            .then(({exists}: {exists: boolean}) =>
+            {
+                const dest = exists
+                    ? `/signin?invite=${token}&email=${encodeURIComponent(email)}`
+                    : `/signup?invite=${token}&email=${encodeURIComponent(email)}`;
+                router.replace(dest);
+            })
+            .catch(() => setChecking(false));
+    }, [isHydrated, isAuthenticated, token, email]);
 
     if (!token)
     {
@@ -48,38 +70,6 @@ const InviteForm = () =>
                     <Link href="/signin" className={styles.footerLink} style={{display: 'inline-flex', alignItems: 'center', gap: 4}}>
                         <ArrowBack /> Ir a inicio de sesión
                     </Link>
-                </p>
-            </div>
-        );
-    }
-
-    if (isHydrated && !isAuthenticated)
-    {
-        return (
-            <div className={styles.card}>
-                <div className={styles.header}>
-                    <Image src="/logo.png" alt="LegalDocs" width={130} height={44} className={styles.logo} priority />
-                    <h1 className={styles.title}>Invitación a despacho</h1>
-                    <p className={styles.subtitle}>Necesitas iniciar sesión para aceptar esta invitación.</p>
-                </div>
-
-                <div style={{display: 'flex', flexDirection: 'column', gap: '0.75rem'}}>
-                    <Link
-                        href={`/signin`}
-                        className={styles.submit}
-                        style={{textAlign: 'center', textDecoration: 'none', display: 'block'}}>
-                        Iniciar sesión
-                    </Link>
-                    <Link
-                        href={`/signup`}
-                        className={styles.submit}
-                        style={{textAlign: 'center', textDecoration: 'none', display: 'block', background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-primary)'}}>
-                        Crear cuenta nueva
-                    </Link>
-                </div>
-
-                <p className={styles.footer} style={{marginTop: '1rem', fontSize: '0.75rem'}}>
-                    Después de iniciar sesión, regresa a este enlace para aceptar la invitación.
                 </p>
             </div>
         );
@@ -103,6 +93,49 @@ const InviteForm = () =>
                 </div>
                 <div className={styles.successMsg}>
                     Acceso concedido correctamente. En unos segundos serás redirigido.
+                </div>
+            </div>
+        );
+    }
+
+    // Unauthenticated with email — redirect is happening automatically, show spinner
+    if (isHydrated && !isAuthenticated && email)
+    {
+        return (
+            <div className={styles.card}>
+                <div className={styles.header}>
+                    <Image src="/logo.png" alt="LegalDocs" width={130} height={44} className={styles.logo} priority />
+                    <h1 className={styles.title}>Invitación a despacho</h1>
+                    <p className={styles.subtitle}>{checking ? 'Verificando tu cuenta...' : 'Preparando tu acceso...'}</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Unauthenticated without email — show manual buttons as fallback
+    if (isHydrated && !isAuthenticated)
+    {
+        return (
+            <div className={styles.card}>
+                <div className={styles.header}>
+                    <Image src="/logo.png" alt="LegalDocs" width={130} height={44} className={styles.logo} priority />
+                    <h1 className={styles.title}>Invitación a despacho</h1>
+                    <p className={styles.subtitle}>Necesitas iniciar sesión para aceptar esta invitación.</p>
+                </div>
+
+                <div style={{display: 'flex', flexDirection: 'column', gap: '0.75rem'}}>
+                    <Link
+                        href={`/signin?invite=${token}`}
+                        className={styles.submit}
+                        style={{textAlign: 'center', textDecoration: 'none', display: 'block'}}>
+                        Iniciar sesión
+                    </Link>
+                    <Link
+                        href={`/signup?invite=${token}`}
+                        className={styles.submit}
+                        style={{textAlign: 'center', textDecoration: 'none', display: 'block', background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-primary)'}}>
+                        Crear cuenta nueva
+                    </Link>
                 </div>
             </div>
         );
@@ -145,13 +178,10 @@ const InviteForm = () =>
     );
 };
 
-const InvitePage = () =>
-{
-    return (
-        <Suspense fallback={null}>
-            <InviteForm />
-        </Suspense>
-    );
-};
+const InvitePage = () => (
+    <Suspense fallback={null}>
+        <InviteForm />
+    </Suspense>
+);
 
 export default InvitePage;

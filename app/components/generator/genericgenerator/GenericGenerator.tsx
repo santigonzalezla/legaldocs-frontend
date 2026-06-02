@@ -15,7 +15,7 @@ import {useFormContext} from '@/context/FormContext';
 const formatTitle = (slug: string) =>
     slug.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
-const STEP_LABELS = ['Información', 'Configuración', 'Finalización'];
+const STEP_LABELS = ['Información', 'Estructuración', 'Finalización'];
 const TOTAL_STEPS = 3;
 
 // Count all FieldConfig nodes (objects with a `type` key) recursively
@@ -166,7 +166,7 @@ const GenericGenerator = () =>
             {/* Step content */}
             <div className={styles.stepContent}>
                 {step === 0 && <DynamicLegalForm />}
-                {step === 1 && <DocumentEditor />}
+                {step === 1 && <DocumentEditor hideVariablesSidebar />}
                 {step === 2 && (
                     <>
                         <SaveBanner />

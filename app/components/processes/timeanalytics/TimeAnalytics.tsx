@@ -1,8 +1,12 @@
 'use client';
 
+import {useState} from 'react';
 import styles from './timeanalytics.module.css';
-import {Clock, Users, Briefcase, BarChart} from '@/app/components/svg';
+import {Clock, Users, Briefcase, BarChart, Search} from '@/app/components/svg';
 import {useFetch} from '@/hooks/useFetch';
+
+const toTitleCase = (str: string) =>
+    str.toLowerCase().replace(/(?:^|\s)\S/g, c => c.toUpperCase());
 
 /* ── Types ──────────────────────────────────────────────────────────────────── */
 
@@ -61,6 +65,7 @@ const PROCESS_COLORS = [
 
 const TimeAnalytics = () =>
 {
+    const [caseSearch, setCaseSearch] = useState('');
     const {data, isLoading} = useFetch<AnalyticsData>('time-entry/analytics', {firmScoped: true});
 
     if (isLoading)
@@ -75,8 +80,13 @@ const TimeAnalytics = () =>
             </div>
         );
 
-    const maxUser    = Math.max(...data.byUser.map(u => u.totalMinutes), 1);
-    const maxProcess = Math.max(...data.byProcess.map(p => p.totalMinutes), 1);
+    const maxUser = Math.max(...data.byUser.map(u => u.totalMinutes), 1);
+
+    const filteredProcesses = caseSearch.trim()
+        ? data.byProcess.filter(p => p.title.toLowerCase().includes(caseSearch.toLowerCase()))
+        : data.byProcess;
+
+    const maxProcess = Math.max(...filteredProcesses.map(p => p.totalMinutes), 1);
 
     /* ── Summary cards ── */
     const cards = [
@@ -188,8 +198,21 @@ const TimeAnalytics = () =>
                         </div>
                     </div>
 
+                    <div className={styles.caseSearchWrap}>
+                        <Search className={styles.caseSearchIcon} />
+                        <input
+                            className={styles.caseSearchInput}
+                            type="text"
+                            placeholder="Filtrar caso..."
+                            value={caseSearch}
+                            onChange={e => setCaseSearch(e.target.value)}
+                        />
+                    </div>
+
                     <div className={styles.barList}>
-                        {data.byProcess.map((p, i) => (
+                        {filteredProcesses.length === 0 ? (
+                            <p className={styles.caseSearchEmpty}>Sin resultados para "{caseSearch}"</p>
+                        ) : filteredProcesses.map((p, i) => (
                             <div key={p.processId} className={styles.barRow}>
                                 <div className={styles.barLabel}>
                                     <span
@@ -197,7 +220,7 @@ const TimeAnalytics = () =>
                                         style={{background: PROCESS_COLORS[i % PROCESS_COLORS.length]}}
                                     />
                                     <div className={styles.barLabelText}>
-                                        <span className={styles.barName}>{p.title}</span>
+                                        <span className={styles.barName}>{toTitleCase(p.title)}</span>
                                         <span className={styles.barMeta}>{p.userCount} usuario{p.userCount !== 1 ? 's' : ''} · {p.entryCount} registro{p.entryCount !== 1 ? 's' : ''}</span>
                                     </div>
                                 </div>
@@ -241,13 +264,14 @@ const TimeAnalytics = () =>
                                 </div>
                                 <div className={styles.crossBars}>
                                     {data.byProcess.slice(0, 5).map((p, pi) => {
+                                        const titleCased = toTitleCase(p.title);
                                         // Pct of this user's time spent on this process
                                         const pct = u.totalMinutes > 0
                                             ? Math.round((Math.min(u.totalMinutes, p.totalMinutes) / u.totalMinutes) * 100)
                                             : 0;
                                         return (
-                                            <div key={p.processId} className={styles.crossCell} title={`${p.title}: ~${pct}%`}>
-                                                <span className={styles.crossCellLabel}>{p.title.length > 18 ? p.title.slice(0, 18) + '…' : p.title}</span>
+                                            <div key={p.processId} className={styles.crossCell} title={`${titleCased}: ~${pct}%`}>
+                                                <span className={styles.crossCellLabel}>{titleCased.length > 18 ? titleCased.slice(0, 18) + '…' : titleCased}</span>
                                                 <div className={styles.crossCellTrack}>
                                                     <div
                                                         className={styles.crossCellFill}

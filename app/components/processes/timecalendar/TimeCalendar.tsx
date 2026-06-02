@@ -151,6 +151,9 @@ const layoutDayEntries = (dayEntries: TimeEntry[]): EntryLayout[] =>
     return items;
 };
 
+const toTitleCase = (str: string) =>
+    str.toLowerCase().replace(/(?:^|\s)\S/g, c => c.toUpperCase());
+
 const TimeCalendar = () =>
 {
     const [weekStart, setWeekStart] = useState<Date>(() => getMonday(new Date()));
@@ -158,6 +161,9 @@ const TimeCalendar = () =>
     const [createModal, setCreateModal] = useState<CreateModal | null>(null);
     const [detailModal, setDetailModal] = useState<DetailModal | null>(null);
     const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+    const [caseSearch, setCaseSearch] = useState('');
+    const [caseOpen, setCaseOpen] = useState(false);
+    const caseRef = useRef<HTMLDivElement>(null);
     const isDragging = useRef(false);
 
     const {data: rawEntries, execute: refetch} = useFetch<TimeEntry[]>('time-entry', {firmScoped: true});
@@ -232,6 +238,24 @@ const TimeCalendar = () =>
         const slot = slotFromY(e);
         setDrag(prev => prev?.dayIdx === dayIdx ? {...prev, endSlot: slot} : prev);
     };
+
+    // Close case dropdown on outside click
+    useEffect(() =>
+    {
+        const handler = (e: MouseEvent) =>
+        {
+            if (caseRef.current && !caseRef.current.contains(e.target as Node))
+                setCaseOpen(false);
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    // Reset case search when modal closes
+    useEffect(() =>
+    {
+        if (!createModal) { setCaseSearch(''); setCaseOpen(false); }
+    }, [createModal]);
 
     useEffect(() =>
     {
@@ -343,6 +367,11 @@ const TimeCalendar = () =>
     const today = new Date();
     const nowSlot = (today.getHours() - HOUR_START) * (60 / SLOT_MINS) + today.getMinutes() / SLOT_MINS;
     const nowVisible = nowSlot >= 0 && nowSlot < TOTAL_SLOTS;
+
+    const selectedProcess = processes.find(p => p.id === createModal?.processId) ?? null;
+    const filteredCases = caseSearch.trim()
+        ? processes.filter(p => p.title.toLowerCase().includes(caseSearch.toLowerCase()))
+        : processes;
 
     const openQuickEntry = () =>
     {
@@ -567,18 +596,39 @@ const TimeCalendar = () =>
                                 <label className={styles.fieldLabel}>
                                     Caso <span className={styles.required}>*</span>
                                 </label>
-                                <div className={styles.selectWrap}>
-                                    <Briefcase className={styles.selectLeadIcon}/>
-                                    <select
-                                        className={styles.select}
-                                        value={createModal.processId}
-                                        onChange={e => setCreateModal(m => m ? {...m, processId: e.target.value} : m)}
-                                    >
-                                        <option value="">— Seleccionar caso —</option>
-                                        {processes.map(p => (
-                                            <option key={p.id} value={p.id}>{p.title}</option>
-                                        ))}
-                                    </select>
+                                <div className={styles.caseCombo} ref={caseRef}>
+                                    <div className={styles.selectWrap}>
+                                        <Briefcase className={styles.selectLeadIcon}/>
+                                        <input
+                                            className={`${styles.select} ${styles.caseInput}`}
+                                            type="text"
+                                            placeholder="— Seleccionar caso —"
+                                            value={caseOpen ? caseSearch : (selectedProcess ? toTitleCase(selectedProcess.title) : '')}
+                                            onChange={e => { setCaseSearch(e.target.value); setCaseOpen(true); }}
+                                            onFocus={() => { setCaseSearch(''); setCaseOpen(true); }}
+                                        />
+                                    </div>
+                                    {caseOpen && (
+                                        <div className={styles.caseDropdown}>
+                                            {filteredCases.length === 0 ? (
+                                                <div className={styles.caseEmpty}>Sin resultados</div>
+                                            ) : filteredCases.map(p => (
+                                                <div
+                                                    key={p.id}
+                                                    className={`${styles.caseOption} ${createModal.processId === p.id ? styles.caseOptionSelected : ''}`}
+                                                    onMouseDown={e =>
+                                                    {
+                                                        e.preventDefault();
+                                                        setCreateModal(m => m ? {...m, processId: p.id} : m);
+                                                        setCaseSearch('');
+                                                        setCaseOpen(false);
+                                                    }}
+                                                >
+                                                    {toTitleCase(p.title)}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 

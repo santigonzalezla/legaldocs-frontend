@@ -127,14 +127,14 @@ const Sidebar = () =>
         {
             title: "Gestión de Procesos",
             options: [
+                {item: "Clientes", icon: <Users/>, link: "/dashboard/clients", category: "processes"},
                 {item: "Procesos Legales", icon: <Briefcase/>, link: "/dashboard/processes", category: "processes"},
                 {
                     item: "Análisis de Tiempo",
                     icon: <BarChart/>,
                     link: "/dashboard/processes/analytics",
                     category: "processes"
-                },
-                {item: "Clientes", icon: <Users/>, link: "/dashboard/clients", category: "processes"}
+                }
             ]
         },
         {
@@ -160,6 +160,7 @@ const Sidebar = () =>
         {
             title: "Configuración",
             options: [
+                {item: "Ramas Jurídicas", icon: <Globe/>, link: "/dashboard/settings/branches", category: "settings"},
                 {
                     item: "Datos de la Firma",
                     icon: <Briefcase/>,
@@ -173,7 +174,6 @@ const Sidebar = () =>
                     link: "/dashboard/settings/profile",
                     category: "settings"
                 },
-                {item: "Ramas Jurídicas", icon: <Globe/>, link: "/dashboard/settings/branches", category: "settings"},
                 {
                     item: "Firmas Digitales",
                     icon: <PenTool/>,
