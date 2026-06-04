@@ -346,7 +346,7 @@
 
 .tableHead {
     display: grid;
-    grid-template-columns: 1.6fr 1fr 0.7fr 1.5fr 0.8fr 32px;
+    grid-template-columns: 1.6fr 1fr 0.85fr 1.5fr 0.8fr 32px;
     padding: 0.55rem 0.85rem;
     background: var(--button-bg);
     font-size: 0.72rem;
@@ -360,7 +360,7 @@
 
 .tableRow {
     display: grid;
-    grid-template-columns: 1.6fr 1fr 0.7fr 1.5fr 0.8fr 32px;
+    grid-template-columns: 1.6fr 1fr 0.85fr 1.5fr 0.8fr 32px;
     padding: 0.65rem 0.85rem;
     border-top: 1px solid var(--border-light);
     align-items: center;
@@ -482,4 +482,238 @@
     padding: 1rem;
     margin: 0;
     font-family: var(--font-family);
+}
+
+/* ── Start confirm panel ────────────────────────────────────────────────────── */
+
+.startConfirm {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    background: var(--button-bg);
+    width: 100%;
+}
+
+.startConfirmLabel {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    white-space: nowrap;
+}
+
+/* ── Billable toggle ────────────────────────────────────────────────────────── */
+
+.billableToggle {
+    display: flex;
+    background: var(--content-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 0.2rem;
+    align-self: flex-start;
+    width: fit-content;
+}
+
+.billableBtn {
+    padding: 0.35rem 1rem;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--font-family);
+    white-space: nowrap;
+}
+
+.billableBtnActive {
+    background: #059669;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(5, 150, 105, 0.35);
+}
+
+[data-theme="dark"] .billableBtnActive {
+    background: #059669;
+    color: #fff;
+}
+
+.nonBillableBtnActive {
+    background: #d97706;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(217, 119, 6, 0.35);
+}
+
+[data-theme="dark"] .nonBillableBtnActive {
+    background: #d97706;
+    color: #fff;
+}
+
+/* ── Billable badge in table ────────────────────────────────────────────────── */
+
+.entryBadges {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.billableBadge {
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 0.15rem 0.4rem;
+    border-radius: 8px;
+    display: inline-block;
+    font-family: var(--font-family);
+    white-space: nowrap;
+}
+
+.billableBadgeYes {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+[data-theme="dark"] .billableBadgeYes {
+    background: rgba(16, 185, 129, 0.12);
+    color: #34d399;
+}
+
+.billableBadgeNo {
+    background: #fff7ed;
+    color: #d97706;
+}
+
+[data-theme="dark"] .billableBadgeNo {
+    background: rgba(245, 158, 11, 0.12);
+    color: #fbbf24;
+}
+
+/* ── Shared hours icon ──────────────────────────────────────────────────────── */
+
+.sharedIcon {
+    width: 12px;
+    height: 12px;
+    color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+/* ── Summary non-billable label ─────────────────────────────────────────────── */
+
+.summaryNonBillable {
+    font-size: 0.7rem;
+    color: #d97706;
+    font-weight: 600;
+    font-family: var(--font-family);
+    background: #fff7ed;
+    padding: 0.1rem 0.35rem;
+    border-radius: 6px;
+}
+
+[data-theme="dark"] .summaryNonBillable {
+    background: rgba(245, 158, 11, 0.12);
+    color: #fbbf24;
+}
+
+/* ── Share section ──────────────────────────────────────────────────────────── */
+
+.shareSection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    border-top: 1px solid var(--border-light);
+    padding-top: 0.6rem;
+    margin-top: 0.2rem;
+}
+
+.shareToggle {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: transparent;
+    border: 1px dashed var(--border-color);
+    border-radius: 6px;
+    padding: 0.4rem 0.75rem;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: var(--font-family);
+    align-self: flex-start;
+}
+
+.shareToggle:hover {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+}
+
+.shareToggleActive {
+    background: var(--primary-color-alpha);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.memberGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.memberChip {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.65rem 0.3rem 0.35rem;
+    border: 1px solid var(--border-light);
+    border-radius: 20px;
+    background: var(--content-bg);
+    color: var(--text-primary);
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: var(--font-family);
+}
+
+.memberChip:hover {
+    background: var(--hover-bg);
+}
+
+.memberChipSelected {
+    background: var(--primary-color-alpha);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.memberInitial {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--border-light);
+    font-size: 0.62rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    text-transform: uppercase;
+}
+
+.memberChipSelected .memberInitial {
+    background: var(--primary-color);
+    color: #fff;
+}
+
+.memberChipX {
+    width: 11px;
+    height: 11px;
+    margin-left: 0.1rem;
+    flex-shrink: 0;
 }

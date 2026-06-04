@@ -86,6 +86,12 @@ export enum TimeEntryType
     MANUAL = 'MANUAL',
 }
 
+export enum BillableType
+{
+    BILLABLE     = 'BILLABLE',
+    NON_BILLABLE = 'NON_BILLABLE',
+}
+
 export enum LibraryDocumentType
 {
     LAW           = 'LAW',

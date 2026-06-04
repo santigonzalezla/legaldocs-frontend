@@ -18,14 +18,15 @@ import CreateProcessModal from '@/app/components/processes/createprocessmodal/Cr
 import type {CreateProcessForm} from '@/app/components/processes/createprocessmodal/CreateProcessModal';
 
 const EMPTY_FORM: CreateProcessForm = {
-    clientId:    '',
-    title:       '',
-    description: '',
-    reference:   '',
-    branchId:    '',
-    court:       '',
-    counterpart: '',
-    startDate:   '',
+    clientId:     '',
+    title:        '',
+    description:  '',
+    reference:    '',
+    branchId:     '',
+    court:        '',
+    counterpart:  '',
+    startDate:    '',
+    processValue: '',
 };
 
 const ProcessesPage = () =>
@@ -89,14 +90,15 @@ const ProcessesPage = () =>
     {
         setSaving(true);
         const body = {
-            clientId:    form.clientId,
-            title:       form.title,
-            description: form.description || undefined,
-            reference:   form.reference   || undefined,
-            branchId:    form.branchId    || undefined,
-            court:       form.court       || undefined,
-            counterpart: form.counterpart || undefined,
-            startDate:   form.startDate   || undefined,
+            clientId:     form.clientId,
+            title:        form.title,
+            description:  form.description  || undefined,
+            reference:    form.reference    || undefined,
+            branchId:     form.branchId     || undefined,
+            court:        form.court        || undefined,
+            counterpart:  form.counterpart  || undefined,
+            startDate:    form.startDate    || undefined,
+            processValue: form.processValue ? Number(form.processValue) : undefined,
         };
         const result = await createProcess({body});
         setSaving(false);

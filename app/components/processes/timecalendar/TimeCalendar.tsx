@@ -4,14 +4,34 @@ import {useEffect, useMemo, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
 import styles from './timecalendar.module.css';
 import {useFetch} from '@/hooks/useFetch';
-import {ArrowLeft, ArrowGo, Briefcase, Clock, Plus, Trash, X} from '@/app/components/svg';
-import type {TimeEntry, LegalProcess, PaginatedResponse} from '@/app/interfaces/interfaces';
+import {ArrowLeft, ArrowGo, Briefcase, Clock, Plus, Trash, User, X} from '@/app/components/svg';
+import type {Client, TimeEntry, LegalProcess, PaginatedResponse} from '@/app/interfaces/interfaces';
+import {BillableType, ClientType} from '@/app/interfaces/enums';
 import {toast} from 'sonner';
+
+interface GoalAnalytics
+{
+    currentUserId?: string;
+    firm?: {
+        dailyBillableGoalHours:    number | null;
+        dailyNonBillableGoalHours: number | null;
+    };
+    byUser?: Array<{
+        userId:             string;
+        billableMinutes:    number;
+        nonBillableMinutes: number;
+        daily: {
+            billableMinutes:     number;
+            nonBillableMinutes:  number;
+            billableGoalMinutes: number;
+        };
+    }>;
+}
 
 const HOUR_START = 6;
 const HOUR_END = 21;
 const SLOT_MINS = 30;
-const SLOT_H = 44; // px per slot
+const SLOT_H = 30; // px per slot
 const TOTAL_SLOTS = (HOUR_END - HOUR_START) * (60 / SLOT_MINS); // 32
 
 const ENTRY_COLORS = [
@@ -23,6 +43,14 @@ const ENTRY_COLORS = [
 const DAY_NAMES = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 const MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 const MONTH_SHORT = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+interface MemberWithUser
+{
+    id: string;
+    userId: string;
+    status: string;
+    user: {firstName: string; lastName: string};
+}
 
 interface DragState
 {
@@ -38,8 +66,10 @@ interface CreateModal
     endSlot: number;
     startTime: string;
     endTime: string;
+    clientId: string;
     processId: string;
     description: string;
+    billableType: BillableType;
 }
 
 interface DetailModal
@@ -108,6 +138,14 @@ const calcDuration = (start: string, end: string): number =>
     return (eh * 60 + em) - (sh * 60 + sm);
 };
 
+const clientLabel = (c: Client) =>
+    c.type === ClientType.COMPANY
+        ? (c.companyName ?? '—')
+        : [c.firstName, c.lastName].filter(Boolean).join(' ') || '—';
+
+const memberInitials = (firstName: string, lastName: string) =>
+    `${firstName[0] ?? ''}${lastName[0] ?? ''}`.toUpperCase();
+
 interface EntryLayout
 {
     entry: TimeEntry;
@@ -128,7 +166,7 @@ const layoutDayEntries = (dayEntries: TimeEntry[]): EntryLayout[] =>
         return {entry: e, startSlot: s, endSlot: Math.min(TOTAL_SLOTS, s + d / SLOT_MINS), col: 0, totalCols: 1};
     }).sort((a, b) => a.startSlot - b.startSlot);
 
-    const colEnds: number[] = []; // latest endSlot for each column
+    const colEnds: number[] = [];
     for (const item of items) {
         const c = colEnds.findIndex(end => item.startSlot >= end);
         if (c === -1) {
@@ -154,28 +192,52 @@ const layoutDayEntries = (dayEntries: TimeEntry[]): EntryLayout[] =>
 const toTitleCase = (str: string) =>
     str.toLowerCase().replace(/(?:^|\s)\S/g, c => c.toUpperCase());
 
-const TimeCalendar = () =>
+const EMPTY_MODAL_BASE = {
+    clientId:    '',
+    processId:   '',
+    description: '',
+    billableType: BillableType.BILLABLE as BillableType,
+};
+
+const TimeCalendar = ({onEntryCreated}: {onEntryCreated?: () => void}) =>
 {
     const [weekStart, setWeekStart] = useState<Date>(() => getMonday(new Date()));
     const [drag, setDrag] = useState<DragState | null>(null);
     const [createModal, setCreateModal] = useState<CreateModal | null>(null);
     const [detailModal, setDetailModal] = useState<DetailModal | null>(null);
     const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+
     const [caseSearch, setCaseSearch] = useState('');
     const [caseOpen, setCaseOpen] = useState(false);
     const caseRef = useRef<HTMLDivElement>(null);
+
+    const [clientSearch, setClientSearch] = useState('');
+    const [clientOpen, setClientOpen] = useState(false);
+    const clientRef = useRef<HTMLDivElement>(null);
+
+    const [shareEnabled, setShareEnabled] = useState(false);
+    const [sharedUserIds, setSharedUserIds] = useState<string[]>([]);
+
     const isDragging = useRef(false);
 
+    const [todayStr] = useState<string>(() => new Date().toISOString().split('T')[0]);
+
     const {data: rawEntries, execute: refetch} = useFetch<TimeEntry[]>('time-entry', {firmScoped: true});
+    const {data: goalData} = useFetch<GoalAnalytics>(`time-entry/analytics?date=${todayStr}`, {firmScoped: true});
     const {data: processRes} = useFetch<PaginatedResponse<LegalProcess>>('process?limit=100', {firmScoped: true});
+    const {data: clientRes} = useFetch<PaginatedResponse<Client>>('client?limit=100', {firmScoped: true});
+    const {data: membersData} = useFetch<MemberWithUser[]>('firm/me/members?status=ACTIVE&limit=100', {firmScoped: true});
     const {execute: saveEntry, isLoading: isSaving} = useFetch<TimeEntry>('time-entry/manual', {
         method: 'POST',
         immediate: false,
         firmScoped: true
     });
     const {execute: doDelete} = useFetch<void>('', {method: 'DELETE', immediate: false, firmScoped: true});
+
     const processes = useMemo(() => processRes?.data ?? [], [processRes]);
-    const entries = useMemo(() => rawEntries ?? [], [rawEntries]);
+    const clients   = useMemo(() => clientRes?.data ?? [], [clientRes]);
+    const members   = useMemo(() => membersData ?? [], [membersData]);
+    const entries   = useMemo(() => rawEntries ?? [], [rawEntries]);
 
     const processColor = useMemo(() =>
     {
@@ -217,6 +279,30 @@ const TimeCalendar = () =>
         return `${s.getDate()} ${MONTH_SHORT[s.getMonth()]} – ${e.getDate()} ${MONTH_SHORT[e.getMonth()]} ${e.getFullYear()}`;
     }, [weekStart]);
 
+    // Reset state when modal closes
+    useEffect(() =>
+    {
+        if (!createModal) {
+            setCaseSearch(''); setCaseOpen(false);
+            setClientSearch(''); setClientOpen(false);
+            setShareEnabled(false); setSharedUserIds([]);
+        }
+    }, [createModal]);
+
+    // Close comboboxes on outside click
+    useEffect(() =>
+    {
+        const handler = (e: MouseEvent) =>
+        {
+            if (caseRef.current && !caseRef.current.contains(e.target as Node))
+                setCaseOpen(false);
+            if (clientRef.current && !clientRef.current.contains(e.target as Node))
+                setClientOpen(false);
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
     const slotFromY = (e: React.MouseEvent<HTMLDivElement>): number =>
     {
         const rect = e.currentTarget.getBoundingClientRect();
@@ -239,24 +325,6 @@ const TimeCalendar = () =>
         setDrag(prev => prev?.dayIdx === dayIdx ? {...prev, endSlot: slot} : prev);
     };
 
-    // Close case dropdown on outside click
-    useEffect(() =>
-    {
-        const handler = (e: MouseEvent) =>
-        {
-            if (caseRef.current && !caseRef.current.contains(e.target as Node))
-                setCaseOpen(false);
-        };
-        document.addEventListener('mousedown', handler);
-        return () => document.removeEventListener('mousedown', handler);
-    }, []);
-
-    // Reset case search when modal closes
-    useEffect(() =>
-    {
-        if (!createModal) { setCaseSearch(''); setCaseOpen(false); }
-    }, [createModal]);
-
     useEffect(() =>
     {
         const onUp = () =>
@@ -276,8 +344,7 @@ const TimeCalendar = () =>
                 endSlot,
                 startTime: slotToTime(startSlot),
                 endTime: slotToTime(endSlot),
-                processId: '',
-                description: ''
+                ...EMPTY_MODAL_BASE,
             });
             setDrag(null);
         };
@@ -298,19 +365,23 @@ const TimeCalendar = () =>
 
         const startedAt = `${toDateStr(createModal.date)}T${createModal.startTime}:00`;
 
-        const result = await saveEntry({
-            body: {
-                processId: createModal.processId,
-                durationMinutes: duration,
-                description: createModal.description || undefined,
-                startedAt
-            }
-        });
+        const body: Record<string, unknown> = {
+            processId:      createModal.processId,
+            durationMinutes: duration,
+            description:    createModal.description || undefined,
+            startedAt,
+            billableType:   createModal.billableType,
+        };
+        if (shareEnabled && sharedUserIds.length > 0)
+            body.sharedWithUserIds = sharedUserIds;
+
+        const result = await saveEntry({body});
 
         if (result) {
             toast.success('Tiempo registrado');
             setCreateModal(null);
             refetch();
+            onEntryCreated?.();
         }
     };
 
@@ -321,6 +392,7 @@ const TimeCalendar = () =>
             toast.success('Registro eliminado');
             setDetailModal(null);
             refetch();
+            onEntryCreated?.();
         }
     };
 
@@ -332,7 +404,7 @@ const TimeCalendar = () =>
 
     const entryStyle = (layout: EntryLayout, color: string): React.CSSProperties =>
     {
-        const GAP = 2; // px gap between side-by-side entries
+        const GAP = 2;
         const pct = 100 / layout.totalCols;
         return {
             top: `${layout.startSlot * SLOT_H}px`,
@@ -364,29 +436,102 @@ const TimeCalendar = () =>
 
     const hideTooltip = () => setTooltip(null);
 
+    const toggleSharedUser = (userId: string) =>
+        setSharedUserIds(ids =>
+            ids.includes(userId) ? ids.filter(id => id !== userId) : [...ids, userId]
+        );
+
     const today = new Date();
     const nowSlot = (today.getHours() - HOUR_START) * (60 / SLOT_MINS) + today.getMinutes() / SLOT_MINS;
     const nowVisible = nowSlot >= 0 && nowSlot < TOTAL_SLOTS;
 
+    const selectedClient  = clients.find(c => c.id === createModal?.clientId) ?? null;
     const selectedProcess = processes.find(p => p.id === createModal?.processId) ?? null;
-    const filteredCases = caseSearch.trim()
-        ? processes.filter(p => p.title.toLowerCase().includes(caseSearch.toLowerCase()))
+
+    const filteredClients = clientSearch.trim()
+        ? clients.filter(c => clientLabel(c).toLowerCase().includes(clientSearch.toLowerCase()))
+        : clients;
+
+    const clientFilteredProcesses = createModal?.clientId
+        ? processes.filter(p => p.clientId === createModal.clientId)
         : processes;
+
+    const filteredCases = caseSearch.trim()
+        ? clientFilteredProcesses.filter(p => p.title.toLowerCase().includes(caseSearch.toLowerCase()))
+        : clientFilteredProcesses;
+
+    /* ── Goal summary (my stats) ─────────────────────────────────────────────── */
+
+    const myStats = useMemo(() =>
+    {
+        const uid = goalData?.currentUserId;
+        if (!uid || !goalData?.byUser) return null;
+        return goalData.byUser.find(u => u.userId === uid) ?? null;
+    }, [goalData]);
+
+    const monthlyStats = useMemo(() =>
+    {
+        const uid = goalData?.currentUserId;
+        if (!uid) return null;
+        const now   = new Date();
+        const year  = now.getFullYear();
+        const month = now.getMonth();
+        const myEntries = entries.filter(e =>
+        {
+            const d = new Date(e.startedAt);
+            return e.userId === uid && d.getFullYear() === year && d.getMonth() === month;
+        });
+        const billableMinutes    = myEntries.filter(e => e.billableType === BillableType.BILLABLE).reduce((sum, e)    => sum + (e.durationMinutes ?? 0), 0);
+        const nonBillableMinutes = myEntries.filter(e => e.billableType === BillableType.NON_BILLABLE).reduce((sum, e) => sum + (e.durationMinutes ?? 0), 0);
+        return {billableMinutes, nonBillableMinutes};
+    }, [entries, goalData?.currentUserId]);
+
+    const monthlyGoalMinutes = useMemo(() =>
+    {
+        const dailyBillable    = goalData?.firm?.dailyBillableGoalHours;
+        const dailyNonBillable = goalData?.firm?.dailyNonBillableGoalHours;
+        if (!dailyBillable) return null;
+        const now  = new Date();
+        const year = now.getFullYear();
+        const mon  = now.getMonth();
+        const daysInMonth = new Date(year, mon + 1, 0).getDate();
+        let workingDays = 0;
+        for (let d = 1; d <= daysInMonth; d++)
+        {
+            const dow = new Date(year, mon, d).getDay();
+            if (dow !== 0 && dow !== 6) workingDays++;
+        }
+        return {
+            billable:    dailyBillable    * workingDays * 60,
+            nonBillable: (dailyNonBillable ?? 0) * workingDays * 60,
+        };
+    }, [goalData]);
+
+    const hasGoal = !!(goalData?.firm?.dailyBillableGoalHours);
+
+    const fmtGoalHours = (minutes: number) =>
+    {
+        const h = Math.floor(minutes / 60);
+        const m = minutes % 60;
+        return h > 0 ? `${h}h${m > 0 ? ` ${m}m` : ''}` : `${m}m`;
+    };
+
+    const goalColor = (done: number, goal: number) =>
+        goal <= 0 ? '#3b82f6' : done / goal < 0.8 ? '#10b981' : done / goal <= 1 ? '#f59e0b' : '#ef4444';
 
     const openQuickEntry = () =>
     {
-        const now        = new Date();
-        const rawSlot    = (now.getHours() - HOUR_START) * (60 / SLOT_MINS) + Math.floor(now.getMinutes() / SLOT_MINS);
-        const startSlot  = Math.max(0, Math.min(TOTAL_SLOTS - 2, rawSlot));
-        const endSlot    = Math.min(TOTAL_SLOTS, startSlot + 2);
+        const now = new Date();
+        const rawSlot   = (now.getHours() - HOUR_START) * (60 / SLOT_MINS) + Math.floor(now.getMinutes() / SLOT_MINS);
+        const startSlot = Math.max(0, Math.min(TOTAL_SLOTS - 2, rawSlot));
+        const endSlot   = Math.min(TOTAL_SLOTS, startSlot + 2);
         setCreateModal({
-            date:        now,
+            date: now,
             startSlot,
             endSlot,
             startTime:   slotToTime(startSlot),
             endTime:     slotToTime(endSlot),
-            processId:   '',
-            description: '',
+            ...EMPTY_MODAL_BASE,
         });
     };
 
@@ -414,6 +559,89 @@ const TimeCalendar = () =>
                     </button>
                 </div>
             </div>
+
+            {/* ── Goal summary cards ── */}
+            {hasGoal && myStats && (
+                <div className={styles.goalSummary}>
+                    {/* Daily billable */}
+                    <div className={styles.goalSummaryCard}>
+                        <span className={styles.goalSummaryPeriod}>Hoy — Facturable</span>
+                        <span className={styles.goalSummaryValue} style={{color: goalColor(myStats.daily.billableMinutes, myStats.daily.billableGoalMinutes)}}>
+                            {fmtGoalHours(myStats.daily.billableMinutes)}
+                            <span className={styles.goalSummaryMax}> / {fmtGoalHours(myStats.daily.billableGoalMinutes)}</span>
+                        </span>
+                        <div className={styles.goalSummaryTrack}>
+                            <div
+                                className={styles.goalSummaryFill}
+                                style={{
+                                    width:      `${Math.min(100, myStats.daily.billableGoalMinutes > 0 ? myStats.daily.billableMinutes / myStats.daily.billableGoalMinutes * 100 : 0)}%`,
+                                    background: goalColor(myStats.daily.billableMinutes, myStats.daily.billableGoalMinutes),
+                                }}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Daily non-billable (if configured) */}
+                    {(goalData?.firm?.dailyNonBillableGoalHours ?? 0) > 0 && (
+                        <div className={styles.goalSummaryCard}>
+                            <span className={styles.goalSummaryPeriod}>Hoy — No facturable</span>
+                            <span className={styles.goalSummaryValue} style={{color: '#f59e0b'}}>
+                                {fmtGoalHours(myStats.daily.nonBillableMinutes)}
+                                <span className={styles.goalSummaryMax}> / {fmtGoalHours((goalData?.firm?.dailyNonBillableGoalHours ?? 0) * 60)}</span>
+                            </span>
+                            <div className={styles.goalSummaryTrack}>
+                                <div
+                                    className={styles.goalSummaryFill}
+                                    style={{
+                                        width:      `${Math.min(100, (goalData?.firm?.dailyNonBillableGoalHours ?? 0) > 0 ? myStats.daily.nonBillableMinutes / ((goalData?.firm?.dailyNonBillableGoalHours ?? 0) * 60) * 100 : 0)}%`,
+                                        background: '#f59e0b',
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Monthly billable */}
+                    {monthlyStats && monthlyGoalMinutes && (
+                        <div className={styles.goalSummaryCard}>
+                            <span className={styles.goalSummaryPeriod}>Este mes — Facturable</span>
+                            <span className={styles.goalSummaryValue} style={{color: goalColor(monthlyStats.billableMinutes, monthlyGoalMinutes.billable)}}>
+                                {fmtGoalHours(monthlyStats.billableMinutes)}
+                                <span className={styles.goalSummaryMax}> / {fmtGoalHours(monthlyGoalMinutes.billable)}</span>
+                            </span>
+                            <div className={styles.goalSummaryTrack}>
+                                <div
+                                    className={styles.goalSummaryFill}
+                                    style={{
+                                        width:      `${Math.min(100, monthlyGoalMinutes.billable > 0 ? monthlyStats.billableMinutes / monthlyGoalMinutes.billable * 100 : 0)}%`,
+                                        background: goalColor(monthlyStats.billableMinutes, monthlyGoalMinutes.billable),
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Monthly non-billable */}
+                    {monthlyStats && monthlyGoalMinutes && monthlyGoalMinutes.nonBillable > 0 && (
+                        <div className={styles.goalSummaryCard}>
+                            <span className={styles.goalSummaryPeriod}>Este mes — No facturable</span>
+                            <span className={styles.goalSummaryValue} style={{color: '#f59e0b'}}>
+                                {fmtGoalHours(monthlyStats.nonBillableMinutes)}
+                                <span className={styles.goalSummaryMax}> / {fmtGoalHours(monthlyGoalMinutes.nonBillable)}</span>
+                            </span>
+                            <div className={styles.goalSummaryTrack}>
+                                <div
+                                    className={styles.goalSummaryFill}
+                                    style={{
+                                        width:      `${Math.min(100, monthlyGoalMinutes.nonBillable > 0 ? monthlyStats.nonBillableMinutes / monthlyGoalMinutes.nonBillable * 100 : 0)}%`,
+                                        background: '#f59e0b',
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Calendar */}
             <div className={styles.calendarCard}>
@@ -472,7 +700,6 @@ const TimeCalendar = () =>
                                     onMouseDown={e => onColMouseDown(dayIdx, e)}
                                     onMouseMove={e => onColMouseMove(dayIdx, e)}
                                 >
-                                    {/* Slot grid lines (visual only, no events) */}
                                     {Array.from({length: TOTAL_SLOTS}, (_, slot) => (
                                         <div
                                             key={slot}
@@ -483,12 +710,10 @@ const TimeCalendar = () =>
                                         />
                                     ))}
 
-                                    {/* Now indicator */}
                                     {isToday && nowVisible && (
                                         <div className={styles.nowLine} style={{top: nowSlot * SLOT_H}}/>
                                     )}
 
-                                    {/* Entries — side-by-side when overlapping */}
                                     {layout.map(item => (
                                         <div
                                             key={item.entry.id}
@@ -511,9 +736,17 @@ const TimeCalendar = () =>
                                             {item.entry.description && (
                                                 <span className={styles.entryDesc}>{item.entry.description}</span>
                                             )}
-                                            <span className={styles.entryDur}>
-                                                {fmtDuration(item.entry.durationMinutes ?? 0)}
-                                            </span>
+                                            <div className={styles.entryFooter}>
+                                                <span className={styles.entryDur}>
+                                                    {fmtDuration(item.entry.durationMinutes ?? 0)}
+                                                </span>
+                                                {item.entry.billableType === BillableType.NON_BILLABLE && (
+                                                    <span className={styles.entryNFBadge}>NF</span>
+                                                )}
+                                                {item.entry.isShared && (
+                                                    <span className={styles.entrySharedDot} title="Entrada compartida">●</span>
+                                                )}
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -591,6 +824,59 @@ const TimeCalendar = () =>
                                 </div>
                             </div>
 
+                            {/* Client selector */}
+                            <div className={styles.fieldGroup}>
+                                <label className={styles.fieldLabel}>
+                                    Cliente <span className={styles.optional}>(filtra los casos)</span>
+                                </label>
+                                <div className={styles.caseCombo} ref={clientRef}>
+                                    <div className={styles.selectWrap}>
+                                        <User className={styles.selectLeadIcon}/>
+                                        <input
+                                            className={`${styles.select} ${styles.caseInput}`}
+                                            type="text"
+                                            placeholder="— Todos los casos —"
+                                            value={clientOpen ? clientSearch : (selectedClient ? clientLabel(selectedClient) : '')}
+                                            onChange={e => { setClientSearch(e.target.value); setClientOpen(true); }}
+                                            onFocus={() => { setClientSearch(''); setClientOpen(true); }}
+                                        />
+                                    </div>
+                                    {clientOpen && (
+                                        <div className={styles.caseDropdown}>
+                                            <div
+                                                className={`${styles.caseOption} ${!createModal.clientId ? styles.caseOptionSelected : ''}`}
+                                                onMouseDown={e =>
+                                                {
+                                                    e.preventDefault();
+                                                    setCreateModal(m => m ? {...m, clientId: '', processId: ''} : m);
+                                                    setClientSearch('');
+                                                    setClientOpen(false);
+                                                }}
+                                            >
+                                                Todos los casos
+                                            </div>
+                                            {filteredClients.length === 0 ? (
+                                                <div className={styles.caseEmpty}>Sin resultados</div>
+                                            ) : filteredClients.map(c => (
+                                                <div
+                                                    key={c.id}
+                                                    className={`${styles.caseOption} ${createModal.clientId === c.id ? styles.caseOptionSelected : ''}`}
+                                                    onMouseDown={e =>
+                                                    {
+                                                        e.preventDefault();
+                                                        setCreateModal(m => m ? {...m, clientId: c.id, processId: ''} : m);
+                                                        setClientSearch('');
+                                                        setClientOpen(false);
+                                                    }}
+                                                >
+                                                    {clientLabel(c)}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
                             {/* Process */}
                             <div className={styles.fieldGroup}>
                                 <label className={styles.fieldLabel}>
@@ -632,6 +918,27 @@ const TimeCalendar = () =>
                                 </div>
                             </div>
 
+                            {/* Billable type */}
+                            <div className={styles.fieldGroup}>
+                                <label className={styles.fieldLabel}>Tipo de tiempo</label>
+                                <div className={styles.billableToggle}>
+                                    <button
+                                        type="button"
+                                        className={`${styles.billableBtn} ${createModal.billableType === BillableType.BILLABLE ? styles.billableBtnActive : ''}`}
+                                        onClick={() => setCreateModal(m => m ? {...m, billableType: BillableType.BILLABLE} : m)}
+                                    >
+                                        Facturable
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`${styles.billableBtn} ${createModal.billableType === BillableType.NON_BILLABLE ? styles.nonBillableBtnActive : ''}`}
+                                        onClick={() => setCreateModal(m => m ? {...m, billableType: BillableType.NON_BILLABLE} : m)}
+                                    >
+                                        No facturable
+                                    </button>
+                                </div>
+                            </div>
+
                             {/* Description */}
                             <div className={styles.fieldGroup}>
                                 <label className={styles.fieldLabel}>
@@ -645,6 +952,42 @@ const TimeCalendar = () =>
                                     onChange={e => setCreateModal(m => m ? {...m, description: e.target.value} : m)}
                                 />
                             </div>
+
+                            {/* Shared hours */}
+                            {members.length > 0 && (
+                                <div className={styles.fieldGroup}>
+                                    <label className={styles.fieldLabel}>Compartir con</label>
+                                    <div className={styles.shareSection}>
+                                        <button
+                                            type="button"
+                                            className={`${styles.shareToggle} ${shareEnabled ? styles.shareToggleActive : ''}`}
+                                            onClick={() => { setShareEnabled(enabled => !enabled); setSharedUserIds([]); }}
+                                        >
+                                            {shareEnabled ? 'Compartiendo con otros abogados' : 'Compartir con otros abogados'}
+                                        </button>
+                                        {shareEnabled && (
+                                            <div className={styles.memberGrid}>
+                                                {members.map(member => (
+                                                    <button
+                                                        key={member.id}
+                                                        type="button"
+                                                        className={`${styles.memberChip} ${sharedUserIds.includes(member.userId) ? styles.memberChipSelected : ''}`}
+                                                        onClick={() => toggleSharedUser(member.userId)}
+                                                    >
+                                                        <span className={styles.memberInitial}>
+                                                            {memberInitials(member.user.firstName, member.user.lastName)}
+                                                        </span>
+                                                        {member.user.firstName} {member.user.lastName}
+                                                        {sharedUserIds.includes(member.userId) && (
+                                                            <span className={styles.memberChipX}>✕</span>
+                                                        )}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <div className={styles.modalFoot}>
@@ -694,12 +1037,31 @@ const TimeCalendar = () =>
 
                         <div className={styles.modalBody}>
                             <div className={styles.detailGrid}>
-                                <div className={styles.detailItem}>
-                                    <span className={styles.detailLabel}>Caso</span>
-                                    <span className={styles.detailValue}>
-                                        {processTitle[detailModal.entry.processId] ?? '—'}
-                                    </span>
-                                </div>
+                                {(() => {
+                                    const entryProcess = processes.find(p => p.id === detailModal.entry.processId);
+                                    const entryClient  = entryProcess ? clients.find(c => c.id === entryProcess.clientId) : null;
+                                    const entryClientName = entryClient
+                                        ? entryClient.type === ClientType.COMPANY
+                                            ? (entryClient.companyName ?? '—')
+                                            : [entryClient.firstName, entryClient.lastName].filter(Boolean).join(' ') || '—'
+                                        : null;
+                                    return (
+                                        <>
+                                            <div className={styles.detailItem}>
+                                                <span className={styles.detailLabel}>Caso</span>
+                                                <span className={styles.detailValue}>
+                                                    {processTitle[detailModal.entry.processId] ?? '—'}
+                                                </span>
+                                            </div>
+                                            {entryClientName && (
+                                                <div className={styles.detailItem}>
+                                                    <span className={styles.detailLabel}>Cliente</span>
+                                                    <span className={styles.detailValue}>{entryClientName}</span>
+                                                </div>
+                                            )}
+                                        </>
+                                    );
+                                })()}
                                 <div className={styles.detailItem}>
                                     <span className={styles.detailLabel}>Duración</span>
                                     <span className={styles.detailValue}>
@@ -714,6 +1076,15 @@ const TimeCalendar = () =>
                                     </span>
                                 </div>
                                 <div className={styles.detailItem}>
+                                    <span className={styles.detailLabel}>Tipo</span>
+                                    <span
+                                        className={styles.detailValue}
+                                        style={{color: detailModal.entry.billableType === BillableType.BILLABLE ? '#059669' : '#d97706', fontWeight: 600}}
+                                    >
+                                        {detailModal.entry.billableType === BillableType.BILLABLE ? 'Facturable' : 'No facturable'}
+                                    </span>
+                                </div>
+                                <div className={styles.detailItem}>
                                     <span className={styles.detailLabel}>Usuario</span>
                                     <span className={styles.detailValue}>
                                         {detailModal.entry.user
@@ -721,6 +1092,16 @@ const TimeCalendar = () =>
                                             : '—'}
                                     </span>
                                 </div>
+                                {detailModal.entry.isShared && detailModal.entry.participants.length > 0 && (
+                                    <div className={styles.detailItem}>
+                                        <span className={styles.detailLabel}>Compartida con</span>
+                                        <span className={styles.detailValue}>
+                                            {detailModal.entry.participants
+                                                .map(p => `${p.user.firstName} ${p.user.lastName}`)
+                                                .join(', ')}
+                                        </span>
+                                    </div>
+                                )}
                                 {detailModal.entry.description && (
                                     <div className={`${styles.detailItem} ${styles.detailItemFull}`}>
                                         <span className={styles.detailLabel}>Descripción</span>

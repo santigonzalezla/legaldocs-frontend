@@ -20,17 +20,47 @@ type FormState = {
     description: string;
 };
 
+type RatesForm = {
+    firmHourlyRate:     string;
+    billableHours:      string;
+    billableMinutes:    string;
+    nonBillableHours:   string;
+    nonBillableMinutes: string;
+};
+
+const decimalToHM = (val: number | null): {hours: string; minutes: string} => {
+    if (val == null) return {hours: '', minutes: ''};
+    const hours   = Math.floor(val);
+    const minutes = Math.round((val - hours) * 60);
+    return {hours: String(hours), minutes: minutes > 0 ? String(minutes) : ''};
+};
+
+const hmToDecimal = (h: string, m: string): number | null => {
+    if (h.trim() === '' && m.trim() === '') return null;
+    return (Number(h) || 0) + (Number(m) || 0) / 60;
+};
+
+const toTotalMinutes = (h: string, m: string) => (Number(h) || 0) * 60 + (Number(m) || 0);
+
 const empty: FormState = {
     name: '', legalName: '', nit: '', address: '', city: '',
     country: '', phone: '', email: '', website: '', description: '',
 };
 
+const emptyRates: RatesForm = {
+    firmHourlyRate: '', billableHours: '', billableMinutes: '',
+    nonBillableHours: '', nonBillableMinutes: '',
+};
+
 const OfficeForm = () =>
 {
-    const [form,         setForm]         = useState<FormState>(empty);
-    const [snapshot,     setSnapshot]     = useState<FormState>(empty);
-    const [isEditing,    setIsEditing]    = useState(false);
-    const [newSpecialty, setNewSpecialty] = useState('');
+    const [form,           setForm]           = useState<FormState>(empty);
+    const [snapshot,       setSnapshot]       = useState<FormState>(empty);
+    const [isEditing,      setIsEditing]      = useState(false);
+    const [newSpecialty,   setNewSpecialty]   = useState('');
+    const [rates,          setRates]          = useState<RatesForm>(emptyRates);
+    const [ratesSnapshot,  setRatesSnapshot]  = useState<RatesForm>(emptyRates);
+    const [isEditingRates, setIsEditingRates] = useState(false);
 
     const {data: firm, isLoading: loadingFirm} = useFetch<Firm>('firm/me', {firmScoped: true});
 
@@ -41,6 +71,12 @@ const OfficeForm = () =>
     const {execute: saveFirm, isLoading: isSaving} = useFetch<Firm>('firm/me', {
         method:    'PATCH',
         immediate: false,
+        firmScoped: true,
+    });
+
+    const {execute: saveRates, isLoading: isSavingRates} = useFetch<Firm>('firm/me', {
+        method:     'PATCH',
+        immediate:  false,
         firmScoped: true,
     });
 
@@ -69,6 +105,18 @@ const OfficeForm = () =>
         };
         setForm(loaded);
         setSnapshot(loaded);
+
+        const billable    = decimalToHM(firm.dailyBillableGoalHours);
+        const nonBillable = decimalToHM(firm.dailyNonBillableGoalHours);
+        const loadedRates: RatesForm = {
+            firmHourlyRate:     firm.firmHourlyRate != null ? String(firm.firmHourlyRate) : '',
+            billableHours:      billable.hours,
+            billableMinutes:    billable.minutes,
+            nonBillableHours:   nonBillable.hours,
+            nonBillableMinutes: nonBillable.minutes,
+        };
+        setRates(loadedRates);
+        setRatesSnapshot(loadedRates);
     }, [firm]);
 
     const handleField = (key: keyof FormState, value: string) =>
@@ -106,6 +154,57 @@ const OfficeForm = () =>
     };
 
     const handleCancel = () => { setForm(snapshot); setIsEditing(false); };
+
+    const handleRatesField = (key: keyof RatesForm, value: string) =>
+        setRates(prev => ({...prev, [key]: value}));
+
+    const handleSaveRates = async () =>
+    {
+        const billTotal    = toTotalMinutes(rates.billableHours,    rates.billableMinutes);
+        const nonBillTotal = toTotalMinutes(rates.nonBillableHours, rates.nonBillableMinutes);
+
+        if (billTotal + nonBillTotal > 24 * 60)
+        {
+            toast.error('La suma de horas facturables y no facturables no puede superar las 24 horas diarias.');
+            return;
+        }
+
+        const minutesInRange = (m: string) => {
+            const n = Number(m);
+            return m.trim() === '' || (Number.isInteger(n) && n >= 0 && n <= 59);
+        };
+
+        if (!minutesInRange(rates.billableMinutes) || !minutesInRange(rates.nonBillableMinutes))
+        {
+            toast.error('Los minutos deben ser un valor entre 0 y 59.');
+            return;
+        }
+
+        const payload = {
+            firmHourlyRate:            rates.firmHourlyRate.trim() === '' ? null : Number(rates.firmHourlyRate),
+            dailyBillableGoalHours:    hmToDecimal(rates.billableHours,    rates.billableMinutes),
+            dailyNonBillableGoalHours: hmToDecimal(rates.nonBillableHours, rates.nonBillableMinutes),
+        };
+
+        const result = await saveRates({body: payload});
+        if (!result) return;
+
+        const billable    = decimalToHM(result.dailyBillableGoalHours);
+        const nonBillable = decimalToHM(result.dailyNonBillableGoalHours);
+        const updated: RatesForm = {
+            firmHourlyRate:     result.firmHourlyRate != null ? String(result.firmHourlyRate) : '',
+            billableHours:      billable.hours,
+            billableMinutes:    billable.minutes,
+            nonBillableHours:   nonBillable.hours,
+            nonBillableMinutes: nonBillable.minutes,
+        };
+        setRates(updated);
+        setRatesSnapshot(updated);
+        setIsEditingRates(false);
+        toast.success('Tarifas y metas actualizadas.');
+    };
+
+    const handleCancelRates = () => { setRates(ratesSnapshot); setIsEditingRates(false); };
 
     const handleAddSpecialty = async () =>
     {
@@ -241,6 +340,87 @@ const OfficeForm = () =>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div className={styles.formSection}>
+                <div className={styles.sectionHeader}>
+                    <h4 className={styles.sectionTitle}>Tarifas y Metas</h4>
+                    {!isEditingRates ? (
+                        <button className={styles.editButton} onClick={() => setIsEditingRates(true)}>Editar</button>
+                    ) : (
+                        <div className={styles.actionButtons}>
+                            <button className={styles.cancelButton} onClick={handleCancelRates}>Cancelar</button>
+                            <button className={styles.saveButton} onClick={handleSaveRates} disabled={isSavingRates}>
+                                {isSavingRates ? 'Guardando...' : 'Guardar'}
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                <div className={styles.formGrid} style={{gridTemplateColumns: 'repeat(3, 1fr)'}}>
+                    <div className={styles.formGroup}>
+                        <label className={styles.label}>Tarifa por hora (COP)</label>
+                        <input
+                            type="number" min={0} step={1000}
+                            className={styles.input}
+                            placeholder="Ej: 250000"
+                            value={rates.firmHourlyRate}
+                            disabled={!isEditingRates}
+                            onChange={e => handleRatesField('firmHourlyRate', e.target.value)}
+                        />
+                    </div>
+
+                    <div className={styles.formGroup}>
+                        <label className={styles.label}>Meta diaria — facturables</label>
+                        <div style={{display: 'flex', gap: '0.5rem', alignItems: 'center'}}>
+                            <input
+                                type="number" min={0} max={24} step={1}
+                                className={styles.input}
+                                placeholder="h"
+                                value={rates.billableHours}
+                                disabled={!isEditingRates}
+                                onChange={e => handleRatesField('billableHours', e.target.value)}
+                            />
+                            <span style={{color: 'var(--text-muted)', flexShrink: 0}}>h</span>
+                            <input
+                                type="number" min={0} max={59} step={1}
+                                className={styles.input}
+                                placeholder="min"
+                                value={rates.billableMinutes}
+                                disabled={!isEditingRates}
+                                onChange={e => handleRatesField('billableMinutes', e.target.value)}
+                            />
+                            <span style={{color: 'var(--text-muted)', flexShrink: 0}}>min</span>
+                        </div>
+                    </div>
+
+                    <div className={styles.formGroup}>
+                        <label className={styles.label}>Meta diaria — no facturables</label>
+                        <div style={{display: 'flex', gap: '0.5rem', alignItems: 'center'}}>
+                            <input
+                                type="number" min={0} max={24} step={1}
+                                className={styles.input}
+                                placeholder="h"
+                                value={rates.nonBillableHours}
+                                disabled={!isEditingRates}
+                                onChange={e => handleRatesField('nonBillableHours', e.target.value)}
+                            />
+                            <span style={{color: 'var(--text-muted)', flexShrink: 0}}>h</span>
+                            <input
+                                type="number" min={0} max={59} step={1}
+                                className={styles.input}
+                                placeholder="min"
+                                value={rates.nonBillableMinutes}
+                                disabled={!isEditingRates}
+                                onChange={e => handleRatesField('nonBillableMinutes', e.target.value)}
+                            />
+                            <span style={{color: 'var(--text-muted)', flexShrink: 0}}>min</span>
+                        </div>
+                    </div>
+                </div>
+                <p style={{fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem'}}>
+                    La tarifa aplica a todos los procesos del despacho. Las metas diarias son las horas que cada abogado debe registrar por día. La suma de ambas metas no puede superar las 24 horas.
+                </p>
             </div>
         </div>
     );

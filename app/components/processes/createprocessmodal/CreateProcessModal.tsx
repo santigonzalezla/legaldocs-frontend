@@ -5,6 +5,12 @@ import {X, Plus} from '@/app/components/svg';
 import type {Client, LegalBranch} from '@/app/interfaces/interfaces';
 import {ClientType} from '@/app/interfaces/enums';
 
+const formatThousands = (raw: string) =>
+{
+    const digits = raw.replace(/\D/g, '');
+    return digits ? Number(digits).toLocaleString('es-CO') : '';
+};
+
 const clientName = (c: Client) =>
     c.type === ClientType.COMPANY
         ? (c.companyName ?? '—')
@@ -12,14 +18,15 @@ const clientName = (c: Client) =>
 
 export interface CreateProcessForm
 {
-    clientId:    string;
-    title:       string;
-    description: string;
-    reference:   string;
-    branchId:    string;
-    court:       string;
-    counterpart: string;
-    startDate:   string;
+    clientId:     string;
+    title:        string;
+    description:  string;
+    reference:    string;
+    branchId:     string;
+    court:        string;
+    counterpart:  string;
+    startDate:    string;
+    processValue: string;
 }
 
 interface CreateProcessModalProps
@@ -135,6 +142,20 @@ const CreateProcessModal = ({open, saving, form, clients, branches, onChange, on
                                 type="date"
                                 value={form.startDate}
                                 onChange={e => onChange('startDate', e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    <div className={styles.row}>
+                        <div className={styles.formGroup}>
+                            <label>Valor inicial pactado (COP)</label>
+                            <input
+                                className={styles.input}
+                                type="text"
+                                inputMode="numeric"
+                                placeholder="Ej: 10.000.000"
+                                value={formatThousands(form.processValue)}
+                                onChange={e => onChange('processValue', e.target.value.replace(/\D/g, ''))}
                             />
                         </div>
                     </div>

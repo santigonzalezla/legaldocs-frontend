@@ -399,3 +399,249 @@
     text-align: right;
     font-family: var(--font-family);
 }
+
+/* ── Daily goal card ────────────────────────────────────────────────────────── */
+
+.goalCard {
+    background: var(--content-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.goalHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.goalHeaderLeft {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.goalDateInput {
+    padding: 6px 10px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text-primary);
+    background: var(--content-bg);
+    font-family: var(--font-family);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+}
+
+.goalDateInput:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+.goalList {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+.goalRow {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 1rem;
+    align-items: start;
+}
+
+.goalUser {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 0.1rem;
+}
+
+.goalAvatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 0.65rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    font-family: var(--font-family);
+}
+
+.goalUserName {
+    font-size: 0.83rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.goalBars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.goalBarGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.goalBarMeta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.goalBarLabel {
+    font-size: 0.72rem;
+    font-weight: 600;
+    font-family: var(--font-family);
+}
+
+.goalBarValue {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+}
+
+.goalTrack {
+    height: 7px;
+    background: var(--hover-bg);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.goalFill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    min-width: 3px;
+}
+
+.goalNote {
+    margin: 0;
+    font-size: 0.73rem;
+    color: var(--text-secondary);
+    font-family: var(--font-family);
+    padding-top: 0.25rem;
+    border-top: 1px solid var(--border-light);
+}
+
+/* ── Process profitability card ─────────────────────────────────────────────── */
+
+.profitCard {
+    background: var(--content-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.profitTable {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.profitTableHead {
+    display: grid;
+    grid-template-columns: 1fr 130px 90px 120px 100px;
+    gap: 0.75rem;
+    padding: 0.6rem 1rem;
+    background: var(--hover-bg);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-family: var(--font-family);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.profitRow {
+    display: grid;
+    grid-template-columns: 1fr 130px 90px 120px 100px;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.7rem 1rem;
+    border-top: 1px solid var(--border-light);
+    transition: background 0.15s;
+}
+
+.profitRow:hover { background: var(--hover-bg); }
+
+.profitProcess {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profitValue {
+    font-size: 0.78rem;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    font-weight: 500;
+}
+
+.profitCell {
+    font-size: 0.82rem;
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    font-weight: 500;
+}
+
+.profitPct {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    font-family: var(--font-family);
+}
+
+.profitDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.profitOverTag {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #ef4444;
+    background: rgba(239,68,68,0.1);
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-family: var(--font-family);
+}
+
+.profitLegend {
+    display: flex;
+    gap: 1.25rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-family: var(--font-family);
+    flex-wrap: wrap;
+}

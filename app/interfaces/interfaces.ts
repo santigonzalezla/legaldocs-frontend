@@ -1,5 +1,6 @@
 import {
     BillingCycle,
+    BillableType,
     ClientType,
     DocumentStatus,
     FirmMemberRole,
@@ -83,6 +84,9 @@ export interface Firm
     website: string | null;
     description: string | null;
     logoUrl: string | null;
+    firmHourlyRate: number | null;
+    dailyBillableGoalHours: number | null;
+    dailyNonBillableGoalHours: number | null;
     createdBy: string;
     deletedAt: string | null;
     createdAt: string;
@@ -316,6 +320,16 @@ export interface Client
 
 // ─── Legal Process ────────────────────────────────────────────────────────────
 
+export interface ProcessValueEntry
+{
+    id: string;
+    processId: string;
+    amount: number;
+    description: string;
+    createdBy: string;
+    createdAt: string;
+}
+
 export interface LegalProcess
 {
     id: string;
@@ -332,6 +346,8 @@ export interface LegalProcess
     startDate: string | null;
     endDate: string | null;
     assignedTo: string | null;
+    processValue: number | null;
+    valueEntries: ProcessValueEntry[];
     createdBy: string;
     deletedAt: string | null;
     createdAt: string;
@@ -350,6 +366,15 @@ export interface ProcessTemplate
 
 // ─── Time Entry ──────────────────────────────────────────────────────────────
 
+export interface TimeEntryParticipant
+{
+    id: string;
+    timeEntryId: string;
+    userId: string;
+    user: { firstName: string; lastName: string };
+    createdAt: string;
+}
+
 export interface TimeEntry
 {
     id: string;
@@ -358,6 +383,8 @@ export interface TimeEntry
     userId: string;
     firmId: string;
     type: TimeEntryType;
+    billableType: BillableType;
+    isShared: boolean;
     description: string | null;
     startedAt: string;
     endedAt: string | null;
@@ -365,6 +392,7 @@ export interface TimeEntry
     createdAt: string;
     updatedAt: string;
     user: { firstName: string; lastName: string; hourlyRate: number | null };
+    participants: TimeEntryParticipant[];
 }
 
 // ─── Paginated Response ──────────────────────────────────────────────────────

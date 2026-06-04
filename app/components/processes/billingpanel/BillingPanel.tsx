@@ -3,27 +3,29 @@
 import {useRef} from 'react';
 import {createPortal} from 'react-dom';
 import styles from './billingpanel.module.css';
-import {X, DollarSign, Download} from '@/app/components/svg';
+import {X, DollarSign, Download, Users} from '@/app/components/svg';
 import type {Client, LegalProcess, TimeEntry} from '@/app/interfaces/interfaces';
-import {ClientType} from '@/app/interfaces/enums';
+import {BillableType, ClientType} from '@/app/interfaces/enums';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 interface BillingPanelProps
 {
-    process: LegalProcess;
-    client:  Client | null;
-    entries: TimeEntry[];
-    onClose: () => void;
+    process:       LegalProcess;
+    client:        Client | null;
+    entries:       TimeEntry[];
+    firmHourlyRate: number | null;
+    onClose:       () => void;
 }
 
 interface UserLine
 {
-    name:        string;
-    userId:      string;
-    minutes:     number;
-    hourlyRate:  number | null;
-    subtotal:    number | null;
+    name:          string;
+    userId:        string;
+    minutes:       number;
+    sharedMinutes: number;
+    collaborators: string[];
+    subtotal:      number | null;
 }
 
 const fmtCOP = (n: number) =>
@@ -44,38 +46,58 @@ const clientName = (c: Client) =>
 const todayLabel = () =>
     new Date().toLocaleDateString('es-ES', {day: '2-digit', month: 'long', year: 'numeric'});
 
-const BillingPanel = ({process, client, entries, onClose}: BillingPanelProps) =>
+const BillingPanel = ({process, client, entries, firmHourlyRate, onClose}: BillingPanelProps) =>
 {
     const previewRef = useRef<HTMLDivElement>(null);
 
-    // Build per-user summary
+    /* Only BILLABLE entries count toward the invoice.
+       Shared entries are counted once (under the creator), never per participant. */
+    const billable = entries.filter(e => e.billableType === BillableType.BILLABLE && e.durationMinutes);
+
     const byUser: Record<string, UserLine> = {};
-    for (const e of entries)
+
+    for (const e of billable)
     {
         if (!e.durationMinutes) continue;
+
         if (!byUser[e.userId])
             byUser[e.userId] = {
-                name:       `${e.user?.firstName ?? ''} ${e.user?.lastName ?? ''}`.trim() || e.userId.slice(0, 8),
-                userId:     e.userId,
-                minutes:    0,
-                hourlyRate: e.user?.hourlyRate ?? null,
-                subtotal:   null,
+                name:          `${e.user?.firstName ?? ''} ${e.user?.lastName ?? ''}`.trim() || e.userId.slice(0, 8),
+                userId:        e.userId,
+                minutes:       0,
+                sharedMinutes: 0,
+                collaborators: [],
+                subtotal:      null,
             };
+
         byUser[e.userId].minutes += e.durationMinutes;
+
+        if (e.isShared && e.participants.length > 0)
+        {
+            byUser[e.userId].sharedMinutes += e.durationMinutes;
+            for (const p of e.participants)
+            {
+                const pName = `${p.user.firstName} ${p.user.lastName}`.trim();
+                if (!byUser[e.userId].collaborators.includes(pName))
+                    byUser[e.userId].collaborators.push(pName);
+            }
+        }
     }
 
+    /* Use firm rate for every subtotal */
     const lines = Object.values(byUser).map(l =>
     {
         const hours    = l.minutes / 60;
-        const subtotal = l.hourlyRate != null ? Math.round(hours * l.hourlyRate) : null;
+        const subtotal = firmHourlyRate != null ? Math.round(hours * firmHourlyRate) : null;
         return {...l, subtotal};
     });
 
-    const total = lines.reduce<number | null>((acc, l) =>
-    {
-        if (l.subtotal == null) return acc;
-        return (acc ?? 0) + l.subtotal;
-    }, null);
+    const totalMinutes = lines.reduce((acc, l) => acc + l.minutes, 0);
+    const total = firmHourlyRate != null
+        ? Math.round((totalMinutes / 60) * firmHourlyRate)
+        : null;
+
+    const hasShared = lines.some(l => l.sharedMinutes > 0);
 
     const handleDownload = async () =>
     {
@@ -147,31 +169,53 @@ const BillingPanel = ({process, client, entries, onClose}: BillingPanelProps) =>
 
                         <div className={styles.divider} />
 
-                        {/* Billing concept label */}
-                        <p className={styles.conceptLabel}>Concepto: Honorarios profesionales por tiempo trabajado en el proceso</p>
+                        <div className={styles.conceptRow}>
+                            <p className={styles.conceptLabel}>Concepto: Honorarios profesionales por tiempo facturado en el proceso</p>
+                            {firmHourlyRate != null && (
+                                <span className={styles.rateTag}>
+                                    Tarifa: {fmtCOP(firmHourlyRate)} / hora
+                                </span>
+                            )}
+                        </div>
 
-                        {/* Table */}
+                        {/* Table — no per-row rate column */}
                         <div className={styles.table}>
                             <div className={styles.tableHead}>
                                 <span>Profesional</span>
-                                <span className={styles.right}>Tiempo</span>
-                                <span className={styles.right}>Tarifa / hora</span>
+                                <span className={styles.right}>Tiempo facturado</span>
                                 <span className={styles.right}>Subtotal</span>
                             </div>
 
                             {lines.length === 0 ? (
-                                <div className={styles.emptyRow}>Sin registros de tiempo completados</div>
+                                <div className={styles.emptyRow}>Sin registros de tiempo facturado</div>
                             ) : (
                                 lines.map(l => (
-                                    <div key={l.userId} className={styles.tableRow}>
-                                        <span>{l.name}</span>
-                                        <span className={styles.right}>{fmtHours(l.minutes)}</span>
-                                        <span className={styles.right}>
-                                            {l.hourlyRate != null ? fmtCOP(l.hourlyRate) : <em className={styles.noRate}>Sin tarifa</em>}
-                                        </span>
-                                        <span className={styles.right}>
-                                            {l.subtotal != null ? fmtCOP(l.subtotal) : '—'}
-                                        </span>
+                                    <div key={l.userId} className={styles.rowGroup}>
+                                        <div className={styles.tableRow}>
+                                            <span className={styles.professionalCell}>
+                                                {l.name}
+                                                {l.sharedMinutes > 0 && (
+                                                    <span className={styles.sharedBadge}>
+                                                        <Users className={styles.sharedBadgeIcon} />
+                                                        Compartida
+                                                    </span>
+                                                )}
+                                            </span>
+                                            <span className={styles.right}>{fmtHours(l.minutes)}</span>
+                                            <span className={styles.right}>
+                                                {l.subtotal != null ? fmtCOP(l.subtotal) : '—'}
+                                            </span>
+                                        </div>
+
+                                        {/* Shared-hours transparency note */}
+                                        {l.collaborators.length > 0 && (
+                                            <div className={styles.sharedNote}>
+                                                <Users className={styles.sharedNoteIcon} />
+                                                <span>
+                                                    {fmtHours(l.sharedMinutes)} compartidas con: {l.collaborators.join(', ')} — facturadas una sola vez
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
                                 ))
                             )}
@@ -179,15 +223,24 @@ const BillingPanel = ({process, client, entries, onClose}: BillingPanelProps) =>
 
                         {/* Total */}
                         <div className={styles.totalRow}>
-                            <span className={styles.totalLabel}>TOTAL A COBRAR</span>
+                            <div>
+                                <span className={styles.totalLabel}>TOTAL A COBRAR</span>
+                                <span className={styles.totalHours}>{fmtHours(totalMinutes)} · {firmHourlyRate != null ? fmtCOP(firmHourlyRate) + '/h' : 'sin tarifa'}</span>
+                            </div>
                             <span className={styles.totalAmount}>
                                 {total != null ? fmtCOP(total) : '—'}
                             </span>
                         </div>
 
-                        {total == null && lines.some(l => l.hourlyRate == null) && (
+                        {total == null && (
                             <p className={styles.rateWarning}>
-                                Uno o más profesionales no tienen tarifa por hora configurada. Complétala en tu perfil de usuario.
+                                La firma no tiene tarifa por hora configurada. Agrégala en Configuración → Despacho.
+                            </p>
+                        )}
+
+                        {hasShared && (
+                            <p className={styles.sharedInfo}>
+                                Las horas marcadas como compartidas se cobran una sola vez al cliente, independientemente del número de colaboradores.
                             </p>
                         )}
 
