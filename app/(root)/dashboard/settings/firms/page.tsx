@@ -5,10 +5,12 @@ import {useState} from 'react';
 import {useRouter} from 'next/navigation';
 import {useFetch} from '@/hooks/useFetch';
 import {useAuth} from '@/context/AuthContext';
+import {usePermissions} from '@/context/PermissionsContext';
 import {toast} from 'sonner';
-import {Bell, Building, Cancel, Check, Crown, Edit, Plus, Users} from '@/app/components/svg';
-import type {Firm, FirmWithRole, PendingInvitation} from '@/app/interfaces/interfaces';
+import {Bell, Building, Cancel, Check, Crown, Edit, Plus, RotateBack, Trash, Users} from '@/app/components/svg';
+import type {DeletedFirm, Firm, FirmWithRole, PendingInvitation} from '@/app/interfaces/interfaces';
 import {FirmMemberRole} from '@/app/interfaces/enums';
+import {ALLOW_FIRM_CREATION} from '@/lib/constants';
 import CreateFirmModal from '@/app/components/settings/firms/createfirmmodal/CreateFirmModal';
 
 interface InvitationCardProps
@@ -43,6 +45,11 @@ const FirmsPage = () =>
 {
     const router = useRouter();
     const {activeFirmId, setActiveFirm} = useAuth();
+    const {canAny} = usePermissions();
+    // El botón "Administrar" lleva a la config de la firma activa, así que solo
+    // se muestra a quien puede verla; sin ese permiso el usuario únicamente ve
+    // las firmas a las que pertenece, no las opciones de gestión.
+    const canManageFirm = canAny(['firm_settings:view', 'firm_settings:edit']);
     const [showCreate, setShowCreate] = useState(false);
     const [saving, setSaving] = useState(false);
     const [form, setForm] = useState({...EMPTY_FORM});
@@ -53,11 +60,15 @@ const FirmsPage = () =>
         isLoading: loadingInv,
         execute: refetchInv
     } = useFetch<PendingInvitation[]>('firm/my-invitations');
+    const {data: deletedFirms, execute: refetchDeleted} = useFetch<DeletedFirm[]>('firm/deleted');
     const {execute: createFirm} = useFetch<Firm>('firm', {method: 'POST', immediate: false});
     const {execute: acceptInv} = useFetch<{ message: string }>('', {method: 'POST', immediate: false});
     const {execute: rejectInv} = useFetch<{ message: string }>('', {method: 'POST', immediate: false});
+    const {execute: restoreFirm} = useFetch<{ message: string }>('', {method: 'POST', immediate: false});
+    const [restoringId, setRestoringId] = useState<string | null>(null);
 
     const isLoading = loadingFirms || loadingInv;
+    const deleted = deletedFirms ?? [];
     const owned = (firms ?? []).filter(f => f.isOwner);
     const associated = (firms ?? []).filter(f => !f.isOwner);
     const pending = invitations ?? [];
@@ -114,6 +125,19 @@ const FirmsPage = () =>
         refetchInv();
     };
 
+    const handleRestore = async (firm: DeletedFirm) =>
+    {
+        setRestoringId(firm.id);
+        const result = await restoreFirm({}, `firm/restore/${firm.id}`);
+        setRestoringId(null);
+        if (!result) return;
+        toast.success(`"${firm.name}" fue restaurada.`);
+        setActiveFirm(firm.id);
+        refetchFirms();
+        refetchDeleted();
+        router.refresh();
+    };
+
     return (
         <div className={styles.page}>
             <div className={styles.header}>
@@ -121,7 +145,7 @@ const FirmsPage = () =>
                     <h1>Mis Firmas</h1>
                     <p>Gestiona las firmas legales a las que perteneces y cambia de firma activa.</p>
                 </div>
-                {!isLoading && owned.length === 0 && (
+                {ALLOW_FIRM_CREATION && !isLoading && owned.length === 0 && (
                     <button className={styles.addButton} onClick={handleOpenCreate}>
                         <Plus/> Crear firma
                     </button>
@@ -153,16 +177,13 @@ const FirmsPage = () =>
                         </section>
                     )}
 
-                    {/* Firmas propias */}
-                    <section className={styles.section}>
-                        <h2 className={styles.sectionTitle}>
-                            <Crown className={styles.sectionIcon}/>
-                            Firmas que administro ({owned.length})
-                        </h2>
-
-                        {owned.length === 0 ? (
-                            <p className={styles.empty}>No eres propietario de ninguna firma.</p>
-                        ) : (
+                    {/* Firmas propias — se oculta si no administra ninguna */}
+                    {owned.length > 0 && (
+                        <section className={styles.section}>
+                            <h2 className={styles.sectionTitle}>
+                                <Crown className={styles.sectionIcon}/>
+                                Firmas que administro ({owned.length})
+                            </h2>
                             <div className={styles.cards}>
                                 {owned.map(firm => (
                                     <FirmCard
@@ -170,12 +191,12 @@ const FirmsPage = () =>
                                         firm={firm}
                                         isActive={firm.id === activeFirmId}
                                         onSwitch={handleSwitch}
-                                        onManage={() => router.push('/dashboard/settings/office')}
+                                        onManage={canManageFirm ? () => router.push('/dashboard/settings/office') : undefined}
                                     />
                                 ))}
                             </div>
-                        )}
-                    </section>
+                        </section>
+                    )}
 
                     {/* Firmas asociadas */}
                     <section className={styles.section}>
@@ -199,21 +220,65 @@ const FirmsPage = () =>
                             </div>
                         )}
                     </section>
+
+                    {/* Firmas eliminadas (recuperables 30 días) */}
+                    {deleted.length > 0 && (
+                        <section className={styles.section}>
+                            <h2 className={styles.sectionTitle}>
+                                <Trash className={styles.sectionIcon}/>
+                                Firmas eliminadas ({deleted.length})
+                            </h2>
+                            <div className={styles.cards}>
+                                {deleted.map(firm => (
+                                    <div key={firm.id} className={`${styles.card} ${styles.cardDeleted}`}>
+                                        <div className={styles.cardTop}>
+                                            <div className={styles.firmIcon}>
+                                                <Building/>
+                                            </div>
+                                            <div className={styles.firmInfo}>
+                                                <div className={styles.firmNameRow}>
+                                                    <span className={styles.firmName}>{firm.name}</span>
+                                                    <span className={styles.deletedBadge}>Eliminada</span>
+                                                </div>
+                                                <div className={styles.firmMeta}>
+                                                    {firm.purgeAt
+                                                        ? <span>Se eliminará definitivamente el {formatDate(firm.purgeAt)}</span>
+                                                        : <span>Dentro del plazo de recuperación</span>}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className={styles.cardActions}>
+                                            <button
+                                                className={styles.btnRestore}
+                                                onClick={() => handleRestore(firm)}
+                                                disabled={restoringId === firm.id}
+                                            >
+                                                <RotateBack className={styles.btnIcon}/>
+                                                {restoringId === firm.id ? 'Restaurando...' : 'Restaurar firma'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    )}
                 </>
             )}
 
-            <CreateFirmModal
-                open={showCreate}
-                saving={saving}
-                name={form.name}
-                legalName={form.legalName}
-                city={form.city}
-                onClose={handleCloseCreate}
-                onSave={handleCreate}
-                onName={v => setForm(prev => ({...prev, name: v}))}
-                onLegalName={v => setForm(prev => ({...prev, legalName: v}))}
-                onCity={v => setForm(prev => ({...prev, city: v}))}
-            />
+            {ALLOW_FIRM_CREATION && (
+                <CreateFirmModal
+                    open={showCreate}
+                    saving={saving}
+                    name={form.name}
+                    legalName={form.legalName}
+                    city={form.city}
+                    onClose={handleCloseCreate}
+                    onSave={handleCreate}
+                    onName={v => setForm(prev => ({...prev, name: v}))}
+                    onLegalName={v => setForm(prev => ({...prev, legalName: v}))}
+                    onCity={v => setForm(prev => ({...prev, city: v}))}
+                />
+            )}
         </div>
     );
 };

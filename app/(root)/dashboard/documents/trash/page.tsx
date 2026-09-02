@@ -10,6 +10,7 @@ import TrashList       from '@/app/components/documents/trash/trashlist/TrashLis
 import {daysUntilExpiry} from '@/app/components/documents/trash/trashlist/TrashList';
 import {useConfirm} from '@/hooks/useConfirm';
 import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
+import {PermissionGuard} from '@/app/components/auth/PermissionGuard';
 
 const statusOptions = [
     {value: 'all', label: 'Todos los eliminados'},
@@ -95,4 +96,10 @@ const Trash = () =>
     );
 };
 
-export default Trash;
+const TrashGuarded = () => (
+    <PermissionGuard permission="documents:view">
+        <Trash/>
+    </PermissionGuard>
+);
+
+export default TrashGuarded;

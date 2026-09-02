@@ -1,6 +1,7 @@
 'use client';
 
 import {useCallback, useEffect, useMemo, useState} from 'react';
+import {toast} from 'sonner';
 import {useAuth} from '@/context/AuthContext';
 import {API_BASE_URL} from '@/lib/constants';
 
@@ -105,6 +106,14 @@ export function useFetch<T = any>(url: string, options: UseFetchOptions = {}): U
                 const message   = Array.isArray(errorData.message)
                     ? errorData.message.join(', ')
                     : (errorData.message ?? `Error ${response.status}: ${response.statusText}`);
+
+                if (response.status === 403)
+                {
+                    toast.error(message, {
+                        description: 'Contactá al administrador de tu despacho si creés que deberías tener acceso.',
+                    });
+                }
+
                 throw new Error(message);
             }
 

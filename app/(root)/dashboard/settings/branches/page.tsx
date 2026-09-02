@@ -8,6 +8,7 @@ import {File, Plus, Scale, Buildings, Users, Hammer, Building, Shield, Globe, Tr
 import {toast} from 'sonner';
 import AddBranchModal  from '@/app/components/settings/branches/addbranch/AddBranchModal';
 import EditBranchModal from '@/app/components/settings/branches/editbranch/EditBranchModal';
+import {PermissionGuard} from '@/app/components/auth/PermissionGuard';
 
 const BRANCH_ICONS: Record<string, React.ReactElement> = {
     civil: <Scale/>,
@@ -258,4 +259,10 @@ const BranchesPage = () =>
     );
 };
 
-export default BranchesPage;
+const BranchesPageGuarded = () => (
+    <PermissionGuard permission={['branches:create', 'branches:edit', 'branches:delete']}>
+        <BranchesPage/>
+    </PermissionGuard>
+);
+
+export default BranchesPageGuarded;

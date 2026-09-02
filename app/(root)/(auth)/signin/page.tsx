@@ -8,13 +8,9 @@ import {toast} from 'sonner';
 import {useFetch} from '@/hooks/useFetch';
 import {useAuth} from '@/context/AuthContext';
 import {Eye, EyeClosed, Lock, Mail} from '@/app/components/svg';
+import {ALLOW_FIRM_CREATION} from '@/lib/constants';
+import type {AuthResponse} from '@/app/interfaces/interfaces';
 import styles from '../form.module.css';
-
-interface LoginResponse
-{
-    accessToken:  string;
-    refreshToken: string;
-}
 
 const SignInForm = () =>
 {
@@ -28,7 +24,7 @@ const SignInForm = () =>
     const [password,     setPassword]     = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
-    const {execute, isLoading, error} = useFetch<LoginResponse>('auth/login', {
+    const {execute, isLoading, error} = useFetch<AuthResponse>('auth/login', {
         method:    'POST',
         immediate: false,
     });
@@ -47,9 +43,10 @@ const SignInForm = () =>
         const result = await execute({body: {email, password}});
         if (!result) return;
 
-        login(result.accessToken, result.refreshToken);
+        login(result.accessToken, result.refreshToken, result.mustChangePassword);
         toast.success('¡Bienvenido de nuevo!');
-        // If came from an invite link, go back to it so it auto-accepts
+        // If came from an invite link, go back to it so it auto-accepts.
+        // Si debe cambiar la clave, el PasswordChangeGate del dashboard intercepta.
         router.push(inviteToken ? `/invite?token=${inviteToken}` : '/dashboard');
     };
 
@@ -118,12 +115,14 @@ const SignInForm = () =>
                 </button>
             </form>
 
-            <p className={styles.footer}>
-                ¿No tienes cuenta?
-                <Link href={inviteToken ? `/signup?invite=${inviteToken}` : '/signup'} className={styles.footerLink}>
-                    Regístrate
-                </Link>
-            </p>
+            {ALLOW_FIRM_CREATION && (
+                <p className={styles.footer}>
+                    ¿No tienes cuenta?
+                    <Link href={inviteToken ? `/signup?invite=${inviteToken}` : '/signup'} className={styles.footerLink}>
+                        Regístrate
+                    </Link>
+                </p>
+            )}
         </div>
     );
 };

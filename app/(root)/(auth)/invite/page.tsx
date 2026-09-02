@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {useFetch} from '@/hooks/useFetch';
 import {useAuth} from '@/context/AuthContext';
-import {API_BASE_URL} from '@/lib/constants';
+import {ALLOW_FIRM_CREATION, API_BASE_URL} from '@/lib/constants';
 import {ArrowBack, Briefcase, Check} from '@/app/components/svg';
 import styles from '../form.module.css';
 
@@ -49,7 +49,8 @@ const InviteForm = () =>
             .then(r => r.json())
             .then(({exists}: {exists: boolean}) =>
             {
-                const dest = exists
+                // En el modelo provisionado el invitado ya tiene cuenta → siempre a signin.
+                const dest = (exists || !ALLOW_FIRM_CREATION)
                     ? `/signin?invite=${token}&email=${encodeURIComponent(email)}`
                     : `/signup?invite=${token}&email=${encodeURIComponent(email)}`;
                 router.replace(dest);
@@ -130,12 +131,14 @@ const InviteForm = () =>
                         style={{textAlign: 'center', textDecoration: 'none', display: 'block'}}>
                         Iniciar sesión
                     </Link>
-                    <Link
-                        href={`/signup?invite=${token}`}
-                        className={styles.submit}
-                        style={{textAlign: 'center', textDecoration: 'none', display: 'block', background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-primary)'}}>
-                        Crear cuenta nueva
-                    </Link>
+                    {ALLOW_FIRM_CREATION && (
+                        <Link
+                            href={`/signup?invite=${token}`}
+                            className={styles.submit}
+                            style={{textAlign: 'center', textDecoration: 'none', display: 'block', background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-primary)'}}>
+                            Crear cuenta nueva
+                        </Link>
+                    )}
                 </div>
             </div>
         );

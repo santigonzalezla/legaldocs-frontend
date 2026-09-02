@@ -3,6 +3,7 @@ export { default as Globe } from './globe.svg';
 export { default as Window } from './window.svg';
 export { default as Eye } from './eye.svg';
 export { default as EyeClosed } from './eyeclosed.svg';
+export { default as Alert } from './alert.svg';
 export { default as ArrorRightDot } from './arrowrightdot.svg';
 export { default as SalesIcon } from './salesicon.svg';
 export { default as InventoryIcon } from './inventoryicon.svg';

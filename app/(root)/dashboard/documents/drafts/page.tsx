@@ -12,6 +12,7 @@ import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
 import StatsCard       from '@/app/components/documents/shared/statscard/StatsCard';
 import DocumentFilters from '@/app/components/documents/shared/documentfilters/DocumentFilters';
 import DraftList       from '@/app/components/documents/drafts/draftlist/DraftList';
+import {PermissionGuard} from '@/app/components/auth/PermissionGuard';
 
 const statusOptions = [
     {value: 'all', label: 'Todos los borradores'},
@@ -107,4 +108,10 @@ const Drafts = () =>
     );
 };
 
-export default Drafts;
+const DraftsGuarded = () => (
+    <PermissionGuard permission="documents:view">
+        <Drafts/>
+    </PermissionGuard>
+);
+
+export default DraftsGuarded;

@@ -4,6 +4,7 @@ import styles from './page.module.css';
 import {useState} from 'react';
 import TemplateEditor from '@/app/components/settings/templates/templateeditor/TemplateEditor';
 import TemplateList from '@/app/components/settings/templates/templatelist/TemplateList';
+import {PermissionGuard} from '@/app/components/auth/PermissionGuard';
 
 const Templates = () =>
 {
@@ -66,4 +67,10 @@ const Templates = () =>
     );
 };
 
-export default Templates;
+const TemplatesGuarded = () => (
+    <PermissionGuard permission="templates:view">
+        <Templates/>
+    </PermissionGuard>
+);
+
+export default TemplatesGuarded;

@@ -8,8 +8,10 @@ import AiAgent from "@/app/components/aiagent/AiAgent";
 import {Suspense} from "react";
 import {ThemeProvider} from "@/context/ThemeContext";
 import {SearchProvider} from "@/context/SearchContext";
+import {PermissionsProvider} from "@/context/PermissionsContext";
 import {AuthGuard} from "@/app/components/auth/AuthGuard";
 import FirmGuard from "@/app/components/auth/FirmGuard";
+import PasswordChangeGate from "@/app/components/auth/PasswordChangeGate";
 
 export const metadata: Metadata = {
     title: {
@@ -26,20 +28,24 @@ export default function RootLayout({children}: Readonly<{ children: React.ReactN
         <div className={`${satoshi.variable} antialiased fulldashboard`}>
             <ThemeProvider>
                 <AuthGuard>
-                    <FirmGuard>
-                        <Suspense fallback={null}>
-                            <Sidebar/>
-                            <SearchProvider>
-                                <div className="dashboardtop">
-                                    <Topbar/>
-                                    <div className="dashcontainer">
-                                        {children}
-                                    </div>
-                                </div>
-                                <AiAgent />
-                            </SearchProvider>
-                        </Suspense>
-                    </FirmGuard>
+                    <PasswordChangeGate>
+                        <FirmGuard>
+                            <PermissionsProvider>
+                                <Suspense fallback={null}>
+                                    <Sidebar/>
+                                    <SearchProvider>
+                                        <div className="dashboardtop">
+                                            <Topbar/>
+                                            <div className="dashcontainer">
+                                                {children}
+                                            </div>
+                                        </div>
+                                        <AiAgent />
+                                    </SearchProvider>
+                                </Suspense>
+                            </PermissionsProvider>
+                        </FirmGuard>
+                    </PasswordChangeGate>
                 </AuthGuard>
             </ThemeProvider>
         </div>

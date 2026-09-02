@@ -8,6 +8,8 @@ import { BarChart, Calendar, Clock, DollarSign } from '@/app/components/svg';
 import { useFetch } from '@/hooks/useFetch';
 import type { Firm, User, TimeEntry } from '@/app/interfaces/interfaces';
 import { BillableType } from '@/app/interfaces/enums';
+import {PermissionGuard} from '@/app/components/auth/PermissionGuard';
+import {usePermissions} from '@/context/PermissionsContext';
 
 type Tab = 'analytics' | 'calendar';
 
@@ -87,6 +89,8 @@ const GoalChip = ({icon, iconCls, value, goal, label, color}: ChipProps) =>
 const ProcessAnalyticsPage = () =>
 {
     const [tab, setTab] = useState<Tab>('calendar');
+    const {can} = usePermissions();
+    const canViewAnalytics = can('time_entries:analytics');
 
     /* Same 3 fetches the process detail page uses */
     const {data: me}      = useFetch<User>('user/me');
@@ -171,13 +175,15 @@ const ProcessAnalyticsPage = () =>
                         <Calendar className={styles.tabIcon} />
                         Calendario
                     </button>
-                    <button
-                        className={`${styles.tab} ${tab === 'analytics' ? styles.tabActive : ''}`}
-                        onClick={() => setTab('analytics')}
-                    >
-                        <BarChart className={styles.tabIcon} />
-                        Estadísticas
-                    </button>
+                    {canViewAnalytics && (
+                        <button
+                            className={`${styles.tab} ${tab === 'analytics' ? styles.tabActive : ''}`}
+                            onClick={() => setTab('analytics')}
+                        >
+                            <BarChart className={styles.tabIcon} />
+                            Estadísticas
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -242,9 +248,15 @@ const ProcessAnalyticsPage = () =>
             )}
 
             {tab === 'calendar'  && <TimeCalendar onEntryCreated={handleEntryCreated} />}
-            {tab === 'analytics' && <TimeAnalytics />}
+            {tab === 'analytics' && canViewAnalytics && <TimeAnalytics />}
         </div>
     );
 };
 
-export default ProcessAnalyticsPage;
+const ProcessAnalyticsPageGuarded = () => (
+    <PermissionGuard permission="time_entries:view">
+        <ProcessAnalyticsPage/>
+    </PermissionGuard>
+);
+
+export default ProcessAnalyticsPageGuarded;

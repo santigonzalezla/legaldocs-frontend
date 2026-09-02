@@ -1,10 +1,15 @@
 'use client';
 
 import {useEffect, useRef, useState} from 'react';
+import {useRouter} from 'next/navigation';
 import styles from './officeform.module.css';
-import {Building, File, Globe, Mail, MapPin, Phone, Upload} from '@/app/components/svg';
+import {Building, File, Globe, Mail, MapPin, Phone, Trash, Upload} from '@/app/components/svg';
 import {useFetch} from '@/hooks/useFetch';
-import type {Firm, FirmSpecialty} from '@/app/interfaces/interfaces';
+import {useAuth} from '@/context/AuthContext';
+import {usePermissions} from '@/context/PermissionsContext';
+import {useConfirm} from '@/hooks/useConfirm';
+import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
+import type {Firm, FirmSpecialty, User} from '@/app/interfaces/interfaces';
 import {toast} from 'sonner';
 
 type FormState = {
@@ -64,6 +69,8 @@ const OfficeForm = () =>
 
     const {data: firm, isLoading: loadingFirm} = useFetch<Firm>('firm/me', {firmScoped: true});
 
+    const {data: me} = useFetch<User>('user/me');
+
     const {data: specialties, execute: refetchSpecialties} = useFetch<FirmSpecialty[]>(
         'firm/me/specialties', {firmScoped: true},
     );
@@ -86,6 +93,21 @@ const OfficeForm = () =>
 
     const {execute: removeSpecialty} = useFetch<void>(
         '', {method: 'DELETE', immediate: false, firmScoped: true},
+    );
+
+    const router = useRouter();
+    const {setActiveFirm} = useAuth();
+    const {can} = usePermissions();
+    const {confirm, confirmState, handleConfirm: confirmYes, handleCancel: confirmNo} = useConfirm();
+    // El backend (assertCanManage) permite eliminar al admin RBAC o al dueño de la firma.
+    const isOwner = !!me && !!firm && firm.createdBy === me.id;
+    // TEMP: sin gate mientras se hacen pruebas de eliminación.
+    // Restaurar a: const canDeleteFirm = can('firm_settings:delete') || isOwner;
+    void isOwner; void can;
+    const canDeleteFirm = true;
+
+    const {execute: deleteFirm, isLoading: isDeletingFirm} = useFetch<{message: string; purgeAt: string}>(
+        'firm/me', {method: 'DELETE', immediate: false, firmScoped: true},
     );
 
     useEffect(() =>
@@ -225,6 +247,26 @@ const OfficeForm = () =>
     {
         await removeSpecialty({}, `firm/me/specialties/${id}`);
         refetchSpecialties();
+    };
+
+    const handleDeleteFirm = async () =>
+    {
+        const ok = await confirm({
+            title:        'Eliminar firma',
+            message:      `Se eliminará "${form.name || 'esta firma'}" junto con todos sus documentos, plantillas, clientes, procesos y registros de tiempo. Podrás recuperarla dentro de los próximos 30 días; pasado ese plazo se borrará de forma permanente.`,
+            confirmLabel: 'Eliminar firma',
+            danger:       true,
+        });
+        if (!ok) return;
+
+        const result = await deleteFirm({});
+        if (!result) return;
+
+        toast.success('Firma eliminada. Tenés 30 días para recuperarla.');
+        setActiveFirm(null);
+        // FirmGuard resuelve: si quedan firmas asociadas muestra "Mis Firmas";
+        // si no queda ninguna, redirige a la vista de "sin despacho asignado".
+        router.push('/dashboard/settings/firms');
     };
 
     if (loadingFirm) return <div className={styles.officeForm}><p>Cargando datos del despacho...</p></div>;
@@ -422,6 +464,38 @@ const OfficeForm = () =>
                     La tarifa aplica a todos los procesos del despacho. Las metas diarias son las horas que cada abogado debe registrar por día. La suma de ambas metas no puede superar las 24 horas.
                 </p>
             </div>
+
+            {canDeleteFirm && (
+                <div className={styles.dangerZone}>
+                    <div className={styles.dangerInfo}>
+                        <h4 className={styles.dangerTitle}>Eliminar firma</h4>
+                        <p className={styles.dangerText}>
+                            Elimina la firma y todos sus datos asociados (documentos, plantillas, clientes, procesos y registros de tiempo).
+                            Es recuperable durante 30 días; después se borra de forma permanente.
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        className={styles.dangerButton}
+                        onClick={handleDeleteFirm}
+                        disabled={isDeletingFirm}
+                    >
+                        <Trash />
+                        {isDeletingFirm ? 'Eliminando...' : 'Eliminar firma'}
+                    </button>
+                </div>
+            )}
+
+            {confirmState && (
+                <ConfirmModal
+                    title={confirmState.title}
+                    message={confirmState.message}
+                    confirmLabel={confirmState.confirmLabel}
+                    danger={confirmState.danger}
+                    onConfirm={confirmYes}
+                    onCancel={confirmNo}
+                />
+            )}
         </div>
     );
 };

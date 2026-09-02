@@ -1,26 +1,25 @@
 'use client';
 
 import {useEffect, useState} from 'react';
-import {useRouter} from 'next/navigation';
 import {useAuth} from '@/context/AuthContext';
 import {API_BASE_URL} from '@/lib/constants';
+import NoFirmAssigned from './NoFirmAssigned';
 
 interface FirmBasic { id: string; name: string; }
 
 const FirmGuard = ({children}: {children: React.ReactNode}) =>
 {
     const {isAuthenticated, isHydrated, accessToken, activeFirmId, setActiveFirm} = useAuth();
-    const router = useRouter();
-    const [ready, setReady] = useState(false);
+    const [ready,  setReady]  = useState(false);
+    const [noFirm, setNoFirm] = useState(false);
 
     useEffect(() =>
     {
         if (!isHydrated || !isAuthenticated) return;
 
-        // Ya tiene firma seleccionada — listo
-        if (activeFirmId) { setReady(true); return; }
+        let cancelled = false;
 
-        const checkFirms = async () =>
+        const resolveFirm = async () =>
         {
             try
             {
@@ -28,30 +27,44 @@ const FirmGuard = ({children}: {children: React.ReactNode}) =>
                     headers: {Authorization: `Bearer ${accessToken}`},
                 });
 
-                if (!res.ok) { router.replace('/onboarding'); return; }
+                if (cancelled) return;
+
+                if (!res.ok) { setNoFirm(true); return; }
 
                 const firms: FirmBasic[] = await res.json();
 
                 if (firms.length === 0)
                 {
-                    router.replace('/onboarding');
+                    setActiveFirm(null);
+                    setNoFirm(true);
+                    return;
                 }
-                else
+
+                // Si la firma activa fue eliminada o perdiste acceso, cambiá a otra
+                // firma asociada en vez de dejar un id colgado que rompe cada request.
+                const stillValid = activeFirmId && firms.some(f => f.id === activeFirmId);
+                if (!stillValid)
                 {
                     setActiveFirm(firms[0].id);
-                    setReady(true);
+                    return; // el cambio de activeFirmId vuelve a disparar el effect
                 }
+
+                setNoFirm(false);
+                setReady(true);
             }
             catch
             {
-                router.replace('/onboarding');
+                if (!cancelled) setNoFirm(true);
             }
         };
 
-        checkFirms();
-    }, [isHydrated, isAuthenticated, accessToken, activeFirmId, setActiveFirm, router]);
+        resolveFirm();
+        return () => { cancelled = true; };
+    }, [isHydrated, isAuthenticated, accessToken, activeFirmId, setActiveFirm]);
 
-    if (!isHydrated || !isAuthenticated || (!ready && !activeFirmId)) return null;
+    if (!isHydrated || !isAuthenticated) return null;
+    if (noFirm) return <NoFirmAssigned/>;
+    if (!ready) return null;
 
     return <>{children}</>;
 };

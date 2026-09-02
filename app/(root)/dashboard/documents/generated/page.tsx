@@ -12,6 +12,7 @@ import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
 import DocumentStatCard   from '@/app/components/documents/generated/documentstatscard/DocumentStatsCard';
 import DocumentFilters    from '@/app/components/documents/shared/documentfilters/DocumentFilters';
 import DocumentList       from '@/app/components/documents/generated/documentlist/DocumentList';
+import {PermissionGuard}  from '@/app/components/auth/PermissionGuard';
 
 const statusOptions = [
     {value: 'all',                        label: 'Todos los estados'},
@@ -127,4 +128,10 @@ const Generated = () =>
     );
 };
 
-export default Generated;
+const GeneratedGuarded = () => (
+    <PermissionGuard permission="documents:view">
+        <Generated/>
+    </PermissionGuard>
+);
+
+export default GeneratedGuarded;

@@ -31,6 +31,7 @@ import {
 import React, {useEffect, useState} from "react";
 import Image from "next/image";
 import {useFetch} from "@/hooks/useFetch";
+import {usePermissions} from "@/context/PermissionsContext";
 import type {DocumentTemplate, LegalBranch, PaginatedResponse} from "@/app/interfaces/interfaces";
 
 interface SubOption
@@ -46,6 +47,9 @@ interface SidebarOptionType
     link: string;
     category: string;
     suboptions?: SubOption[];
+    // Sin permission -> visible para cualquier miembro autenticado (self-service,
+    // recursos informativos, o datos compartidos como "Mis Firmas").
+    permission?: string | string[];
 }
 
 interface OptionGroup
@@ -68,6 +72,13 @@ const Sidebar = () =>
 {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [expandedOption, setExpandedOption] = useState<string | null>(null);
+
+    const {can, canAny} = usePermissions();
+    const hasAccess = (permission?: string | string[]): boolean =>
+    {
+        if (!permission) return true;
+        return Array.isArray(permission) ? canAny(permission) : can(permission);
+    };
 
     const {data: branchesData} = useFetch<LegalBranch[]>('branch?isActive=true&limit=50', {firmScoped: true});
     const branches = branchesData ?? [];
@@ -97,21 +108,23 @@ const Sidebar = () =>
         setExpandedOption(prev => (prev === optionItem ? null : optionItem));
     };
 
-    const generatorOptions: SidebarOptionType[] = [...branches]
-        .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-        .filter(b => templates.some(t => t.branches.some(br => br.id === b.id)))
-        .map(b => ({
-            item: b.name,
-            icon: BRANCH_ICONS[b.slug] ?? <File/>,
-            link: `/dashboard/generator/${b.slug}`,
-            category: 'generator',
-            suboptions: templates
-                .filter(t => t.branches.some(br => br.id === b.id))
-                .map(t => ({
-                    item: t.title,
-                    link: `/dashboard/generator/${b.slug}/${t.documentType}`
-                }))
-        }));
+    const generatorOptions: SidebarOptionType[] = can('documents:create')
+        ? [...branches]
+            .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+            .filter(b => templates.some(t => t.branches.some(br => br.id === b.id)))
+            .map(b => ({
+                item: b.name,
+                icon: BRANCH_ICONS[b.slug] ?? <File/>,
+                link: `/dashboard/generator/${b.slug}`,
+                category: 'generator',
+                suboptions: templates
+                    .filter(t => t.branches.some(br => br.id === b.id))
+                    .map(t => ({
+                        item: t.title,
+                        link: `/dashboard/generator/${b.slug}/${t.documentType}`
+                    }))
+            }))
+        : [];
 
     const optionGroups: OptionGroup[] = [
         {
@@ -127,13 +140,14 @@ const Sidebar = () =>
         {
             title: "Gestión de Procesos",
             options: [
-                {item: "Clientes", icon: <Users/>, link: "/dashboard/clients", category: "processes"},
-                {item: "Procesos Legales", icon: <Briefcase/>, link: "/dashboard/processes", category: "processes"},
+                {item: "Clientes", icon: <Users/>, link: "/dashboard/clients", category: "processes", permission: "clients:view"},
+                {item: "Procesos Legales", icon: <Briefcase/>, link: "/dashboard/processes", category: "processes", permission: "processes:view"},
                 {
                     item: "Análisis de Tiempo",
                     icon: <BarChart/>,
                     link: "/dashboard/processes/analytics",
-                    category: "processes"
+                    category: "processes",
+                    permission: "time_entries:view"
                 }
             ]
         },
@@ -144,28 +158,37 @@ const Sidebar = () =>
                     item: "Documentos Generados",
                     icon: <FileCheck/>,
                     link: "/dashboard/documents/generated",
-                    category: "documents"
+                    category: "documents",
+                    permission: "documents:view"
                 },
                 {
                     item: "Plantillas Personalizadas",
                     icon: <ScrollText/>,
                     link: "/dashboard/settings/templates",
-                    category: "documents"
+                    category: "documents",
+                    permission: "templates:view"
                 },
-                {item: "Borradores", icon: <File/>, link: "/dashboard/documents/drafts", category: "documents"},
-                {item: "Favoritos", icon: <Star/>, link: "/dashboard/documents/favorites", category: "documents"},
-                {item: "Papelera", icon: <Trash/>, link: "/dashboard/documents/trash", category: "documents"}
+                {item: "Borradores", icon: <File/>, link: "/dashboard/documents/drafts", category: "documents", permission: "documents:view"},
+                {item: "Favoritos", icon: <Star/>, link: "/dashboard/documents/favorites", category: "documents", permission: "documents:view"},
+                {item: "Papelera", icon: <Trash/>, link: "/dashboard/documents/trash", category: "documents", permission: "documents:view"}
             ]
         },
         {
             title: "Configuración",
             options: [
-                {item: "Ramas Jurídicas", icon: <Globe/>, link: "/dashboard/settings/branches", category: "settings"},
+                {
+                    item: "Ramas Jurídicas",
+                    icon: <Globe/>,
+                    link: "/dashboard/settings/branches",
+                    category: "settings",
+                    permission: ["branches:create", "branches:edit", "branches:delete"]
+                },
                 {
                     item: "Datos de la Firma",
                     icon: <Briefcase/>,
                     link: "/dashboard/settings/office",
-                    category: "settings"
+                    category: "settings",
+                    permission: ["firm_settings:view", "firm_settings:edit"]
                 },
                 {item: "Mis Firmas", icon: <Crown/>, link: "/dashboard/settings/firms", category: "settings"},
                 {
@@ -189,7 +212,8 @@ const Sidebar = () =>
                     item: "Biblioteca Jurídica",
                     icon: <BookOpen/>,
                     link: "/dashboard/resources/library",
-                    category: "resources"
+                    category: "resources",
+                    permission: "library:view"
                 },
                 {
                     item: "Actualizaciones Normativas",
@@ -204,22 +228,28 @@ const Sidebar = () =>
         {
             title: "Suscripción",
             options: [
-                {item: "Plan Actual", icon: <Card/>, link: "/dashboard/subscription/current", category: "subscription"},
+                {item: "Plan Actual", icon: <Card/>, link: "/dashboard/subscription/current", category: "subscription", permission: "firm_settings:view"},
                 {
                     item: "Historial de Pagos",
                     icon: <BarChart/>,
                     link: "/dashboard/subscription/history",
-                    category: "subscription"
+                    category: "subscription",
+                    permission: "firm_settings:view"
                 },
                 {
                     item: "Upgrade de Plan",
                     icon: <Star/>,
                     link: "/dashboard/subscription/upgrade",
-                    category: "subscription"
+                    category: "subscription",
+                    permission: "firm_settings:view"
                 }
             ]
         }
     ];
+
+    const visibleGroups = optionGroups
+        .map(group => ({...group, options: group.options.filter(option => hasAccess(option.permission))}))
+        .filter(group => group.options.length > 0);
 
     return (
         <div className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ""}`}>
@@ -236,7 +266,7 @@ const Sidebar = () =>
 
             <div className={styles.scrollContainer}>
                 <div className={styles.options}>
-                    {optionGroups.filter(g => g.options.length > 0).map((group, groupIndex) => (
+                    {visibleGroups.map((group, groupIndex) => (
                         <div key={groupIndex} className={styles.optionGroup}>
                             {!isCollapsed && (
                                 <h3 className={styles.groupTitle}>{group.title}</h3>

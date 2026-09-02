@@ -298,8 +298,81 @@
     color: var(--text-secondary);
 }
 
+/* Danger zone */
+.dangerZone {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid #fca5a5;
+    border-radius: 10px;
+    background: rgba(239, 68, 68, 0.05);
+}
+
+.dangerInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.dangerTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #dc2626;
+    margin: 0;
+}
+
+.dangerText {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    margin: 0;
+    max-width: 46ch;
+    line-height: 1.5;
+}
+
+.dangerButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    background: #dc2626;
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dangerButton:hover:not(:disabled) {
+    background: #b91c1c;
+    transform: translateY(-1px);
+}
+
+.dangerButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.dangerButton svg {
+    width: 16px;
+    height: 16px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
+    .dangerZone {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dangerButton {
+        justify-content: center;
+    }
+
     .logoSection {
         flex-direction: column;
         text-align: center;

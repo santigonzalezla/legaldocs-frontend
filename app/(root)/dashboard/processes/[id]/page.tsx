@@ -6,7 +6,7 @@ import {useParams, useRouter} from 'next/navigation';
 import {useFetch} from '@/hooks/useFetch';
 import {toast} from 'sonner';
 import {ArrowLeft, Briefcase, Building, Calendar, DollarSign, Edit, Plus, Trash, User} from '@/app/components/svg';
-import type {Client, Firm, LegalBranch, LegalProcess, ProcessValueEntry, TimeEntry} from '@/app/interfaces/interfaces';
+import type {Firm, LegalBranch, LegalProcess, ProcessClientSummary, ProcessValueEntry, TimeEntry} from '@/app/interfaces/interfaces';
 import {useConfirm} from '@/hooks/useConfirm';
 import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
 import TimeTracker from '@/app/components/processes/timetracker/TimeTracker';
@@ -15,6 +15,8 @@ import BillingPanel from '@/app/components/processes/billingpanel/BillingPanel';
 import AddValueEntryModal from '@/app/components/processes/addvalueentrymodal/AddValueEntryModal';
 import {BillableType, ClientType, ProcessStatus} from '@/app/interfaces/enums';
 import {STATUS_LABEL} from '@/app/components/processes/processgrid/ProcessGrid';
+import {PermissionGuard} from '@/app/components/auth/PermissionGuard';
+import {usePermissions} from '@/context/PermissionsContext';
 
 const formatCOP = (value: number) =>
     new Intl.NumberFormat('es-CO', {style: 'currency', currency: 'COP', maximumFractionDigits: 0}).format(value);
@@ -22,10 +24,10 @@ const formatCOP = (value: number) =>
 const formatDate = (d: string | null) =>
     d ? new Date(d).toLocaleDateString('es-ES', {day: '2-digit', month: 'long', year: 'numeric'}) : '—';
 
-const clientName = (c: Client) =>
-    c.type === ClientType.COMPANY
-        ? (c.companyName ?? '—')
-        : [c.firstName, c.lastName].filter(Boolean).join(' ') || '—';
+const clientName = (client: ProcessClientSummary) =>
+    client.type === ClientType.COMPANY
+        ? (client.companyName ?? '—')
+        : [client.firstName, client.lastName].filter(Boolean).join(' ') || '—';
 
 const STATUS_DOT: Record<ProcessStatus, string> = {
     [ProcessStatus.ACTIVE]:    '#10b981',
@@ -38,6 +40,7 @@ const ProcessDetailPage = () =>
 {
     const {id}   = useParams<{id: string}>();
     const router = useRouter();
+    const {can}  = usePermissions();
     const [showBilling, setShowBilling] = useState(false);
 
     const [showAddEntry, setShowAddEntry] = useState(false);
@@ -46,22 +49,20 @@ const ProcessDetailPage = () =>
     const {data: process, isLoading, execute: refetchProcess} =
         useFetch<LegalProcess>(`process/${id}`, {firmScoped: true});
 
+    const client = process?.client ?? null;
+
     const {data: firm} =
         useFetch<Firm>('firm/me', {firmScoped: true});
-
-    const {data: client} =
-        useFetch<Client>(process ? `client/${process.clientId}` : '', {
-            firmScoped: true,
-            immediate:  !!process,
-        });
 
     const {data: branches} =
         useFetch<LegalBranch[]>('branch?isActive=true&limit=50', {firmScoped: true});
 
     const branch = branches?.find(branchItem => branchItem.id === process?.branchId);
 
+    const canViewTimeEntries = can('time_entries:view');
+
     const {data: entries, execute: refetchTimeEntries} =
-        useFetch<TimeEntry[]>(`time-entry?processId=${id}`, {firmScoped: true});
+        useFetch<TimeEntry[]>(`time-entry?processId=${id}`, {firmScoped: true, immediate: canViewTimeEntries});
 
     const {execute: deleteProcess} =
         useFetch<void>('', {method: 'DELETE', immediate: false, firmScoped: true});
@@ -139,9 +140,11 @@ const ProcessDetailPage = () =>
                 </div>
 
                 <div className={styles.titleActions}>
-                    <button className={styles.billingBtn} onClick={() => setShowBilling(true)}>
-                        <DollarSign /> Cuenta de cobro
-                    </button>
+                    {canViewTimeEntries && (
+                        <button className={styles.billingBtn} onClick={() => setShowBilling(true)}>
+                            <DollarSign /> Cuenta de cobro
+                        </button>
+                    )}
                     <button className={styles.editBtn} onClick={() => router.push(`/dashboard/processes/${id}/edit`)}>
                         <Edit /> Editar
                     </button>
@@ -156,15 +159,24 @@ const ProcessDetailPage = () =>
                 <div className={styles.infoCard}>
                     <span className={styles.infoCardLabel}>Cliente</span>
                     {client ? (
-                        <button
-                            className={styles.clientLink}
-                            onClick={() => router.push(`/dashboard/clients/${client.id}`)}
-                        >
-                            <div className={styles.clientAvatar}>
-                                {client.type === ClientType.COMPANY ? <Building /> : <User />}
+                        can('clients:view') ? (
+                            <button
+                                className={styles.clientLink}
+                                onClick={() => router.push(`/dashboard/clients/${client.id}`)}
+                            >
+                                <div className={styles.clientAvatar}>
+                                    {client.type === ClientType.COMPANY ? <Building /> : <User />}
+                                </div>
+                                <span>{clientName(client)}</span>
+                            </button>
+                        ) : (
+                            <div className={styles.clientLink} style={{cursor: 'default'}}>
+                                <div className={styles.clientAvatar}>
+                                    {client.type === ClientType.COMPANY ? <Building /> : <User />}
+                                </div>
+                                <span>{clientName(client)}</span>
                             </div>
-                            <span>{clientName(client)}</span>
-                        </button>
+                        )
                     ) : (
                         <span className={styles.infoValue}>—</span>
                     )}
@@ -286,7 +298,7 @@ const ProcessDetailPage = () =>
                 )}
             </div>
 
-            <TimeTracker processId={process.id} onEntryCreated={refetchTimeEntries} />
+            {canViewTimeEntries && <TimeTracker processId={process.id} onEntryCreated={refetchTimeEntries} />}
 
             <ProcessDocuments processId={process.id} />
 
@@ -343,4 +355,10 @@ const ProcessDetailPage = () =>
     );
 };
 
-export default ProcessDetailPage;
+const ProcessDetailPageGuarded = () => (
+    <PermissionGuard permission="processes:view">
+        <ProcessDetailPage/>
+    </PermissionGuard>
+);
+
+export default ProcessDetailPageGuarded;

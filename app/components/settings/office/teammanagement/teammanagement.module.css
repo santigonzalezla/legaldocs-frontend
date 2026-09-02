@@ -369,10 +369,21 @@
     gap: 0.5rem;
 }
 
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
 .label {
     font-size: 0.875rem;
     font-weight: 500;
     color: var(--text-primary);
+}
+
+.optional {
+    font-weight: 400;
+    color: var(--text-secondary);
 }
 
 .input,

@@ -4,25 +4,27 @@ import {useEffect, useRef, useState} from 'react';
 import {Crown, Shield, User as UserIcon, Users, Mail, Phone, MoreHorizontal, UserPlus, X} from '@/app/components/svg';
 import styles from './teammanagement.module.css';
 import {useFetch} from '@/hooks/useFetch';
-import type {FirmMember, User} from '@/app/interfaces/interfaces';
-import {FirmMemberRole, FirmMemberStatus} from '@/app/interfaces/enums';
+import type {FirmMember, FirmRole, User} from '@/app/interfaces/interfaces';
+import {FirmMemberStatus} from '@/app/interfaces/enums';
 import {toast} from 'sonner';
 import {useConfirm} from '@/hooks/useConfirm';
 import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
 
-// Backend populates user relation on active members
+// Backend populates user y firmRole relations en los miembros
 type MemberWithUser = FirmMember & {
     user?: {firstName: string; lastName: string; email: string; phone: string | null};
 };
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-const ROLE_CONFIG: Record<FirmMemberRole, {label: string; color: string}> = {
-    [FirmMemberRole.ADMIN]:     {label: 'Administrador', color: '#ef4444'},
-    [FirmMemberRole.LAWYER]:    {label: 'Abogado',       color: '#3b82f6'},
-    [FirmMemberRole.ASSISTANT]: {label: 'Asistente',     color: '#10b981'},
-    [FirmMemberRole.INTERN]:    {label: 'Practicante',   color: '#f59e0b'},
+const ROLE_COLOR: Record<string, string> = {
+    admin:   '#ef4444',
+    abogado: '#3b82f6',
+    gerente: '#10b981',
 };
+const DEFAULT_ROLE_COLOR = '#8b5cf6'; // roles custom
+
+const roleColor = (slug: string | null | undefined) => (slug && ROLE_COLOR[slug]) ?? DEFAULT_ROLE_COLOR;
 
 const STATUS_CONFIG: Record<FirmMemberStatus, {label: string; color: string}> = {
     [FirmMemberStatus.ACTIVE]:   {label: 'Activo',    color: '#10b981'},
@@ -30,10 +32,10 @@ const STATUS_CONFIG: Record<FirmMemberStatus, {label: string; color: string}> = 
     [FirmMemberStatus.PENDING]:  {label: 'Pendiente', color: '#f59e0b'},
 };
 
-const roleIcon = (role: FirmMemberRole) =>
+const roleIcon = (slug: string | null | undefined) =>
 {
-    if (role === FirmMemberRole.ADMIN)  return <Crown />;
-    if (role === FirmMemberRole.LAWYER) return <Shield />;
+    if (slug === 'admin')   return <Crown />;
+    if (slug === 'abogado') return <Shield />;
     return <UserIcon />;
 };
 
@@ -49,13 +51,15 @@ const formatDate = (d: string | null) =>
 
 const TeamManagement = () =>
 {
-    const [openMenuId,     setOpenMenuId]     = useState<string | null>(null);
-    const [menuUp,         setMenuUp]         = useState(false);
-    const [showInvite,     setShowInvite]     = useState(false);
-    const [inviteEmail,    setInviteEmail]    = useState('');
-    const [inviteRole,     setInviteRole]     = useState<FirmMemberRole>(FirmMemberRole.LAWYER);
-    const [changeRoleFor,  setChangeRoleFor]  = useState<MemberWithUser | null>(null);
-    const [newRole,        setNewRole]        = useState<FirmMemberRole>(FirmMemberRole.LAWYER);
+    const [openMenuId,      setOpenMenuId]      = useState<string | null>(null);
+    const [menuUp,          setMenuUp]          = useState(false);
+    const [showInvite,      setShowInvite]      = useState(false);
+    const [inviteEmail,     setInviteEmail]     = useState('');
+    const [inviteFirstName, setInviteFirstName] = useState('');
+    const [inviteLastName,  setInviteLastName]  = useState('');
+    const [inviteFirmRoleId, setInviteFirmRoleId] = useState('');
+    const [changeRoleFor,   setChangeRoleFor]   = useState<MemberWithUser | null>(null);
+    const [newFirmRoleId,   setNewFirmRoleId]   = useState('');
     const menuRef = useRef<HTMLDivElement>(null);
 
     // ── API ──────────────────────────────────────────────────────────────────
@@ -63,6 +67,9 @@ const TeamManagement = () =>
 
     const {data: members, isLoading, execute: refetch} =
         useFetch<MemberWithUser[]>('firm/me/members', {firmScoped: true});
+
+    const {data: firmRoles} =
+        useFetch<FirmRole[]>('permissions/firm-roles', {firmScoped: true});
 
     const {execute: inviteMember, isLoading: isInviting} =
         useFetch<FirmMember>('firm/me/members', {method: 'POST', immediate: false, firmScoped: true});
@@ -74,6 +81,15 @@ const TeamManagement = () =>
         useFetch<void>('', {method: 'DELETE', immediate: false, firmScoped: true});
 
     const {confirm, confirmState, handleConfirm, handleCancel} = useConfirm();
+
+    const roles = firmRoles ?? [];
+
+    // Default de invitación: rol Abogado si existe, si no el primero de la lista
+    useEffect(() =>
+    {
+        if (inviteFirmRoleId || roles.length === 0) return;
+        setInviteFirmRoleId(roles.find(r => r.slug === 'abogado')?.id ?? roles[0].id);
+    }, [roles, inviteFirmRoleId]);
 
     // Close dropdown on outside click
     useEffect(() =>
@@ -91,19 +107,27 @@ const TeamManagement = () =>
     const handleInvite = async () =>
     {
         if (!inviteEmail.trim()) { toast.error('Ingresa un email.'); return; }
-        const result = await inviteMember({body: {email: inviteEmail.trim(), role: inviteRole}});
+        if (!inviteFirmRoleId) { toast.error('Seleccioná un rol.'); return; }
+        const result = await inviteMember({body: {
+            email: inviteEmail.trim(),
+            firmRoleId: inviteFirmRoleId,
+            ...(inviteFirstName.trim() && {firstName: inviteFirstName.trim()}),
+            ...(inviteLastName.trim()  && {lastName:  inviteLastName.trim()}),
+        }});
         if (!result) return;
-        toast.success(`Invitación enviada a ${inviteEmail}.`);
+        toast.success(`Listo. ${inviteEmail} ya tiene acceso al despacho y recibirá un correo con las instrucciones de ingreso.`);
         setInviteEmail('');
+        setInviteFirstName('');
+        setInviteLastName('');
         setShowInvite(false);
         refetch();
     };
 
     const handleChangeRole = async () =>
     {
-        if (!changeRoleFor) return;
+        if (!changeRoleFor || !newFirmRoleId) return;
         const result = await updateMember(
-            {body: {role: newRole}},
+            {body: {firmRoleId: newFirmRoleId}},
             `firm/me/members/${changeRoleFor.id}`,
         );
         if (!result) return;
@@ -128,10 +152,10 @@ const TeamManagement = () =>
         return aIsMe + bIsMe;
     });
     const counts = {
-        total:     list.length,
-        admin:     list.filter(m => m.role === FirmMemberRole.ADMIN).length,
-        lawyer:    list.filter(m => m.role === FirmMemberRole.LAWYER).length,
-        assistant: list.filter(m => m.role === FirmMemberRole.ASSISTANT || m.role === FirmMemberRole.INTERN).length,
+        total:    list.length,
+        admin:    list.filter(m => m.firmRole?.slug === 'admin').length,
+        active:   list.filter(m => m.status === FirmMemberStatus.ACTIVE).length,
+        pending:  list.filter(m => m.status === FirmMemberStatus.PENDING).length,
     };
 
     return (
@@ -140,10 +164,10 @@ const TeamManagement = () =>
             {/* Stats */}
             <div className={styles.statsSection}>
                 {[
-                    {label: 'Total Miembros',   value: counts.total,     color: '#3b82f6', icon: <Users />},
-                    {label: 'Administradores',   value: counts.admin,     color: '#ef4444', icon: <Crown />},
-                    {label: 'Abogados',          value: counts.lawyer,    color: '#3b82f6', icon: <Shield />},
-                    {label: 'Asistentes',        value: counts.assistant, color: '#10b981', icon: <UserIcon />},
+                    {label: 'Total Miembros',        value: counts.total,   color: '#3b82f6', icon: <Users />},
+                    {label: 'Administradores',        value: counts.admin,   color: '#ef4444', icon: <Crown />},
+                    {label: 'Activos',                value: counts.active,  color: '#10b981', icon: <Shield />},
+                    {label: 'Invitaciones Pendientes', value: counts.pending, color: '#f59e0b', icon: <UserIcon />},
                 ].map(s => (
                     <div key={s.label} className={styles.statCard}>
                         <div className={styles.statIcon} style={{backgroundColor: `${s.color}15`, color: s.color}}>
@@ -172,7 +196,9 @@ const TeamManagement = () =>
                 <div className={styles.membersList} ref={menuRef}>
                     {list.map(member =>
                     {
-                        const role      = ROLE_CONFIG[member.role]   ?? {label: member.role,   color: '#6b7280'};
+                        const roleName  = member.firmRole?.name ?? 'Sin rol asignado';
+                        const roleSlug  = member.firmRole?.slug ?? null;
+                        const roleClr   = roleColor(roleSlug);
                         const status    = STATUS_CONFIG[member.status] ?? {label: member.status, color: '#6b7280'};
                         const isMenuOpen = openMenuId === member.id;
                         const isMe      = me?.id && member.userId === me.id;
@@ -205,8 +231,8 @@ const TeamManagement = () =>
                                 {/* Badges */}
                                 <div className={styles.memberBadges}>
                                     <span className={styles.roleBadge}
-                                        style={{backgroundColor: `${role.color}15`, color: role.color}}>
-                                        {roleIcon(member.role)} {role.label}
+                                        style={{backgroundColor: `${roleClr}15`, color: roleClr}}>
+                                        {roleIcon(roleSlug)} {roleName}
                                     </span>
                                     <span className={styles.statusBadge}
                                         style={{backgroundColor: `${status.color}15`, color: status.color}}>
@@ -244,7 +270,7 @@ const TeamManagement = () =>
                                                 <button className={styles.dropdownItem}
                                                     onClick={() =>
                                                     {
-                                                        setNewRole(member.role);
+                                                        setNewFirmRoleId(member.firmRoleId ?? '');
                                                         setChangeRoleFor(member);
                                                         setOpenMenuId(null);
                                                     }}>
@@ -273,6 +299,20 @@ const TeamManagement = () =>
                             <button className={styles.closeButton} onClick={() => setShowInvite(false)}>×</button>
                         </div>
                         <div className={styles.modalContent}>
+                            <div className={styles.formRow}>
+                                <div className={styles.formGroup}>
+                                    <label className={styles.label}>Nombre <span className={styles.optional}>(opcional)</span></label>
+                                    <input type="text" className={styles.input}
+                                        value={inviteFirstName} onChange={e => setInviteFirstName(e.target.value)}
+                                        placeholder="Juan" />
+                                </div>
+                                <div className={styles.formGroup}>
+                                    <label className={styles.label}>Apellido <span className={styles.optional}>(opcional)</span></label>
+                                    <input type="text" className={styles.input}
+                                        value={inviteLastName} onChange={e => setInviteLastName(e.target.value)}
+                                        placeholder="Pérez" />
+                                </div>
+                            </div>
                             <div className={styles.formGroup}>
                                 <label className={styles.label}>Email</label>
                                 <input type="email" className={styles.input}
@@ -282,12 +322,11 @@ const TeamManagement = () =>
                             </div>
                             <div className={styles.formGroup}>
                                 <label className={styles.label}>Rol</label>
-                                <select className={styles.select} value={inviteRole}
-                                    onChange={e => setInviteRole(e.target.value as FirmMemberRole)}>
-                                    <option value={FirmMemberRole.INTERN}>Practicante</option>
-                                    <option value={FirmMemberRole.ASSISTANT}>Asistente</option>
-                                    <option value={FirmMemberRole.LAWYER}>Abogado</option>
-                                    <option value={FirmMemberRole.ADMIN}>Administrador</option>
+                                <select className={styles.select} value={inviteFirmRoleId}
+                                    onChange={e => setInviteFirmRoleId(e.target.value)}>
+                                    {roles.map(r => (
+                                        <option key={r.id} value={r.id}>{r.name}</option>
+                                    ))}
                                 </select>
                             </div>
                         </div>
@@ -318,12 +357,11 @@ const TeamManagement = () =>
                             </p>
                             <div className={styles.formGroup}>
                                 <label className={styles.label}>Nuevo rol</label>
-                                <select className={styles.select} value={newRole}
-                                    onChange={e => setNewRole(e.target.value as FirmMemberRole)}>
-                                    <option value={FirmMemberRole.INTERN}>Practicante</option>
-                                    <option value={FirmMemberRole.ASSISTANT}>Asistente</option>
-                                    <option value={FirmMemberRole.LAWYER}>Abogado</option>
-                                    <option value={FirmMemberRole.ADMIN}>Administrador</option>
+                                <select className={styles.select} value={newFirmRoleId}
+                                    onChange={e => setNewFirmRoleId(e.target.value)}>
+                                    {roles.map(r => (
+                                        <option key={r.id} value={r.id}>{r.name}</option>
+                                    ))}
                                 </select>
                             </div>
                         </div>
@@ -332,7 +370,7 @@ const TeamManagement = () =>
                                 Cancelar
                             </button>
                             <button className={styles.inviteConfirmButton} onClick={handleChangeRole}
-                                disabled={isUpdating || newRole === changeRoleFor.role}>
+                                disabled={isUpdating || !newFirmRoleId || newFirmRoleId === changeRoleFor.firmRoleId}>
                                 {isUpdating ? 'Guardando...' : 'Guardar Cambio'}
                             </button>
                         </div>

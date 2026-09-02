@@ -5,9 +5,10 @@ import {createPortal} from 'react-dom';
 import styles from './timecalendar.module.css';
 import {useFetch} from '@/hooks/useFetch';
 import {ArrowLeft, ArrowGo, Briefcase, Clock, Plus, Trash, User, X} from '@/app/components/svg';
-import type {Client, TimeEntry, LegalProcess, PaginatedResponse} from '@/app/interfaces/interfaces';
-import {BillableType, ClientType} from '@/app/interfaces/enums';
+import type {ClientPickerOption, TimeEntry, LegalProcess, PaginatedResponse} from '@/app/interfaces/interfaces';
+import {BillableType} from '@/app/interfaces/enums';
 import {toast} from 'sonner';
+import {usePermissions} from '@/context/PermissionsContext';
 
 interface GoalAnalytics
 {
@@ -138,10 +139,7 @@ const calcDuration = (start: string, end: string): number =>
     return (eh * 60 + em) - (sh * 60 + sm);
 };
 
-const clientLabel = (c: Client) =>
-    c.type === ClientType.COMPANY
-        ? (c.companyName ?? '—')
-        : [c.firstName, c.lastName].filter(Boolean).join(' ') || '—';
+const clientLabel = (client: ClientPickerOption) => client.name;
 
 const memberInitials = (firstName: string, lastName: string) =>
     `${firstName[0] ?? ''}${lastName[0] ?? ''}`.toUpperCase();
@@ -223,10 +221,12 @@ const TimeCalendar = ({onEntryCreated}: {onEntryCreated?: () => void}) =>
     const [todayStr] = useState<string>(() => new Date().toISOString().split('T')[0]);
 
     const {data: rawEntries, execute: refetch} = useFetch<TimeEntry[]>('time-entry', {firmScoped: true});
-    const {data: goalData} = useFetch<GoalAnalytics>(`time-entry/analytics?date=${todayStr}`, {firmScoped: true});
+    const {data: goalData} = useFetch<GoalAnalytics>(`time-entry/my-goal-progress?date=${todayStr}`, {firmScoped: true});
     const {data: processRes} = useFetch<PaginatedResponse<LegalProcess>>('process?limit=100', {firmScoped: true});
-    const {data: clientRes} = useFetch<PaginatedResponse<Client>>('client?limit=100', {firmScoped: true});
-    const {data: membersData} = useFetch<MemberWithUser[]>('firm/me/members?status=ACTIVE&limit=100', {firmScoped: true});
+    const {data: clientOptions} = useFetch<ClientPickerOption[]>('process/client-options', {firmScoped: true});
+    const {can} = usePermissions();
+    const canViewTeam = can('team:view');
+    const {data: membersData} = useFetch<MemberWithUser[]>('firm/me/members?status=ACTIVE&limit=100', {firmScoped: true, immediate: canViewTeam});
     const {execute: saveEntry, isLoading: isSaving} = useFetch<TimeEntry>('time-entry/manual', {
         method: 'POST',
         immediate: false,
@@ -235,7 +235,7 @@ const TimeCalendar = ({onEntryCreated}: {onEntryCreated?: () => void}) =>
     const {execute: doDelete} = useFetch<void>('', {method: 'DELETE', immediate: false, firmScoped: true});
 
     const processes = useMemo(() => processRes?.data ?? [], [processRes]);
-    const clients   = useMemo(() => clientRes?.data ?? [], [clientRes]);
+    const clients   = useMemo(() => clientOptions ?? [], [clientOptions]);
     const members   = useMemo(() => membersData ?? [], [membersData]);
     const entries   = useMemo(() => rawEntries ?? [], [rawEntries]);
 
@@ -445,19 +445,19 @@ const TimeCalendar = ({onEntryCreated}: {onEntryCreated?: () => void}) =>
     const nowSlot = (today.getHours() - HOUR_START) * (60 / SLOT_MINS) + today.getMinutes() / SLOT_MINS;
     const nowVisible = nowSlot >= 0 && nowSlot < TOTAL_SLOTS;
 
-    const selectedClient  = clients.find(c => c.id === createModal?.clientId) ?? null;
-    const selectedProcess = processes.find(p => p.id === createModal?.processId) ?? null;
+    const selectedClient  = clients.find(client => client.id === createModal?.clientId) ?? null;
+    const selectedProcess = processes.find(process => process.id === createModal?.processId) ?? null;
 
     const filteredClients = clientSearch.trim()
-        ? clients.filter(c => clientLabel(c).toLowerCase().includes(clientSearch.toLowerCase()))
+        ? clients.filter(client => clientLabel(client).toLowerCase().includes(clientSearch.toLowerCase()))
         : clients;
 
     const clientFilteredProcesses = createModal?.clientId
-        ? processes.filter(p => p.clientId === createModal.clientId)
+        ? processes.filter(process => process.clientId === createModal.clientId)
         : processes;
 
     const filteredCases = caseSearch.trim()
-        ? clientFilteredProcesses.filter(p => p.title.toLowerCase().includes(caseSearch.toLowerCase()))
+        ? clientFilteredProcesses.filter(process => process.title.toLowerCase().includes(caseSearch.toLowerCase()))
         : clientFilteredProcesses;
 
     /* ── Goal summary (my stats) ─────────────────────────────────────────────── */
@@ -791,8 +791,8 @@ const TimeCalendar = ({onEntryCreated}: {onEntryCreated?: () => void}) =>
                                     value={toDateStr(createModal.date)}
                                     onChange={e =>
                                     {
-                                        const d = new Date(e.target.value + 'T12:00:00');
-                                        setCreateModal(m => m ? {...m, date: d} : m);
+                                        const selectedDate = new Date(e.target.value + 'T12:00:00');
+                                        setCreateModal(modal => modal ? {...modal, date: selectedDate} : modal);
                                     }}
                                 />
                             </div>
@@ -805,14 +805,14 @@ const TimeCalendar = ({onEntryCreated}: {onEntryCreated?: () => void}) =>
                                         type="time"
                                         className={styles.timeInput}
                                         value={createModal.startTime}
-                                        onChange={e => setCreateModal(m => m ? {...m, startTime: e.target.value} : m)}
+                                        onChange={e => setCreateModal(modal => modal ? {...modal, startTime: e.target.value} : modal)}
                                     />
                                     <span className={styles.timeSep}>—</span>
                                     <input
                                         type="time"
                                         className={styles.timeInput}
                                         value={createModal.endTime}
-                                        onChange={e => setCreateModal(m => m ? {...m, endTime: e.target.value} : m)}
+                                        onChange={e => setCreateModal(modal => modal ? {...modal, endTime: e.target.value} : modal)}
                                     />
                                     <span className={styles.timeDur}>
                                         {(() =>
@@ -848,7 +848,7 @@ const TimeCalendar = ({onEntryCreated}: {onEntryCreated?: () => void}) =>
                                                 onMouseDown={e =>
                                                 {
                                                     e.preventDefault();
-                                                    setCreateModal(m => m ? {...m, clientId: '', processId: ''} : m);
+                                                    setCreateModal(modal => modal ? {...modal, clientId: '', processId: ''} : modal);
                                                     setClientSearch('');
                                                     setClientOpen(false);
                                                 }}
@@ -857,19 +857,19 @@ const TimeCalendar = ({onEntryCreated}: {onEntryCreated?: () => void}) =>
                                             </div>
                                             {filteredClients.length === 0 ? (
                                                 <div className={styles.caseEmpty}>Sin resultados</div>
-                                            ) : filteredClients.map(c => (
+                                            ) : filteredClients.map(client => (
                                                 <div
-                                                    key={c.id}
-                                                    className={`${styles.caseOption} ${createModal.clientId === c.id ? styles.caseOptionSelected : ''}`}
+                                                    key={client.id}
+                                                    className={`${styles.caseOption} ${createModal.clientId === client.id ? styles.caseOptionSelected : ''}`}
                                                     onMouseDown={e =>
                                                     {
                                                         e.preventDefault();
-                                                        setCreateModal(m => m ? {...m, clientId: c.id, processId: ''} : m);
+                                                        setCreateModal(modal => modal ? {...modal, clientId: client.id, processId: ''} : modal);
                                                         setClientSearch('');
                                                         setClientOpen(false);
                                                     }}
                                                 >
-                                                    {clientLabel(c)}
+                                                    {clientLabel(client)}
                                                 </div>
                                             ))}
                                         </div>
@@ -898,19 +898,19 @@ const TimeCalendar = ({onEntryCreated}: {onEntryCreated?: () => void}) =>
                                         <div className={styles.caseDropdown}>
                                             {filteredCases.length === 0 ? (
                                                 <div className={styles.caseEmpty}>Sin resultados</div>
-                                            ) : filteredCases.map(p => (
+                                            ) : filteredCases.map(process => (
                                                 <div
-                                                    key={p.id}
-                                                    className={`${styles.caseOption} ${createModal.processId === p.id ? styles.caseOptionSelected : ''}`}
+                                                    key={process.id}
+                                                    className={`${styles.caseOption} ${createModal.processId === process.id ? styles.caseOptionSelected : ''}`}
                                                     onMouseDown={e =>
                                                     {
                                                         e.preventDefault();
-                                                        setCreateModal(m => m ? {...m, processId: p.id} : m);
+                                                        setCreateModal(modal => modal ? {...modal, processId: process.id} : modal);
                                                         setCaseSearch('');
                                                         setCaseOpen(false);
                                                     }}
                                                 >
-                                                    {toTitleCase(p.title)}
+                                                    {toTitleCase(process.title)}
                                                 </div>
                                             ))}
                                         </div>
@@ -925,14 +925,14 @@ const TimeCalendar = ({onEntryCreated}: {onEntryCreated?: () => void}) =>
                                     <button
                                         type="button"
                                         className={`${styles.billableBtn} ${createModal.billableType === BillableType.BILLABLE ? styles.billableBtnActive : ''}`}
-                                        onClick={() => setCreateModal(m => m ? {...m, billableType: BillableType.BILLABLE} : m)}
+                                        onClick={() => setCreateModal(modal => modal ? {...modal, billableType: BillableType.BILLABLE} : modal)}
                                     >
                                         Facturable
                                     </button>
                                     <button
                                         type="button"
                                         className={`${styles.billableBtn} ${createModal.billableType === BillableType.NON_BILLABLE ? styles.nonBillableBtnActive : ''}`}
-                                        onClick={() => setCreateModal(m => m ? {...m, billableType: BillableType.NON_BILLABLE} : m)}
+                                        onClick={() => setCreateModal(modal => modal ? {...modal, billableType: BillableType.NON_BILLABLE} : modal)}
                                     >
                                         No facturable
                                     </button>
@@ -949,7 +949,7 @@ const TimeCalendar = ({onEntryCreated}: {onEntryCreated?: () => void}) =>
                                     rows={3}
                                     placeholder="¿Qué actividad realizaste en este tiempo?"
                                     value={createModal.description}
-                                    onChange={e => setCreateModal(m => m ? {...m, description: e.target.value} : m)}
+                                    onChange={e => setCreateModal(modal => modal ? {...modal, description: e.target.value} : modal)}
                                 />
                             </div>
 
@@ -1038,13 +1038,9 @@ const TimeCalendar = ({onEntryCreated}: {onEntryCreated?: () => void}) =>
                         <div className={styles.modalBody}>
                             <div className={styles.detailGrid}>
                                 {(() => {
-                                    const entryProcess = processes.find(p => p.id === detailModal.entry.processId);
-                                    const entryClient  = entryProcess ? clients.find(c => c.id === entryProcess.clientId) : null;
-                                    const entryClientName = entryClient
-                                        ? entryClient.type === ClientType.COMPANY
-                                            ? (entryClient.companyName ?? '—')
-                                            : [entryClient.firstName, entryClient.lastName].filter(Boolean).join(' ') || '—'
-                                        : null;
+                                    const entryProcess = processes.find(process => process.id === detailModal.entry.processId);
+                                    const entryClient  = entryProcess ? clients.find(client => client.id === entryProcess.clientId) : null;
+                                    const entryClientName = entryClient?.name ?? null;
                                     return (
                                         <>
                                             <div className={styles.detailItem}>

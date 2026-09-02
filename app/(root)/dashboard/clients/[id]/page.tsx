@@ -11,6 +11,7 @@ import {ClientType, ProcessStatus} from '@/app/interfaces/enums';
 import {STATUS_COLOR, STATUS_LABEL} from '@/app/components/processes/processgrid/ProcessGrid';
 import {useConfirm} from '@/hooks/useConfirm';
 import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
+import {PermissionGuard} from '@/app/components/auth/PermissionGuard';
 
 const formatDate = (d: string) =>
     new Date(d).toLocaleDateString('es-ES', {day: '2-digit', month: 'long', year: 'numeric'});
@@ -185,4 +186,10 @@ const ClientDetailPage = () =>
     );
 };
 
-export default ClientDetailPage;
+const ClientDetailPageGuarded = () => (
+    <PermissionGuard permission="clients:view">
+        <ClientDetailPage/>
+    </PermissionGuard>
+);
+
+export default ClientDetailPageGuarded;

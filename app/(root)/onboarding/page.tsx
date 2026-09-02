@@ -8,6 +8,7 @@ import {useFetch} from '@/hooks/useFetch';
 import {useAuth} from '@/context/AuthContext';
 import {ThemeProvider} from '@/context/ThemeContext';
 import {Building, MapPin, Phone, Scale} from '@/app/components/svg';
+import {ALLOW_FIRM_CREATION} from '@/lib/constants';
 import styles from './page.module.css';
 
 interface FirmResponse { id: string; name: string; }
@@ -26,6 +27,13 @@ const OnboardingPage = () =>
         method:    'POST',
         immediate: false,
     });
+
+    useEffect(() =>
+    {
+        // Modelo provisionado: la creación de firmas está deshabilitada en el front.
+        if (isHydrated && !ALLOW_FIRM_CREATION)
+            router.replace('/dashboard');
+    }, [isHydrated, router]);
 
     useEffect(() =>
     {

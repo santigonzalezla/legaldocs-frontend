@@ -7,6 +7,7 @@ import {useFetch} from '@/hooks/useFetch';
 import {toast} from 'sonner';
 import type {TimeEntry, User} from '@/app/interfaces/interfaces';
 import {BillableType, FirmMemberStatus, TimeEntryType} from '@/app/interfaces/enums';
+import {usePermissions} from '@/context/PermissionsContext';
 
 interface TimeTrackerProps
 {
@@ -62,13 +63,19 @@ const TimeTracker = ({processId, onEntryCreated}: TimeTrackerProps) =>
     const [shareEnabled,     setShareEnabled]      = useState(false);
     const [sharedUserIds,    setSharedUserIds]     = useState<string[]>([]);
 
+    const {can} = usePermissions();
+
     const {data: me} = useFetch<User>('user/me');
 
+    const canViewTimeEntries = can('time_entries:view');
+
     const {data: entries, execute: refetchEntries} =
-        useFetch<TimeEntry[]>(`time-entry?processId=${processId}`, {firmScoped: true});
+        useFetch<TimeEntry[]>(`time-entry?processId=${processId}`, {firmScoped: true, immediate: canViewTimeEntries});
+
+    const canViewTeam = can('team:view');
 
     const {data: members} =
-        useFetch<MemberWithUser[]>('firm/me/members?status=ACTIVE&limit=100', {firmScoped: true});
+        useFetch<MemberWithUser[]>('firm/me/members?status=ACTIVE&limit=100', {firmScoped: true, immediate: canViewTeam});
 
     const {execute: startTimer, isLoading: isStarting} =
         useFetch<TimeEntry>('time-entry/start', {method: 'POST', immediate: false, firmScoped: true});

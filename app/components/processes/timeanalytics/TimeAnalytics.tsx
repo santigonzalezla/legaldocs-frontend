@@ -1,10 +1,49 @@
 'use client';
 
-import {useMemo, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import styles from './timeanalytics.module.css';
 import {BarChart, Briefcase, Calendar, Clock, DollarSign, Search, Users} from '@/app/components/svg';
 import {useFetch} from '@/hooks/useFetch';
 import type {LegalProcess, PaginatedResponse} from '@/app/interfaces/interfaces';
+import DateRangePicker from '@/app/components/ui/daterangepicker/DateRangePicker';
+
+interface LawyerOption
+{
+    userId:    string;
+    firstName: string;
+    lastName:  string;
+}
+
+interface AnalyticsFilters
+{
+    startDate: string;
+    endDate:   string;
+    processId: string;
+    lawyerId:  string;
+}
+
+const toISODate = (date: Date) => date.toISOString().split('T')[0];
+
+// Por defecto: del primer día del mes en curso a hoy.
+const getDefaultFilters = (): AnalyticsFilters =>
+{
+    const today     = new Date();
+    const firstDay  = new Date(today.getFullYear(), today.getMonth(), 1);
+    return {startDate: toISODate(firstDay), endDate: toISODate(today), processId: '', lawyerId: ''};
+};
+
+const areFiltersEqual = (a: AnalyticsFilters, b: AnalyticsFilters) =>
+    a.startDate === b.startDate && a.endDate === b.endDate && a.processId === b.processId && a.lawyerId === b.lawyerId;
+
+const buildAnalyticsQuery = (goalDate: string, filters: AnalyticsFilters): string =>
+{
+    const params = new URLSearchParams({date: goalDate});
+    if (filters.startDate) params.set('startDate', filters.startDate);
+    if (filters.endDate)   params.set('endDate', filters.endDate);
+    if (filters.processId) params.set('processId', filters.processId);
+    if (filters.lawyerId)  params.set('lawyerId', filters.lawyerId);
+    return `time-entry/analytics?${params.toString()}`;
+};
 
 const toTitleCase = (str: string) =>
     str.toLowerCase().replace(/(?:^|\s)\S/g, c => c.toUpperCase());
@@ -105,14 +144,40 @@ const TimeAnalytics = () =>
     // ── All hooks must come before any early return ──────────────────────────
     const [caseSearch, setCaseSearch] = useState('');
     const [goalDate,   setGoalDate]   = useState<string>(() => new Date().toISOString().split('T')[0]);
+    const [filters,    setFilters]    = useState<AnalyticsFilters>(getDefaultFilters);
+    const [lawyerOptions, setLawyerOptions] = useState<LawyerOption[]>([]);
 
     const {data, isLoading, execute: refetchAnalytics} =
-        useFetch<AnalyticsData>(`time-entry/analytics?date=${goalDate}`, {firmScoped: true});
+        useFetch<AnalyticsData>(buildAnalyticsQuery(goalDate, getDefaultFilters()), {firmScoped: true});
 
     const {data: processRes} =
         useFetch<PaginatedResponse<LegalProcess>>('process?limit=100', {firmScoped: true});
 
     const processes = useMemo(() => processRes?.data ?? [], [processRes]);
+
+    // Captura la lista de abogados una sola vez (primera carga sin filtros),
+    // para que el dropdown no se vaya achicando a medida que se filtra.
+    useEffect(() =>
+    {
+        if (data?.byUser && lawyerOptions.length === 0)
+            setLawyerOptions(data.byUser.map(u => ({userId: u.userId, firstName: u.firstName, lastName: u.lastName})));
+    }, [data, lawyerOptions.length]);
+
+    const applyFilters = (nextFilters: AnalyticsFilters) =>
+    {
+        setFilters(nextFilters);
+        refetchAnalytics({}, buildAnalyticsQuery(goalDate, nextFilters));
+    };
+
+    const handleFilterChange = (field: keyof AnalyticsFilters, value: string) =>
+        applyFilters({...filters, [field]: value});
+
+    const handleDateRangeChange = (rangeStart: string, rangeEnd: string) =>
+        applyFilters({...filters, startDate: rangeStart, endDate: rangeEnd});
+
+    const handleClearFilters = () => applyFilters(getDefaultFilters());
+
+    const hasActiveFilters = !areFiltersEqual(filters, getDefaultFilters());
 
     // Must be declared before any early return
     const profitProcesses = useMemo(() =>
@@ -136,19 +201,73 @@ const TimeAnalytics = () =>
     const handleGoalDateChange = (date: string) =>
     {
         setGoalDate(date);
-        refetchAnalytics({}, `time-entry/analytics?date=${date}`);
+        refetchAnalytics({}, buildAnalyticsQuery(date, filters));
     };
+
+    const filtersBar = (
+        <div className={styles.filtersContainer}>
+            <div className={styles.filtersContent}>
+                <div className={styles.filterGroup}>
+                    <label className={styles.filterLabel}>Rango de fechas</label>
+                    <DateRangePicker
+                        startDate={filters.startDate}
+                        endDate={filters.endDate}
+                        onChange={handleDateRangeChange}
+                    />
+                </div>
+                <div className={styles.filterGroup}>
+                    <label className={styles.filterLabel}>Caso</label>
+                    <select
+                        className={styles.filterSelect}
+                        value={filters.processId}
+                        onChange={e => handleFilterChange('processId', e.target.value)}
+                    >
+                        <option value="">Todos los casos</option>
+                        {processes.map(process => (
+                            <option key={process.id} value={process.id}>{toTitleCase(process.title)}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className={styles.filterGroup}>
+                    <label className={styles.filterLabel}>Abogado</label>
+                    <select
+                        className={styles.filterSelect}
+                        value={filters.lawyerId}
+                        onChange={e => handleFilterChange('lawyerId', e.target.value)}
+                    >
+                        <option value="">Todos los abogados</option>
+                        {lawyerOptions.map(lawyer => (
+                            <option key={lawyer.userId} value={lawyer.userId}>{lawyer.firstName} {lawyer.lastName}</option>
+                        ))}
+                    </select>
+                </div>
+                {hasActiveFilters && (
+                    <button className={styles.clearFiltersButton} onClick={handleClearFilters}>
+                        Limpiar filtros
+                    </button>
+                )}
+            </div>
+        </div>
+    );
 
     // ── Early returns (after all hooks) ─────────────────────────────────────
     if (isLoading)
-        return <div className={styles.loading}>Cargando analíticas...</div>;
+        return (
+            <div className={styles.container}>
+                {filtersBar}
+                <div className={styles.loading}>Cargando analíticas...</div>
+            </div>
+        );
 
     if (!data || (data.byUser.length === 0 && data.byProcess.length === 0))
         return (
-            <div className={styles.empty}>
-                <BarChart className={styles.emptyIcon} />
-                <p>Aún no hay registros de tiempo en ningún proceso.</p>
-                <span>Inicia el control de tiempo desde el detalle de cada proceso.</span>
+            <div className={styles.container}>
+                {filtersBar}
+                <div className={styles.empty}>
+                    <BarChart className={styles.emptyIcon} />
+                    <p>{hasActiveFilters ? 'No hay registros de tiempo para estos filtros.' : 'No hay registros de tiempo este mes.'}</p>
+                    <span>Inicia el control de tiempo desde el detalle de cada proceso.</span>
+                </div>
             </div>
         );
 
@@ -208,6 +327,8 @@ const TimeAnalytics = () =>
 
     return (
         <div className={styles.container}>
+
+            {filtersBar}
 
             {/* Summary cards */}
             <div className={styles.cards}>

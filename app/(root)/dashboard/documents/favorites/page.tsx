@@ -7,6 +7,7 @@ import {toast} from 'sonner';
 import type {Document, PaginatedResponse} from '@/app/interfaces/interfaces';
 import DocumentFilters from '@/app/components/documents/shared/documentfilters/DocumentFilters';
 import FavoritesList   from '@/app/components/documents/favorites/favoriteslist/FavoritesList';
+import {PermissionGuard} from '@/app/components/auth/PermissionGuard';
 
 const statusOptions = [
     {value: 'all', label: 'Todos los favoritos'},
@@ -60,4 +61,10 @@ const Favorites = () =>
     );
 };
 
-export default Favorites;
+const FavoritesGuarded = () => (
+    <PermissionGuard permission="documents:view">
+        <Favorites/>
+    </PermissionGuard>
+);
+
+export default FavoritesGuarded;

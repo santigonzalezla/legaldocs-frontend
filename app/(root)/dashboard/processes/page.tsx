@@ -7,7 +7,7 @@ import {Briefcase, Check, Clock, Plus} from '@/app/components/svg';
 import {useFetch} from '@/hooks/useFetch';
 import {toast} from 'sonner';
 import {ProcessStatus} from '@/app/interfaces/enums';
-import type {Client, LegalBranch, LegalProcess, PaginatedResponse} from '@/app/interfaces/interfaces';
+import type {ClientPickerOption, LegalBranch, LegalProcess, PaginatedResponse} from '@/app/interfaces/interfaces';
 import {useConfirm} from '@/hooks/useConfirm';
 import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
 import DocumentStatCard   from '@/app/components/documents/generated/documentstatscard/DocumentStatsCard';
@@ -16,6 +16,7 @@ import ProcessGrid        from '@/app/components/processes/processgrid/ProcessGr
 import ProcessList        from '@/app/components/processes/processlist/ProcessList';
 import CreateProcessModal from '@/app/components/processes/createprocessmodal/CreateProcessModal';
 import type {CreateProcessForm} from '@/app/components/processes/createprocessmodal/CreateProcessModal';
+import {PermissionGuard} from '@/app/components/auth/PermissionGuard';
 
 const EMPTY_FORM: CreateProcessForm = {
     clientId:     '',
@@ -45,8 +46,8 @@ const ProcessesPage = () =>
     const {data: processRes, isLoading, execute: refetch} =
         useFetch<PaginatedResponse<LegalProcess>>('process?limit=100', {firmScoped: true});
 
-    const {data: clientRes} =
-        useFetch<PaginatedResponse<Client>>('client?limit=100', {firmScoped: true});
+    const {data: clientOptions} =
+        useFetch<ClientPickerOption[]>('process/client-options', {firmScoped: true});
 
     const {data: branches} =
         useFetch<LegalBranch[]>('branch?isActive=true&limit=50', {firmScoped: true});
@@ -60,7 +61,7 @@ const ProcessesPage = () =>
     const {confirm, confirmState, handleConfirm, handleCancel} = useConfirm();
 
     const processes  = processRes?.data ?? [];
-    const clients    = clientRes?.data  ?? [];
+    const clients    = clientOptions    ?? [];
     const branchList = branches         ?? [];
 
     const filtered = processes.filter(p =>
@@ -190,4 +191,10 @@ const ProcessesPage = () =>
     );
 };
 
-export default ProcessesPage;
+const ProcessesPageGuarded = () => (
+    <PermissionGuard permission="processes:view">
+        <ProcessesPage/>
+    </PermissionGuard>
+);
+
+export default ProcessesPageGuarded;

@@ -2,19 +2,13 @@
 
 import styles from './createprocessmodal.module.css';
 import {X, Plus} from '@/app/components/svg';
-import type {Client, LegalBranch} from '@/app/interfaces/interfaces';
-import {ClientType} from '@/app/interfaces/enums';
+import type {ClientPickerOption, LegalBranch} from '@/app/interfaces/interfaces';
 
 const formatThousands = (raw: string) =>
 {
     const digits = raw.replace(/\D/g, '');
     return digits ? Number(digits).toLocaleString('es-CO') : '';
 };
-
-const clientName = (c: Client) =>
-    c.type === ClientType.COMPANY
-        ? (c.companyName ?? '—')
-        : [c.firstName, c.lastName].filter(Boolean).join(' ') || '—';
 
 export interface CreateProcessForm
 {
@@ -34,7 +28,7 @@ interface CreateProcessModalProps
     open:     boolean;
     saving:   boolean;
     form:     CreateProcessForm;
-    clients:  Client[];
+    clients:  ClientPickerOption[];
     branches: LegalBranch[];
     onChange: (field: keyof CreateProcessForm, value: string) => void;
     onClose:  () => void;
@@ -62,8 +56,8 @@ const CreateProcessModal = ({open, saving, form, clients, branches, onChange, on
                             onChange={e => onChange('clientId', e.target.value)}
                         >
                             <option value="">Seleccionar cliente</option>
-                            {clients.map(c => (
-                                <option key={c.id} value={c.id}>{clientName(c)}</option>
+                            {clients.map(client => (
+                                <option key={client.id} value={client.id}>{client.name}</option>
                             ))}
                         </select>
                     </div>
@@ -108,8 +102,8 @@ const CreateProcessModal = ({open, saving, form, clients, branches, onChange, on
                                 onChange={e => onChange('branchId', e.target.value)}
                             >
                                 <option value="">Sin rama</option>
-                                {branches.map(b => (
-                                    <option key={b.id} value={b.id}>{b.name}</option>
+                                {branches.map(branch => (
+                                    <option key={branch.id} value={branch.id}>{branch.name}</option>
                                 ))}
                             </select>
                         </div>

@@ -5,6 +5,7 @@ import {useFetch} from '@/hooks/useFetch';
 import type {Invoice} from '@/app/interfaces/interfaces';
 import {InvoiceStatus} from '@/app/interfaces/enums';
 import {FileDown, DollarSign} from '@/app/components/svg';
+import {PermissionGuard} from '@/app/components/auth/PermissionGuard';
 
 const STATUS_LABEL: Record<InvoiceStatus, string> = {
     [InvoiceStatus.PENDING]:  'Pendiente',
@@ -118,4 +119,10 @@ const HistoryPage = () =>
     );
 };
 
-export default HistoryPage;
+const HistoryPageGuarded = () => (
+    <PermissionGuard permission="firm_settings:view">
+        <HistoryPage/>
+    </PermissionGuard>
+);
+
+export default HistoryPageGuarded;

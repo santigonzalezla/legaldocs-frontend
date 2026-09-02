@@ -15,6 +15,7 @@ import ClientGrid          from '@/app/components/clients/clientgrid/ClientGrid'
 import ClientList          from '@/app/components/clients/clientlist/ClientList';
 import CreateClientModal   from '@/app/components/clients/createclientmodal/CreateClientModal';
 import ClientDetailModal   from '@/app/components/clients/clientdetailmodal/ClientDetailModal';
+import {PermissionGuard}  from '@/app/components/auth/PermissionGuard';
 
 const EMPTY_FORM = {
     type:           ClientType.INDIVIDUAL,
@@ -180,4 +181,10 @@ const ClientsPage = () =>
     );
 };
 
-export default ClientsPage;
+const ClientsPageGuarded = () => (
+    <PermissionGuard permission="clients:view">
+        <ClientsPage/>
+    </PermissionGuard>
+);
+
+export default ClientsPageGuarded;

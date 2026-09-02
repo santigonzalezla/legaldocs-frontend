@@ -2,13 +2,8 @@
 
 import styles from './processfilters.module.css';
 import {Grid, List, Search} from '@/app/components/svg';
-import {ProcessStatus, ClientType} from '@/app/interfaces/enums';
-import type {Client, LegalBranch} from '@/app/interfaces/interfaces';
-
-const clientName = (c: Client) =>
-    c.type === ClientType.COMPANY
-        ? (c.companyName ?? '—')
-        : [c.firstName, c.lastName].filter(Boolean).join(' ') || '—';
+import {ProcessStatus} from '@/app/interfaces/enums';
+import type {ClientPickerOption, LegalBranch} from '@/app/interfaces/interfaces';
 
 const statusOptions = [
     {value: 'all',                   label: 'Todos los estados'},
@@ -28,7 +23,7 @@ interface ProcessFiltersProps
     onClient:       (v: string) => void;
     selectedBranch: string;
     onBranch:       (v: string) => void;
-    clients:        Client[];
+    clients:        ClientPickerOption[];
     branches:       LegalBranch[];
     view:           'grid' | 'list';
     onViewChange:   (v: 'grid' | 'list') => void;
@@ -61,14 +56,14 @@ const ProcessFilters = ({search, onSearch, selectedStatus, onStatus, selectedCli
                 <div className={styles.filterGroup}>
                     <select className={styles.filterSelect} value={selectedClient} onChange={e => onClient(e.target.value)}>
                         <option value="all">Todos los clientes</option>
-                        {clients.map(c => <option key={c.id} value={c.id}>{clientName(c)}</option>)}
+                        {clients.map(client => <option key={client.id} value={client.id}>{client.name}</option>)}
                     </select>
                 </div>
 
                 <div className={styles.filterGroup}>
                     <select className={styles.filterSelect} value={selectedBranch} onChange={e => onBranch(e.target.value)}>
                         <option value="all">Todas las ramas</option>
-                        {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                        {branches.map(branch => <option key={branch.id} value={branch.id}>{branch.name}</option>)}
                     </select>
                 </div>
             </div>

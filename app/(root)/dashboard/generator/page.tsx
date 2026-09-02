@@ -6,6 +6,7 @@ import {useFetch} from '@/hooks/useFetch';
 import type {DocumentTemplate, LegalBranch, PaginatedResponse} from '@/app/interfaces/interfaces';
 import {ArrowGo, Building, Buildings, File, Globe, Hammer, Scale, Shield, Users} from '@/app/components/svg';
 import React from 'react';
+import {PermissionGuard} from '@/app/components/auth/PermissionGuard';
 
 const BRANCH_ICONS: Record<string, React.ReactElement> = {
     civil:          <Scale />,
@@ -109,4 +110,10 @@ const GeneratorPage = () =>
     );
 };
 
-export default GeneratorPage;
+const GeneratorPageGuarded = () => (
+    <PermissionGuard permission="documents:create">
+        <GeneratorPage/>
+    </PermissionGuard>
+);
+
+export default GeneratorPageGuarded;

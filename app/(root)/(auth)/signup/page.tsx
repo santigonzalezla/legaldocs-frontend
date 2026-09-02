@@ -8,14 +8,34 @@ import {toast} from 'sonner';
 import {useFetch} from '@/hooks/useFetch';
 import {useAuth} from '@/context/AuthContext';
 import {Eye, EyeClosed, Lock, Mail, User} from '@/app/components/svg';
-import {API_BASE_URL} from '@/lib/constants';
+import {ALLOW_FIRM_CREATION} from '@/lib/constants';
+import type {AuthResponse} from '@/app/interfaces/interfaces';
 import styles from '../form.module.css';
 
-interface RegisterResponse
-{
-    accessToken:  string;
-    refreshToken: string;
-}
+const SignUpDisabled = () => (
+    <div className={styles.card}>
+        <div className={styles.header}>
+            <Image
+                src="/logo.png"
+                alt="LegalDocs"
+                width={200}
+                height={100}
+                className={styles.logo}
+                style={{objectFit: 'cover'}}
+                priority
+            />
+            <h1 className={styles.title}>Registro no disponible</h1>
+            <p className={styles.subtitle}>
+                Las cuentas de LegalDocs se crean por invitación. Pedí a un administrador de tu
+                despacho que te envíe una, o revisá tu correo si ya la recibiste.
+            </p>
+        </div>
+        <p className={styles.footer}>
+            ¿Ya tienes cuenta?{' '}
+            <Link href="/signin" className={styles.footerLink}>Inicia sesión</Link>
+        </p>
+    </div>
+);
 
 const SignUpForm = () =>
 {
@@ -32,7 +52,7 @@ const SignUpForm = () =>
     const [password,     setPassword]     = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
-    const {execute, isLoading, error} = useFetch<RegisterResponse>('auth/register', {
+    const {execute, isLoading, error} = useFetch<AuthResponse>('auth/register', {
         method:    'POST',
         immediate: false,
     });
@@ -41,8 +61,8 @@ const SignUpForm = () =>
     {
         // Skip redirect if we just registered — navigation is handled in handleSubmit
         if (!isHydrated || !isAuthenticated || justRegistered.current) return;
-        router.replace(inviteToken ? `/invite?token=${inviteToken}&email=${encodeURIComponent(inviteEmail)}` : '/dashboard');
-    }, [isHydrated, isAuthenticated, router, inviteToken, inviteEmail]);
+        router.replace('/dashboard');
+    }, [isHydrated, isAuthenticated, router]);
 
     useEffect(() => { if (error) toast.error(error); }, [error]);
 
@@ -53,24 +73,7 @@ const SignUpForm = () =>
         if (!result) return;
 
         justRegistered.current = true;
-        login(result.accessToken, result.refreshToken);
-
-        // If registration came from an invitation, accept it immediately
-        if (inviteToken)
-        {
-            try
-            {
-                await fetch(`${API_BASE_URL}/firm/me/members/accept?token=${inviteToken}`, {
-                    method:  'POST',
-                    headers: {Authorization: `Bearer ${result.accessToken}`},
-                });
-            }
-            catch
-            {
-                // Accept failed — user can accept later from the firms settings page
-            }
-        }
-
+        login(result.accessToken, result.refreshToken, result.mustChangePassword);
         toast.success('¡Cuenta creada! Revisa tu correo para verificarla.');
         router.push('/dashboard');
     };
@@ -183,7 +186,7 @@ const SignUpForm = () =>
 
 const SignUpPage = () => (
     <Suspense fallback={null}>
-        <SignUpForm />
+        {ALLOW_FIRM_CREATION ? <SignUpForm /> : <SignUpDisabled />}
     </Suspense>
 );
 

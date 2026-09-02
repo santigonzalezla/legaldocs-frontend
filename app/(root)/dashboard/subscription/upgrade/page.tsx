@@ -9,6 +9,7 @@ import {toast} from 'sonner';
 import type {SubscriptionPlan, Subscription} from '@/app/interfaces/interfaces';
 import {BillingCycle, SubscriptionStatus} from '@/app/interfaces/enums';
 import {Check, ArrowGo, Crown} from '@/app/components/svg';
+import {PermissionGuard} from '@/app/components/auth/PermissionGuard';
 
 const formatPrice = (n: number | null) =>
     n === 0 || n === null ? 'Gratis' : `$${String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.')} COP`;
@@ -250,4 +251,10 @@ const UpgradePage = () =>
     );
 };
 
-export default UpgradePage;
+const UpgradePageGuarded = () => (
+    <PermissionGuard permission="firm_settings:view">
+        <UpgradePage/>
+    </PermissionGuard>
+);
+
+export default UpgradePageGuarded;

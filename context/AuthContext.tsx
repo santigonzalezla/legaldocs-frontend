@@ -15,22 +15,25 @@ interface AuthUser
 
 interface AuthContextType
 {
-    accessToken:         string | null;
-    user:                AuthUser | null;
-    activeFirmId:        string | null;
-    isAuthenticated:     boolean;
-    isHydrated:          boolean; // true once localStorage has been read
-    login:               (accessToken: string, refreshToken: string) => void;
-    logout:              () => void;
-    setActiveFirm:       (firmId: string | null) => void;
-    refreshAccessToken:  () => Promise<string | null>;
+    accessToken:            string | null;
+    user:                   AuthUser | null;
+    activeFirmId:           string | null;
+    mustChangePassword:     boolean;
+    isAuthenticated:        boolean;
+    isHydrated:             boolean; // true once localStorage has been read
+    login:                  (accessToken: string, refreshToken: string, mustChangePassword?: boolean) => void;
+    logout:                 () => void;
+    setActiveFirm:          (firmId: string | null) => void;
+    clearMustChangePassword: () => void;
+    refreshAccessToken:     () => Promise<string | null>;
 }
 
 // ─── Storage Keys ──────────────────────────────────────────────────────────────
 
-const KEY_ACCESS  = 'ld_access_token';
-const KEY_REFRESH = 'ld_refresh_token';
-const KEY_FIRM    = 'ld_active_firm';
+const KEY_ACCESS       = 'ld_access_token';
+const KEY_REFRESH      = 'ld_refresh_token';
+const KEY_FIRM         = 'ld_active_firm';
+const KEY_MUST_CHANGE  = 'ld_must_change_pw';
 
 // ─── Context ───────────────────────────────────────────────────────────────────
 
@@ -42,6 +45,7 @@ export function AuthProvider({children}: {children: React.ReactNode})
     const [refreshToken, setRefreshToken] = useState<string | null>(null);
     const [user,         setUser]         = useState<AuthUser | null>(null);
     const [activeFirmId, setActiveFirmId] = useState<string | null>(null);
+    const [mustChangePassword, setMustChangePassword] = useState(false);
     const [isHydrated,   setIsHydrated]   = useState(false);
 
     // Rehydrate from localStorage on mount
@@ -54,16 +58,19 @@ export function AuthProvider({children}: {children: React.ReactNode})
         if (at)  setAccessToken(at);
         if (rt)  setRefreshToken(rt);
         if (fid) setActiveFirmId(fid);
+        setMustChangePassword(localStorage.getItem(KEY_MUST_CHANGE) === 'true');
 
         setIsHydrated(true);
     }, []);
 
-    const login = useCallback((at: string, rt: string) =>
+    const login = useCallback((at: string, rt: string, mustChange = false) =>
     {
         localStorage.setItem(KEY_ACCESS,  at);
         localStorage.setItem(KEY_REFRESH, rt);
+        localStorage.setItem(KEY_MUST_CHANGE, String(!!mustChange));
         setAccessToken(at);
         setRefreshToken(rt);
+        setMustChangePassword(!!mustChange);
     }, []);
 
     const logout = useCallback(() =>
@@ -71,10 +78,12 @@ export function AuthProvider({children}: {children: React.ReactNode})
         localStorage.removeItem(KEY_ACCESS);
         localStorage.removeItem(KEY_REFRESH);
         localStorage.removeItem(KEY_FIRM);
+        localStorage.removeItem(KEY_MUST_CHANGE);
         setAccessToken(null);
         setRefreshToken(null);
         setUser(null);
         setActiveFirmId(null);
+        setMustChangePassword(false);
     }, []);
 
     const setActiveFirm = useCallback((firmId: string | null) =>
@@ -82,6 +91,12 @@ export function AuthProvider({children}: {children: React.ReactNode})
         if (firmId) localStorage.setItem(KEY_FIRM, firmId);
         else        localStorage.removeItem(KEY_FIRM);
         setActiveFirmId(firmId);
+    }, []);
+
+    const clearMustChangePassword = useCallback(() =>
+    {
+        localStorage.removeItem(KEY_MUST_CHANGE);
+        setMustChangePassword(false);
     }, []);
 
     const refreshAccessToken = useCallback(async (): Promise<string | null> =>
@@ -120,11 +135,13 @@ export function AuthProvider({children}: {children: React.ReactNode})
             accessToken,
             user,
             activeFirmId,
+            mustChangePassword,
             isAuthenticated: !!accessToken,
             isHydrated,
             login,
             logout,
             setActiveFirm,
+            clearMustChangePassword,
             refreshAccessToken,
         }}>
             {children}

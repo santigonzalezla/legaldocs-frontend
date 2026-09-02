@@ -9,6 +9,7 @@ import {toast} from 'sonner';
 import type {Subscription} from '@/app/interfaces/interfaces';
 import {SubscriptionStatus, BillingCycle} from '@/app/interfaces/enums';
 import {ArrowGo, Check, Card, Users, File, BookOpen, Legalito} from '@/app/components/svg';
+import {PermissionGuard} from '@/app/components/auth/PermissionGuard';
 
 interface Usage {
     documents: {used: number; max: number | null};
@@ -355,4 +356,10 @@ const CurrentSubscriptionPage = () =>
     );
 };
 
-export default CurrentSubscriptionPage;
+const CurrentSubscriptionPageGuarded = () => (
+    <PermissionGuard permission="firm_settings:view">
+        <CurrentSubscriptionPage/>
+    </PermissionGuard>
+);
+
+export default CurrentSubscriptionPageGuarded;

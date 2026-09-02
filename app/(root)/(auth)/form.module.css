@@ -181,6 +181,44 @@
     padding: 10px 14px;
 }
 
+/* ─── Inline field error (input rojo + mensaje corto debajo) ────────────────── */
+
+.inputWrapperError .input
+{
+    border-color: #dc2626;
+    background: rgba(220, 38, 38, 0.03);
+}
+
+.inputWrapperError .input:focus
+{
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+.fieldError
+{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #dc2626;
+    margin-top: 2px;
+}
+
+.fieldError svg
+{
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+/* Reserva el alto del mensaje para que el botón no se mueva al aparecer el error */
+.fieldErrorReserved
+{
+    min-height: 18px;
+}
+
 /* ─── Success ──────────────────────────────────────────────────────────────── */
 
 .successMsg

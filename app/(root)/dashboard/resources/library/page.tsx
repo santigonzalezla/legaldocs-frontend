@@ -12,6 +12,7 @@ import DocumentStatCard    from '@/app/components/documents/generated/documentst
 import DocumentFilters     from '@/app/components/documents/shared/documentfilters/DocumentFilters';
 import LibraryDocumentList from '@/app/components/library/librarydocumentlist/LibraryDocumentList';
 import UploadDocumentModal from '@/app/components/library/uploaddocumentmodal/UploadDocumentModal';
+import {PermissionGuard} from '@/app/components/auth/PermissionGuard';
 
 const typeOptions = [
     {value: 'all',           label: 'Todos los tipos'},
@@ -195,4 +196,10 @@ const LibraryPage = () =>
     );
 };
 
-export default LibraryPage;
+const LibraryPageGuarded = () => (
+    <PermissionGuard permission="library:view">
+        <LibraryPage/>
+    </PermissionGuard>
+);
+
+export default LibraryPageGuarded;

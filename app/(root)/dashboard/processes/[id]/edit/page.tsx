@@ -7,13 +7,8 @@ import {useEffect, useState} from 'react';
 import {useFetch} from '@/hooks/useFetch';
 import {toast} from 'sonner';
 import {ArrowLeft, Save} from '@/app/components/svg';
-import type {Client, LegalBranch, LegalProcess, PaginatedResponse} from '@/app/interfaces/interfaces';
-import {ClientType, ProcessStatus} from '@/app/interfaces/enums';
-
-const clientName = (c: Client) =>
-    c.type === ClientType.COMPANY
-        ? (c.companyName ?? '—')
-        : [c.firstName, c.lastName].filter(Boolean).join(' ') || '—';
+import type {ClientPickerOption, LegalBranch, LegalProcess} from '@/app/interfaces/interfaces';
+import {ProcessStatus} from '@/app/interfaces/enums';
 
 const STATUS_OPTIONS = [
     {value: ProcessStatus.ACTIVE,    label: 'Activo'},
@@ -30,8 +25,8 @@ const ProcessEditPage = () =>
     const {data: process, isLoading} =
         useFetch<LegalProcess>(`process/${id}`, {firmScoped: true});
 
-    const {data: clientRes} =
-        useFetch<PaginatedResponse<Client>>('client?limit=100', {firmScoped: true});
+    const {data: clientOptions} =
+        useFetch<ClientPickerOption[]>('process/client-options', {firmScoped: true});
 
     const {data: branches} =
         useFetch<LegalBranch[]>('branch?isActive=true&limit=50', {firmScoped: true});
@@ -99,8 +94,8 @@ const ProcessEditPage = () =>
     if (!process)
         return <div className={styles.loading}>Proceso no encontrado.</div>;
 
-    const clients    = clientRes?.data ?? [];
-    const branchList = branches        ?? [];
+    const clients    = clientOptions ?? [];
+    const branchList = branches      ?? [];
 
     return (
         <div className={styles.page}>
@@ -123,8 +118,8 @@ const ProcessEditPage = () =>
                                 onChange={e => set('clientId', e.target.value)}
                             >
                                 <option value="">Seleccionar cliente</option>
-                                {clients.map(c => (
-                                    <option key={c.id} value={c.id}>{clientName(c)}</option>
+                                {clients.map(client => (
+                                    <option key={client.id} value={client.id}>{client.name}</option>
                                 ))}
                             </select>
                         </div>
@@ -181,8 +176,8 @@ const ProcessEditPage = () =>
                                 onChange={e => set('branchId', e.target.value)}
                             >
                                 <option value="">Sin rama</option>
-                                {branchList.map(b => (
-                                    <option key={b.id} value={b.id}>{b.name}</option>
+                                {branchList.map(branch => (
+                                    <option key={branch.id} value={branch.id}>{branch.name}</option>
                                 ))}
                             </select>
                         </div>

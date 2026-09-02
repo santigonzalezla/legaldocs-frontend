@@ -67,6 +67,16 @@ export interface SecuritySettings
     updatedAt: string;
 }
 
+// ─── Auth ────────────────────────────────────────────────────────────────────
+
+export interface AuthResponse
+{
+    accessToken: string;
+    refreshToken: string;
+    // Presente en login/refresh; ausente en register (el owner define su propia clave).
+    mustChangePassword?: boolean;
+}
+
 // ─── Firm ────────────────────────────────────────────────────────────────────
 
 export interface Firm
@@ -105,6 +115,8 @@ export interface FirmMember
     firmId: string;
     userId: string | null;
     role: FirmMemberRole;
+    firmRoleId: string | null;
+    firmRole: {id: string; name: string; slug: string | null} | null;
     status: FirmMemberStatus;
     inviteEmail: string | null;
     inviteExpiresAt: string | null;
@@ -112,6 +124,14 @@ export interface FirmMember
     lastActiveAt: string | null;
     createdAt: string;
     updatedAt: string;
+}
+
+export interface DeletedFirm
+{
+    id: string;
+    name: string;
+    deletedAt: string | null;
+    purgeAt: string | null;
 }
 
 export interface PendingInvitation
@@ -127,6 +147,45 @@ export interface PendingInvitation
         legalName: string | null;
         city: string | null;
     };
+}
+
+// ─── Roles y Permisos ───────────────────────────────────────────────────────
+
+export interface FirmRole
+{
+    id: string;
+    name: string;
+    description: string | null;
+    slug: string | null;
+    isSystem: boolean;
+    memberCount: number;
+    permissionKeys: string[];
+}
+
+export interface PermissionEntry
+{
+    id: string;
+    key: string;
+    method: string;
+    path: string;
+    label: string;
+    deprecated: boolean;
+}
+
+export interface PermissionModule
+{
+    id: string;
+    key: string;
+    label: string;
+    description: string | null;
+    sortOrder: number;
+    permissions: PermissionEntry[];
+}
+
+export interface EffectivePermissions
+{
+    isAdmin: boolean;
+    permissionKeys: string[];
 }
 
 // ─── Document ────────────────────────────────────────────────────────────────
@@ -318,6 +377,14 @@ export interface Client
     updatedAt: string;
 }
 
+// Proyección mínima (id+nombre) usada por selectores fuera del módulo Clientes
+// (ej. asignar cliente a un proceso) — no requiere el permiso clients:view.
+export interface ClientPickerOption
+{
+    id:   string;
+    name: string;
+}
+
 // ─── Legal Process ────────────────────────────────────────────────────────────
 
 export interface ProcessValueEntry
@@ -348,10 +415,25 @@ export interface LegalProcess
     assignedTo: string | null;
     processValue: number | null;
     valueEntries: ProcessValueEntry[];
+    // Solo viene poblado en GET process/:id (no en el listado).
+    client?: ProcessClientSummary | null;
     createdBy: string;
     deletedAt: string | null;
     createdAt: string;
     updatedAt: string;
+}
+
+// Subconjunto de Client sin datos de contacto (email/teléfono/dirección),
+// embebido en LegalProcess — ver LegalProcessWithEntriesEntity en el backend.
+export interface ProcessClientSummary
+{
+    id: string;
+    type: ClientType;
+    firstName: string | null;
+    lastName: string | null;
+    companyName: string | null;
+    documentType: string | null;
+    documentNumber: string | null;
 }
 
 export interface ProcessTemplate

@@ -4,7 +4,7 @@ import {useRef} from 'react';
 import {createPortal} from 'react-dom';
 import styles from './billingpanel.module.css';
 import {X, DollarSign, Download, Users} from '@/app/components/svg';
-import type {Client, LegalProcess, TimeEntry} from '@/app/interfaces/interfaces';
+import type {LegalProcess, ProcessClientSummary, TimeEntry} from '@/app/interfaces/interfaces';
 import {BillableType, ClientType} from '@/app/interfaces/enums';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -12,7 +12,7 @@ import html2canvas from 'html2canvas';
 interface BillingPanelProps
 {
     process:       LegalProcess;
-    client:        Client | null;
+    client:        ProcessClientSummary | null;
     entries:       TimeEntry[];
     firmHourlyRate: number | null;
     onClose:       () => void;
@@ -38,10 +38,10 @@ const fmtHours = (minutes: number) =>
     return h > 0 ? (m > 0 ? `${h}h ${m}m` : `${h}h`) : `${m}m`;
 };
 
-const clientName = (c: Client) =>
-    c.type === ClientType.COMPANY
-        ? (c.companyName ?? '—')
-        : [c.firstName, c.lastName].filter(Boolean).join(' ') || '—';
+const clientName = (client: ProcessClientSummary) =>
+    client.type === ClientType.COMPANY
+        ? (client.companyName ?? '—')
+        : [client.firstName, client.lastName].filter(Boolean).join(' ') || '—';
 
 const todayLabel = () =>
     new Date().toLocaleDateString('es-ES', {day: '2-digit', month: 'long', year: 'numeric'});
