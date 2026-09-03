@@ -1,65 +1,24 @@
 "use client"
 import type React from "react"
+import {useRouter} from "next/navigation"
 import styles from "./legalupdates.module.css"
-import {Bell, Calendar, ExternalLink} from "@/app/components/svg";
+import {Bell, Calendar, ExternalLink} from "@/app/components/svg"
+import type {LegalUpdate} from "@/app/interfaces/interfaces"
+import {LEGAL_UPDATE_TYPE_COLORS, LEGAL_UPDATE_TYPE_LABELS, LegalUpdateType} from "@/app/interfaces/enums"
+import {formatRelativeTime} from "@/lib/format"
 
-interface LegalUpdate {
-    id: string
-    title: string
-    summary: string
-    date: string
-    category: string
-    priority: "high" | "medium" | "low" | string
-    source: string
-    url?: string
-}
-
-interface LegalUpdatesProps {
+interface LegalUpdatesProps
+{
     updates: LegalUpdate[]
     maxItems?: number
-    showPriority?: boolean
 }
 
-const LegalUpdates: React.FC<LegalUpdatesProps> = ({ updates, maxItems, showPriority }) =>
+const LegalUpdates: React.FC<LegalUpdatesProps> = ({updates, maxItems}) =>
 {
-    const limitedUpdates = updates.slice(0, maxItems);
+    const router = useRouter();
+    const limited = maxItems ? updates.slice(0, maxItems) : updates;
 
-    const getPriorityColor = (priority: string) =>
-    {
-        switch (priority)
-        {
-            case "high":
-                return "#EF4444";
-            case "medium":
-                return "#F59E0B";
-            case "low":
-                return "#10B981";
-            default:
-                return "#6B7280";
-        }
-    }
-
-    const getPriorityText = (priority: string) =>
-    {
-        switch (priority)
-        {
-            case "high":
-                return "Alta";
-            case "medium":
-                return "Media";
-            case "low":
-                return "Baja";
-            default:
-                return "Normal";
-        }
-    }
-
-    const formatDate = (dateString: string) =>
-    {
-        const date = new Date(dateString);
-
-        return date.toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" });
-    }
+    const openSource = (url: string) => window.open(url, "_blank", "noopener,noreferrer");
 
     return (
         <div className={styles.container}>
@@ -68,45 +27,48 @@ const LegalUpdates: React.FC<LegalUpdatesProps> = ({ updates, maxItems, showPrio
                     <Bell/>
                     <h3 className={styles.title}>Actualizaciones Legales</h3>
                 </div>
-                <button className={styles.viewAllButton}>Ver todas</button>
+                <button className={styles.viewAllButton} onClick={() => router.push("/dashboard/resources/updates")}>
+                    Ver todas
+                </button>
             </div>
 
             <div className={styles.updatesList}>
-                {limitedUpdates.map((update) => (
-                    <div key={update.id} className={styles.updateItem}>
-                        <div className={styles.updateHeader}>
-                            <div className={styles.updateMeta}>
-                                <span className={styles.updateCategory}>{update.category}</span>
+                {limited.length === 0 && (
+                    <p className={styles.emptyState}>Aún no hay actualizaciones.</p>
+                )}
+
+                {limited.map((update) =>
+                {
+                    const badge = LEGAL_UPDATE_TYPE_COLORS[update.type] ?? LEGAL_UPDATE_TYPE_COLORS[LegalUpdateType.OTHER];
+                    const label = LEGAL_UPDATE_TYPE_LABELS[update.type] ?? LEGAL_UPDATE_TYPE_LABELS[LegalUpdateType.OTHER];
+
+                    return (
+                        <div key={update.id} className={styles.updateItem} onClick={() => openSource(update.url)}>
+                            <div className={styles.updateHeader}>
+                                <span className={styles.typeBadge} style={{backgroundColor: badge.bg, color: badge.color}}>
+                                    {label}
+                                </span>
                                 <span className={styles.updateDate}>
                                     <Calendar/>
-                                    {formatDate(update.date)}
+                                    {formatRelativeTime(update.publishedAt)}
                                 </span>
                             </div>
-                            {showPriority && (
-                                <div className={styles.priorityBadge} style={{backgroundColor: `${getPriorityColor(update.priority)}15`}}>
-                                    <span
-                                        style={{color: getPriorityColor(update.priority)}}>{getPriorityText(update.priority)}
-                                    </span>
-                                </div>
-                            )}
-                        </div>
 
-                        <div className={styles.updateContent}>
-                            <h4 className={styles.updateTitle}>{update.title}</h4>
-                            <p className={styles.updateSummary}>{update.summary}</p>
-                        </div>
+                            <div className={styles.updateContent}>
+                                <h4 className={styles.updateTitle}>{update.title}</h4>
+                                {update.summary && <p className={styles.updateSummary}>{update.summary}</p>}
+                            </div>
 
-                        <div className={styles.updateFooter}>
-                            <span className={styles.updateSource}>Fuente: {update.source}</span>
-                            {update.url && (
-                                <button className={styles.readMoreButton}>
-                                    <span>Leer más</span>
-                                    <ExternalLink />
-                                </button>
-                            )}
+                            <div className={styles.updateFooter}>
+                                <span className={styles.updateSource}>Fuente: {update.sourceLabel}</span>
+                                <span className={styles.readMoreButton}>
+                                    <span>Leer en la fuente</span>
+                                    <ExternalLink/>
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     )

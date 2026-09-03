@@ -5,8 +5,9 @@ import styles from "./statscard.module.css"
 interface StatCard {
     title: string
     value: string | number
-    change?: string
-    changeType: "positive" | "negative" | "neutral" | string
+    delta?: string
+    deltaType?: "positive" | "negative" | "neutral" | string
+    subtitle?: string
     icon: React.ReactNode
     color: string
 }
@@ -20,17 +21,20 @@ const StatsCard: React.FC<StatsCardsProps> = ({ stat }) =>
     return (
         <div className={styles.statCard}>
             <div className={styles.cardHeader}>
+                <p className={styles.statTitle}>{stat.title}</p>
                 <div className={styles.iconContainer} style={{ backgroundColor: `${stat.color}15` }}>
                     <div style={{ color: stat.color }}>{stat.icon}</div>
                 </div>
-                {stat.change && (
-                    <div className={`${styles.change} ${styles[stat.changeType || "neutral"]}`}>{stat.change}</div>
+            </div>
+
+            <div className={styles.valueRow}>
+                <h3 className={styles.statValue}>{stat.value}</h3>
+                {stat.delta && (
+                    <span className={`${styles.delta} ${styles[stat.deltaType || "neutral"]}`}>{stat.delta}</span>
                 )}
             </div>
-            <div className={styles.cardContent}>
-                <h3 className={styles.statValue}>{stat.value}</h3>
-                <p className={styles.statTitle}>{stat.title}</p>
-            </div>
+
+            {stat.subtitle && <p className={styles.statSub}>{stat.subtitle}</p>}
         </div>
     )
 }

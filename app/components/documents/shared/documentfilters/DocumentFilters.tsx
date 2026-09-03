@@ -5,6 +5,7 @@ import {Grid, List, Search} from "@/app/components/svg";
 
 interface DocumentFiltersProps {
     searchTerm?: string
+    searchPlaceholder?: string
     onSearchChange?: (term: string) => void
     selectedStatus?: string
     onStatusChange?: (status: string) => void
@@ -21,7 +22,7 @@ interface DocumentFiltersProps {
 
 const defaultTypeOptions = [{value: "all", label: "Todos los tipos"}];
 
-const DocumentFilters: React.FC<DocumentFiltersProps> = ({ searchTerm, onSearchChange, selectedStatus, onStatusChange, selectedType, onTypeChange, selectedExtra, onExtraChange, extraOptions, viewMode, onViewModeChange, statusOptions, typeOptions }) =>
+const DocumentFilters: React.FC<DocumentFiltersProps> = ({ searchTerm, searchPlaceholder, onSearchChange, selectedStatus, onStatusChange, selectedType, onTypeChange, selectedExtra, onExtraChange, extraOptions, viewMode, onViewModeChange, statusOptions, typeOptions }) =>
 {
     return (
         <div className={styles.filtersContainer}>
@@ -32,7 +33,7 @@ const DocumentFilters: React.FC<DocumentFiltersProps> = ({ searchTerm, onSearchC
                         <Search />
                         <input
                             type="text"
-                            placeholder="Buscar documentos..."
+                            placeholder={searchPlaceholder ?? "Buscar documentos..."}
                             value={searchTerm}
                             onChange={(e) => onSearchChange?.(e.target.value)}
                             className={styles.searchInput}

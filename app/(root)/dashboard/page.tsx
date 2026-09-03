@@ -2,98 +2,68 @@
 
 import styles from './page.module.css';
 import StatsCard from '@/app/components/dashboard/statscard/StatsCard';
-import {Briefcase, File, FileCheck, TimeAgo} from '@/app/components/svg';
+import {FileCheck, Scale, TimeAgo, Users} from '@/app/components/svg';
 import RecentDocuments from '@/app/components/dashboard/recentdocuments/RecentDocuments';
 import LegalUpdates from '@/app/components/dashboard/legalupdates/LegalUpdates';
 import QuickActions from '@/app/components/dashboard/quickactions/QuickActions';
 import {useFetch} from '@/hooks/useFetch';
-import {Document, PaginatedResponse} from '@/app/interfaces/interfaces';
+import {DashboardSummary, Document, LegalUpdate, PaginatedResponse} from '@/app/interfaces/interfaces';
 import {DocumentStatus} from '@/app/interfaces/enums';
 
-const defaultUpdates = [
-    {
-        id:       '1',
-        title:    'Nueva Ley de Protección de Datos Personales',
-        summary:  'Modificaciones importantes en el tratamiento de datos personales que afectan contratos comerciales.',
-        date:     '2024-01-15',
-        category: 'Derecho Digital',
-        priority: 'high',
-        source:   'Congreso de la República',
-        url:      '#',
-    },
-    {
-        id:       '2',
-        title:    'Actualización Código Sustantivo del Trabajo',
-        summary:  'Nuevas disposiciones sobre teletrabajo y modalidades de contratación laboral.',
-        date:     '2024-01-12',
-        category: 'Derecho Laboral',
-        priority: 'medium',
-        source:   'Ministerio del Trabajo',
-        url:      '#',
-    },
-    {
-        id:       '3',
-        title:    'Reforma Tributaria 2024',
-        summary:  'Cambios en las tarifas del impuesto de renta para personas jurídicas.',
-        date:     '2024-01-10',
-        category: 'Derecho Tributario',
-        priority: 'high',
-        source:   'DIAN',
-        url:      '#',
-    },
-    {
-        id:       '4',
-        title:    'Circular Superintendencia de Sociedades',
-        summary:  'Nuevos requisitos para la constitución de sociedades por acciones simplificadas.',
-        date:     '2024-01-08',
-        category: 'Derecho Comercial',
-        priority: 'medium',
-        source:   'Supersociedades',
-        url:      '#',
-    },
-];
+const plural = (n: number, singular: string, pluralForm: string) => `${n} ${n === 1 ? singular : pluralForm}`;
+
+const formatPct = (value: number | null): string | undefined =>
+    value === null ? undefined : `${value >= 0 ? '↑' : '↓'} ${Math.abs(value)}%`;
+
+const formatNew = (n: number): string | undefined =>
+    n > 0 ? `+${plural(n, 'nuevo', 'nuevos')}` : undefined;
 
 const Dashboard = () =>
 {
     const {data: docsResponse, isLoading} = useFetch<PaginatedResponse<Document>>('document?limit=5', {firmScoped: true});
-
-    const total     = docsResponse?.total ?? 0;
-    const completed = docsResponse?.data.filter(d => d.status === DocumentStatus.COMPLETED).length ?? 0;
-    const drafts    = docsResponse?.data.filter(d => d.status === DocumentStatus.DRAFT).length ?? 0;
-    const hoursaved = Math.round(total * 0.63);
+    const {data: updatesResponse} = useFetch<PaginatedResponse<LegalUpdate>>('legal-updates?limit=5');
+    const {data: summary} = useFetch<DashboardSummary>('dashboard/summary', {firmScoped: true});
 
     const statsData = [
         {
-            title:      'Documentos Generados',
-            value:      String(total),
-            change:     '+12%',
-            changeType: 'positive',
-            icon:       <FileCheck />,
-            color:      '#10b981',
+            title:     'Documentos generados',
+            value:     summary ? summary.documents.month : '—',
+            delta:     summary ? formatPct(summary.documents.deltaPct) : undefined,
+            deltaType: (summary?.documents.deltaPct ?? 0) >= 0 ? 'positive' : 'negative',
+            subtitle:  summary ? `${summary.documents.total} en total` : undefined,
+            icon:      <FileCheck />,
+            color:     '#3b82f6',
         },
         {
-            title:      'Tiempo Ahorrado',
-            value:      `${hoursaved}h`,
-            change:     '+8%',
-            changeType: 'positive',
-            icon:       <TimeAgo />,
-            color:      '#3b82f6',
+            title:     'Horas facturables',
+            value:     summary ? `${summary.billableHours.month} h` : '—',
+            delta:     summary ? formatPct(summary.billableHours.deltaPct) : undefined,
+            deltaType: (summary?.billableHours.deltaPct ?? 0) >= 0 ? 'positive' : 'negative',
+            subtitle:  summary ? `de ${summary.billableHours.trackedMonth} h registradas este mes` : undefined,
+            icon:      <TimeAgo />,
+            color:     '#10b981',
         },
         {
-            title:      'Completados',
-            value:      String(completed),
-            change:     '+3%',
-            changeType: 'positive',
-            icon:       <File />,
-            color:      '#f59e0b',
+            title:     'Procesos activos',
+            value:     summary ? summary.processes.active : '—',
+            delta:     summary ? formatNew(summary.processes.newThisMonth) : undefined,
+            deltaType: 'positive',
+            subtitle:  summary ? `${summary.processes.inReview} en revisión` : undefined,
+            icon:      <Scale />,
+            color:     '#f59e0b',
         },
         {
-            title:      'Borradores',
-            value:      String(drafts),
-            change:     '',
-            changeType: 'neutral',
-            icon:       <Briefcase />,
-            color:      '#8b5cf6',
+            title:     'Clientes activos',
+            value:     summary ? summary.clients.active : '—',
+            delta:     summary ? formatNew(summary.clients.newThisMonth) : undefined,
+            deltaType: 'positive',
+            subtitle:  summary
+                ? (summary.clients.newThisMonth > 0
+                    ? `${plural(summary.clients.newCompanies, 'empresa', 'empresas')} · ${plural(summary.clients.newIndividuals, 'p. natural', 'p. naturales')}`
+                    : 'sin altas este mes')
+                : undefined,
+            icon:      <Users />,
+            color:     '#8b5cf6',
         },
     ];
 
@@ -123,7 +93,7 @@ const Dashboard = () =>
                         : <RecentDocuments documents={recentDocuments} maxItems={5} showActions={true} />
                     }
                 </div>
-                <LegalUpdates updates={defaultUpdates} maxItems={5} showPriority={true} />
+                <LegalUpdates updates={updatesResponse?.data ?? []} maxItems={5} />
             </div>
         </div>
     );

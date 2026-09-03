@@ -6,6 +6,8 @@ import {
     FirmMemberRole,
     FirmMemberStatus,
     InvoiceStatus,
+    LegalUpdateSource,
+    LegalUpdateType,
     PaymentMethodType,
     ProcessStatus,
     SignatureType,
@@ -508,4 +510,59 @@ export interface LibraryDocument
     deletedAt: string | null;
     createdAt: string;
     updatedAt: string;
+}
+
+// ─── Legal Update ────────────────────────────────────────────────────────────
+
+export interface LegalUpdate
+{
+    id: string;
+    numId: number;
+    source: LegalUpdateSource;
+    sourceLabel: string;
+    type: LegalUpdateType;
+    title: string;
+    summary: string | null;
+    url: string;
+    category: string | null;
+    branchId: string | null;
+    branch: { id: string; name: string; slug: string; color: string | null; icon: string | null } | null;
+    publishedAt: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface LegalUpdateSourceInfo
+{
+    source: LegalUpdateSource;
+    label: string;
+    lastOkAt: string | null;
+    itemsLastRun: number;
+}
+
+// ─── Dashboard ───────────────────────────────────────────────────────────────
+
+export interface DashboardSummary
+{
+    documents: {
+        month: number;
+        total: number;
+        deltaPct: number | null;
+    };
+    billableHours: {
+        month: number;
+        trackedMonth: number;
+        deltaPct: number | null;
+    };
+    processes: {
+        active: number;
+        inReview: number;
+        newThisMonth: number;
+    };
+    clients: {
+        active: number;
+        newThisMonth: number;
+        newCompanies: number;
+        newIndividuals: number;
+    };
 }
