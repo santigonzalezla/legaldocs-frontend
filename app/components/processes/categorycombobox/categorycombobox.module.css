@@ -1,0 +1,103 @@
+.wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.input {
+    padding: 10px 12px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text-primary);
+    background: var(--content-bg);
+    outline: none;
+    transition: border-color 0.2s ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.input:focus {
+    border-color: #92400e;
+}
+
+.input::placeholder {
+    color: var(--text-secondary);
+}
+
+.dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--content-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 20;
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.empty {
+    padding: 8px 10px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 10px;
+    border: none;
+    background: none;
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.option:hover {
+    background: var(--hover-bg);
+}
+
+.optionActive {
+    background: var(--primary-color-alpha);
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.createOption {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 8px 10px;
+    border: none;
+    border-top: 1px solid var(--border-light);
+    background: none;
+    border-radius: 0 0 6px 6px;
+    font-size: 14px;
+    color: var(--primary-color);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.createOption:hover {
+    background: var(--primary-color-alpha);
+}
+
+.createOption:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.createOption svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}

@@ -1,0 +1,315 @@
+.panel {
+    background: var(--content-bg);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid var(--border-light);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.addButton {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary-color);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.addButton:hover {
+    opacity: 0.9;
+}
+
+.uploadBox {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 14px;
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    background: var(--hover-bg);
+}
+
+.dropzone {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.dropzone:hover {
+    border-color: var(--primary-color);
+}
+
+.dropzoneActive {
+    border-color: var(--primary-color);
+    background: var(--primary-color-alpha);
+}
+
+/* El <div> de la zona de arrastre abre el selector programáticamente (onClick →
+   input.click()). El input no debe capturar el click él mismo o el diálogo se
+   dispara dos veces y Safari lo cancela — de ahí que "hacer clic" no adjuntara. */
+.fileInput {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.dropzoneEmpty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-secondary);
+}
+
+.dropzoneEmpty p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.dropzoneEmpty span {
+    font-size: 12px;
+}
+
+.fileSelected {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.fileSize {
+    color: var(--text-secondary);
+}
+
+.uploadRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.select {
+    flex: 1;
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--content-bg);
+    color: var(--text-primary);
+    font-size: 13px;
+}
+
+.cancelButton {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: none;
+    color: var(--text-secondary);
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.cancelButton:hover {
+    background: var(--hover-bg);
+}
+
+.uploadButton {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary-color);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.uploadButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.empty {
+    margin: 0;
+    padding: 16px 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+}
+
+.itemIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: var(--primary-color-alpha);
+    color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+.itemInfo {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.itemName {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.itemMeta {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.itemAction,
+.itemDelete {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 6px;
+    background: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.itemAction:hover {
+    background: var(--hover-bg);
+    color: var(--primary-color);
+}
+
+.itemDelete:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+/* ── Variante "inline": anidada dentro de otra tarjeta (comentarios) ────── */
+
+.inline {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.inlineHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.inlineLabel {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.inlineAdd {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    border: none;
+    background: none;
+    color: var(--primary-color);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.inlineAdd svg {
+    width: 12px;
+    height: 12px;
+}
+
+.gridInline {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 8px;
+}
+
+.itemInline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: var(--content-bg);
+    border: 1px solid var(--border-light);
+}
+
+.itemInline .itemName {
+    font-size: 12.5px;
+}
+
+.itemInline .itemMeta {
+    font-size: 11px;
+}
+
+.itemInline .itemIcon {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+}
+
+.itemInline .itemIcon svg {
+    width: 15px;
+    height: 15px;
+}

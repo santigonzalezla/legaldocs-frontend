@@ -96,6 +96,16 @@
     flex-shrink: 0;
 }
 
+.tagBadge {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: #fffbeb;
+    color: #b45309;
+    flex-shrink: 0;
+}
+
 .reference {
     font-size: 0.875rem;
     color: var(--primary-color);
@@ -170,68 +180,51 @@
 
 /* Info grid */
 .infoGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 1rem;
-}
-
-.infoCard {
     background: var(--content-bg);
     border: 1px solid var(--border-light);
     border-radius: 12px;
-    padding: 1.1rem 1.25rem;
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 18px 24px;
+}
+
+.infoItem {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 4px;
+    min-width: 0;
 }
 
 .infoCardLabel {
-    font-size: 0.75rem;
+    font-size: 12px;
     font-weight: 600;
     color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
 }
 
 .infoValue {
-    font-size: 0.9rem;
+    font-size: 14px;
     font-weight: 500;
     color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .clientLink {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
+    align-self: flex-start;
     background: none;
     border: none;
-    cursor: pointer;
     padding: 0;
     text-align: left;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--primary-color);
+    cursor: pointer;
     transition: opacity 0.2s ease;
 }
 
 .clientLink:hover { opacity: 0.75; }
-
-.clientAvatar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    background: var(--primary-color-alpha);
-    color: var(--primary-color);
-    border-radius: 7px;
-    flex-shrink: 0;
-}
-
-.clientAvatar svg { width: 15px; height: 15px; }
-
-.clientLink span {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--primary-color);
-}
 
 /* Description */
 .descCard {
@@ -252,46 +245,3 @@
     white-space: pre-wrap;
 }
 
-/* Placeholder sections */
-.placeholderGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1rem;
-}
-
-.placeholderCard {
-    background: var(--content-bg);
-    border: 1px dashed var(--border-light);
-    border-radius: 12px;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.placeholderHeader {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-}
-
-.placeholderHeader svg {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-    color: var(--text-secondary);
-}
-
-.placeholderHeader h3 {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0;
-}
-
-.placeholderText {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    margin: 0;
-    line-height: 1.5;
-}

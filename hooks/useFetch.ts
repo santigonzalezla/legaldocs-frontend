@@ -67,6 +67,10 @@ export function useFetch<T = any>(url: string, options: UseFetchOptions = {}): U
             const fetchOptions: RequestInit = {
                 method:  merged.method ?? 'GET',
                 headers,
+                // API autenticada: nunca servir desde la caché del navegador. Safari
+                // cacheaba de forma heurística los GET y las listas no se refrescaban
+                // tras subir/crear.
+                cache:   'no-store',
             };
 
             if (merged.body && merged.method !== 'GET')

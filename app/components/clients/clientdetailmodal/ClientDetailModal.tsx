@@ -6,14 +6,14 @@ import {useEffect, useState} from 'react';
 import {useRouter} from 'next/navigation';
 import {useFetch} from '@/hooks/useFetch';
 import {toast} from 'sonner';
-import {ArrowLeft, Briefcase, Building, Calendar, Edit, Mail, MapPin, Phone, Save, Trash, User, X} from '@/app/components/svg';
-import {ClientType, ProcessStatus} from '@/app/interfaces/enums';
+import {ArrowLeft, Briefcase, Building, Calendar, Edit, Save, Trash, User, X} from '@/app/components/svg';
+import {CLIENT_DOCUMENT_TYPE_LABELS, CLIENT_REGIME_TYPE_LABELS, ClientIdDocumentType, ClientType, ProcessStatus} from '@/app/interfaces/enums';
 import type {Client, LegalProcess, PaginatedResponse} from '@/app/interfaces/interfaces';
 import {STATUS_COLOR, STATUS_LABEL} from '@/app/components/processes/processgrid/ProcessGrid';
 import {useConfirm} from '@/hooks/useConfirm';
 import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
-
-const DOC_TYPES = ['CC', 'NIT', 'CE', 'PP', 'TI', 'RUT'];
+import ClientExtraFields from '@/app/components/clients/clientextrafields/ClientExtraFields';
+import AttachmentsPanel from '@/app/components/shared/attachmentspanel/AttachmentsPanel';
 
 const formatDate = (d: string) =>
     new Date(d).toLocaleDateString('es-ES', {day: '2-digit', month: 'long', year: 'numeric'});
@@ -51,44 +51,64 @@ const ClientDetailModal = ({clientId, onClose, onSaved, onDeleted}: ClientDetail
     const {confirm, confirmState, handleConfirm, handleCancel} = useConfirm();
 
     const [form, setForm] = useState({
-        type:           ClientType.INDIVIDUAL as ClientType,
-        firstName:      '',
-        lastName:       '',
-        companyName:    '',
-        documentType:   '',
-        documentNumber: '',
-        email:          '',
-        phone:          '',
-        city:           '',
-        address:        '',
+        type:                  ClientType.INDIVIDUAL as ClientType,
+        firstName:             '',
+        lastName:              '',
+        companyName:           '',
+        documentType:          '',
+        documentNumber:        '',
+        email:                 '',
+        phone:                 '',
+        city:                  '',
+        address:               '',
+        regimeType:            '',
+        sector:                '',
+        isBusinessGroup:       false,
+        responsiblePartnerId:  '',
     });
 
     useEffect(() =>
     {
         if (!client) return;
         setForm({
-            type:           client.type,
-            firstName:      client.firstName      ?? '',
-            lastName:       client.lastName       ?? '',
-            companyName:    client.companyName    ?? '',
-            documentType:   client.documentType   ?? '',
-            documentNumber: client.documentNumber ?? '',
-            email:          client.email          ?? '',
-            phone:          client.phone          ?? '',
-            city:           client.city           ?? '',
-            address:        client.address        ?? '',
+            type:                  client.type,
+            firstName:             client.firstName      ?? '',
+            lastName:              client.lastName       ?? '',
+            companyName:           client.companyName    ?? '',
+            documentType:          client.documentType   ?? '',
+            documentNumber:        client.documentNumber ?? '',
+            email:                 client.email          ?? '',
+            phone:                 client.phone          ?? '',
+            city:                  client.city           ?? '',
+            address:               client.address        ?? '',
+            regimeType:            client.regimeType     ?? '',
+            sector:                client.sector         ?? '',
+            isBusinessGroup:       client.isBusinessGroup,
+            responsiblePartnerId:  client.responsiblePartnerId ?? '',
         });
     }, [client]);
 
-    const set = (field: keyof typeof form, value: string) =>
+    const set = (field: keyof typeof form, value: string | boolean) =>
         setForm(prev => ({...prev, [field]: value}));
 
     const handleSave = async () =>
     {
         const isCompany = form.type === ClientType.COMPANY;
+        const shared = {
+            documentType:          form.documentType || undefined,
+            documentNumber:        form.documentNumber || undefined,
+            email:                 form.email || undefined,
+            phone:                 form.phone || undefined,
+            city:                  form.city || undefined,
+            address:               form.address || undefined,
+            regimeType:            form.regimeType || undefined,
+            sector:                form.sector || undefined,
+            isBusinessGroup:       form.isBusinessGroup,
+            responsiblePartnerId:  form.responsiblePartnerId || undefined,
+        };
         const body = isCompany
-            ? {type: form.type, companyName: form.companyName || undefined, documentType: form.documentType || undefined, documentNumber: form.documentNumber || undefined, email: form.email || undefined, phone: form.phone || undefined, city: form.city || undefined, address: form.address || undefined}
-            : {type: form.type, firstName: form.firstName || undefined, lastName: form.lastName || undefined, documentType: form.documentType || undefined, documentNumber: form.documentNumber || undefined, email: form.email || undefined, phone: form.phone || undefined, city: form.city || undefined, address: form.address || undefined};
+            ? {type: form.type, companyName: form.companyName || undefined, ...shared}
+            : {type: form.type, firstName: form.firstName || undefined, lastName: form.lastName || undefined, ...shared};
 
         const result = await updateClient({body}, `client/${clientId}`);
         if (!result) return;
@@ -157,7 +177,7 @@ const ClientDetailModal = ({clientId, onClose, onSaved, onDeleted}: ClientDetail
                     <div className={styles.viewBody}>
                         {/* Profile */}
                         <div className={styles.profileCard}>
-                            <div className={styles.profileLeft}>
+                            <div className={styles.profileHeader}>
                                 <div className={styles.avatar}>
                                     {client.type === ClientType.COMPANY ? <Building /> : <User />}
                                 </div>
@@ -166,43 +186,72 @@ const ClientDetailModal = ({clientId, onClose, onSaved, onDeleted}: ClientDetail
                                     <span className={`${styles.typeBadge} ${client.type === ClientType.COMPANY ? styles.company : styles.individual}`}>
                                         {client.type === ClientType.COMPANY ? 'Empresa' : 'Persona Natural'}
                                     </span>
+                                    {client.isBusinessGroup && (
+                                        <span className={styles.groupBadge}>Grupo empresarial</span>
+                                    )}
                                 </div>
                             </div>
 
                             <div className={styles.profileInfo}>
-                                {client.documentNumber && (
-                                    <div className={styles.infoItem}>
-                                        <span className={styles.infoLabel}>{client.documentType ?? 'Documento'}</span>
-                                        <span className={styles.infoValue}>{client.documentNumber}</span>
-                                    </div>
-                                )}
-                                {client.email && (
-                                    <div className={styles.infoItem}>
-                                        <Mail />
-                                        <span className={styles.infoValue}>{client.email}</span>
-                                    </div>
-                                )}
-                                {client.phone && (
-                                    <div className={styles.infoItem}>
-                                        <Phone />
-                                        <span className={styles.infoValue}>{client.phone}</span>
-                                    </div>
-                                )}
-                                {client.city && (
-                                    <div className={styles.infoItem}>
-                                        <MapPin />
-                                        <span className={styles.infoValue}>{client.city}</span>
-                                    </div>
-                                )}
-                                {client.address && (
-                                    <div className={styles.infoItem}>
-                                        <span className={styles.infoLabel}>Dirección</span>
-                                        <span className={styles.infoValue}>{client.address}</span>
-                                    </div>
-                                )}
-                                <div className={styles.infoItem}>
+                                <div className={styles.infoColumn}>
+                                    {client.documentNumber && (
+                                        <div className={styles.infoItem}>
+                                            <span className={styles.infoLabel}>{client.documentType ?? 'Documento'}</span>
+                                            <span className={styles.infoValue}>{client.documentNumber}</span>
+                                        </div>
+                                    )}
+                                    {client.email && (
+                                        <div className={styles.infoItem}>
+                                            <span className={styles.infoLabel}>Email</span>
+                                            <span className={styles.infoValue}>{client.email}</span>
+                                        </div>
+                                    )}
+                                    {client.phone && (
+                                        <div className={styles.infoItem}>
+                                            <span className={styles.infoLabel}>Teléfono</span>
+                                            <span className={styles.infoValue}>{client.phone}</span>
+                                        </div>
+                                    )}
+                                    {client.address && (
+                                        <div className={styles.infoItem}>
+                                            <span className={styles.infoLabel}>Dirección</span>
+                                            <span className={styles.infoValue}>{client.address}</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className={styles.infoColumn}>
+                                    {client.regimeType && (
+                                        <div className={styles.infoItem}>
+                                            <span className={styles.infoLabel}>Régimen</span>
+                                            <span className={styles.infoValue}>{CLIENT_REGIME_TYPE_LABELS[client.regimeType]}</span>
+                                        </div>
+                                    )}
+                                    {client.responsiblePartner?.user && (
+                                        <div className={styles.infoItem}>
+                                            <span className={styles.infoLabel}>Socio responsable</span>
+                                            <span className={styles.infoValue}>{client.responsiblePartner.user.firstName} {client.responsiblePartner.user.lastName}</span>
+                                        </div>
+                                    )}
+                                    {client.city && (
+                                        <div className={styles.infoItem}>
+                                            <span className={styles.infoLabel}>Ciudad</span>
+                                            <span className={styles.infoValue}>{client.city}</span>
+                                        </div>
+                                    )}
+                                    {client.sector && (
+                                        <div className={styles.infoItem}>
+                                            <span className={styles.infoLabel}>Sector</span>
+                                            <span className={styles.infoValue}>{client.sector}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className={styles.profileFooter}>
+                                <div className={styles.registeredRow}>
                                     <Calendar />
-                                    <span className={styles.infoValue}>Registrado el {formatDate(client.createdAt)}</span>
+                                    <span>Registrado el {formatDate(client.createdAt)}</span>
                                 </div>
                             </div>
                         </div>
@@ -259,6 +308,11 @@ const ClientDetailModal = ({clientId, onClose, onSaved, onDeleted}: ClientDetail
                                 </div>
                             )}
                         </div>
+
+                        <AttachmentsPanel
+                            apiBasePath={`client/${clientId}/documents`}
+                            typeOptions={Object.entries(CLIENT_DOCUMENT_TYPE_LABELS).map(([value, label]) => ({value, label}))}
+                        />
                     </div>
 
                 ) : (
@@ -328,7 +382,7 @@ const ClientDetailModal = ({clientId, onClose, onSaved, onDeleted}: ClientDetail
                                         onChange={e => set('documentType', e.target.value)}
                                     >
                                         <option value="">Seleccionar</option>
-                                        {DOC_TYPES.map(d => <option key={d} value={d}>{d}</option>)}
+                                        {Object.values(ClientIdDocumentType).map(docType => <option key={docType} value={docType}>{docType}</option>)}
                                     </select>
                                 </div>
                                 <div className={formStyles.formGroup}>
@@ -384,6 +438,18 @@ const ClientDetailModal = ({clientId, onClose, onSaved, onDeleted}: ClientDetail
                                     />
                                 </div>
                             </div>
+
+                            <ClientExtraFields
+                                showAddress={false}
+                                value={{
+                                    address:               form.address,
+                                    regimeType:            form.regimeType,
+                                    sector:                form.sector,
+                                    isBusinessGroup:       form.isBusinessGroup,
+                                    responsiblePartnerId:  form.responsiblePartnerId,
+                                }}
+                                onChange={set}
+                            />
                         </div>
 
                         <div className={formStyles.modalActions}>

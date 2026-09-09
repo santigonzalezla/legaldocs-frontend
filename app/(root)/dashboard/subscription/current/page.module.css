@@ -254,34 +254,47 @@
     margin: 0;
 }
 
-/* ── Limits grid ──────────────────────────────────────────────── */
+/* ── Uso del plan ─────────────────────────────────────────────── */
 
-.limitsGrid {
+.limitsRow {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 0.875rem;
 }
 
-.limitCard {
+.limitsWideRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.875rem;
+}
+
+@media (max-width: 900px) {
+    .limitsRow,
+    .limitsWideRow { grid-template-columns: 1fr; }
+}
+
+.limitCard,
+.wideCard {
     background: var(--content-bg);
     border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 1.25rem;
+    border-radius: 12px;
+    padding: 1.1rem 1.25rem;
     display: flex;
     flex-direction: column;
-    gap: 0.875rem;
+    gap: 0.85rem;
 }
 
-.limitCardTop {
+.limitTop,
+.wideMain {
     display: flex;
     align-items: center;
-    gap: 0.875rem;
+    gap: 0.75rem;
 }
 
 .limitIcon {
     width: 38px;
     height: 38px;
-    border-radius: 8px;
+    border-radius: 9px;
     background: color-mix(in srgb, var(--primary-color) 10%, transparent);
     color: var(--primary-color);
     display: flex;
@@ -292,40 +305,140 @@
 
 .limitIcon svg { width: 18px; height: 18px; }
 
-.limitInfo {
+.limitHeadings,
+.wideHeadings {
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
+    gap: 0.1rem;
     min-width: 0;
+    flex: 1;
 }
 
-.limitLabel {
-    font-size: 0.78rem;
-    color: var(--text-secondary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.limitValue {
-    font-size: 1.2rem;
+.limitLabel,
+.wideLabel {
+    font-size: 0.85rem;
     font-weight: 700;
     color: var(--text-primary);
-    line-height: 1;
+    line-height: 1.25;
 }
 
-.limitMax {
-    font-size: 0.85rem;
-    font-weight: 500;
+.wideLabel { font-size: 1.05rem; }
+
+.limitSub {
+    font-size: 0.72rem;
     color: var(--text-secondary);
+    line-height: 1.25;
 }
 
-.limitPctRow {
+.limitPill {
+    flex-shrink: 0;
+    align-self: flex-start;
+    padding: 0.1rem 0.45rem;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+    color: var(--primary-color);
+}
+
+.limitValueRow {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
     gap: 0.5rem;
+    flex-wrap: wrap;
 }
+
+.limitValue,
+.wideValue {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.wideValue {
+    flex-shrink: 0;
+    font-size: 1.9rem;
+    text-align: right;
+}
+
+.limitValueRest {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.limitSecondary {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.wideFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    font-size: 0.78rem;
+}
+
+.legend {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-secondary);
+    flex-wrap: wrap;
+}
+
+.dot,
+.dotMuted {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    flex-shrink: 0;
+}
+
+.dotMuted {
+    background: var(--border-color);
+    margin-left: 0.5rem;
+}
+
+.wideLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: 0.78rem;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.wideLink svg { width: 13px; height: 13px; }
+
+.breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.breakdownRow {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-size: 0.8rem;
+    color: var(--text-primary);
+}
+
+.breakdownMeta { color: var(--text-secondary); }
 
 .limitTrack {
     width: 100%;
@@ -338,6 +451,7 @@
 .limitFill {
     height: 100%;
     border-radius: 99px;
+    background: var(--primary-color);
     transition: width 0.4s ease;
 }
 

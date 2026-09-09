@@ -9,6 +9,8 @@ import {toast} from 'sonner';
 import {ArrowLeft, Save} from '@/app/components/svg';
 import type {ClientPickerOption, LegalBranch, LegalProcess} from '@/app/interfaces/interfaces';
 import {ProcessStatus} from '@/app/interfaces/enums';
+import ProcessExtraFields from '@/app/components/processes/processextrafields/ProcessExtraFields';
+import CategoryCombobox from '@/app/components/processes/categorycombobox/CategoryCombobox';
 
 const STATUS_OPTIONS = [
     {value: ProcessStatus.ACTIVE,    label: 'Activo'},
@@ -35,51 +37,75 @@ const ProcessEditPage = () =>
         useFetch<LegalProcess>('', {method: 'PATCH', immediate: false, firmScoped: true});
 
     const [form, setForm] = useState({
-        clientId:    '',
-        title:       '',
-        description: '',
-        reference:   '',
-        branchId:    '',
-        status:      ProcessStatus.ACTIVE as ProcessStatus,
-        court:       '',
-        counterpart: '',
-        startDate:   '',
-        endDate:     '',
+        clientId:              '',
+        title:                 '',
+        description:           '',
+        reference:             '',
+        branchId:              '',
+        status:                ProcessStatus.ACTIVE as ProcessStatus,
+        court:                 '',
+        counterpart:           '',
+        startDate:             '',
+        endDate:               '',
+        billingType:           '',
+        categoryId:            '',
+        responsiblePartnerId:  '',
+        originatorId:          '',
+        billingResponsibleId:  '',
+        assignedTo:            '',
+        isProBono:             false,
+        hasPartialPayment:     false,
     });
 
     useEffect(() =>
     {
         if (!process) return;
         setForm({
-            clientId:    process.clientId        ?? '',
-            title:       process.title           ?? '',
-            description: process.description     ?? '',
-            reference:   process.reference       ?? '',
-            branchId:    process.branchId        ?? '',
-            status:      process.status,
-            court:       process.court           ?? '',
-            counterpart: process.counterpart     ?? '',
-            startDate:   process.startDate       ? process.startDate.slice(0, 10) : '',
-            endDate:     process.endDate         ? process.endDate.slice(0, 10)   : '',
+            clientId:              process.clientId        ?? '',
+            title:                 process.title           ?? '',
+            description:           process.description     ?? '',
+            reference:             process.reference       ?? '',
+            branchId:              process.branchId        ?? '',
+            status:                process.status,
+            court:                 process.court           ?? '',
+            counterpart:           process.counterpart     ?? '',
+            startDate:             process.startDate       ? process.startDate.slice(0, 10) : '',
+            endDate:               process.endDate         ? process.endDate.slice(0, 10)   : '',
+            billingType:           process.billingType     ?? '',
+            categoryId:            process.categoryId      ?? '',
+            responsiblePartnerId:  process.responsiblePartnerId ?? '',
+            originatorId:          process.originatorId         ?? '',
+            billingResponsibleId:  process.billingResponsibleId ?? '',
+            assignedTo:            process.assignedTo           ?? '',
+            isProBono:             process.isProBono,
+            hasPartialPayment:     process.hasPartialPayment,
         });
     }, [process]);
 
-    const set = (field: keyof typeof form, value: string) =>
+    const set = (field: keyof typeof form, value: string | boolean) =>
         setForm(prev => ({...prev, [field]: value}));
 
     const handleSave = async () =>
     {
         const body = {
-            clientId:    form.clientId    || undefined,
-            title:       form.title       || undefined,
-            description: form.description || undefined,
-            reference:   form.reference   || undefined,
-            branchId:    form.branchId    || undefined,
-            status:      form.status,
-            court:       form.court       || undefined,
-            counterpart: form.counterpart || undefined,
-            startDate:   form.startDate   || undefined,
-            endDate:     form.endDate     || undefined,
+            clientId:              form.clientId    || undefined,
+            title:                 form.title       || undefined,
+            description:           form.description || undefined,
+            reference:             form.reference   || undefined,
+            branchId:              form.branchId    || undefined,
+            status:                form.status,
+            court:                 form.court       || undefined,
+            counterpart:           form.counterpart || undefined,
+            startDate:             form.startDate   || undefined,
+            endDate:               form.endDate     || undefined,
+            billingType:           form.billingType || undefined,
+            categoryId:            form.categoryId  || undefined,
+            responsiblePartnerId:  form.responsiblePartnerId || undefined,
+            originatorId:          form.originatorId         || undefined,
+            billingResponsibleId:  form.billingResponsibleId || undefined,
+            assignedTo:            form.assignedTo           || undefined,
+            isProBono:             form.isProBono,
+            hasPartialPayment:     form.hasPartialPayment,
         };
 
         const result = await updateProcess({body}, `process/${id}`);
@@ -139,11 +165,15 @@ const ProcessEditPage = () =>
 
                     <div className={formStyles.formGroup}>
                         <label>Título del proceso *</label>
-                        <input
-                            className={formStyles.input}
+                        <CategoryCombobox
+                            categoryId={form.categoryId}
+                            categoryName={form.title}
                             placeholder="Ej: Proceso arrendamiento Apto 301"
-                            value={form.title}
-                            onChange={e => set('title', e.target.value)}
+                            onChange={(categoryId, categoryName) =>
+                            {
+                                set('categoryId', categoryId);
+                                set('title', categoryName);
+                            }}
                         />
                     </div>
 
@@ -223,6 +253,8 @@ const ProcessEditPage = () =>
                             onChange={e => set('endDate', e.target.value)}
                         />
                     </div>
+
+                    <ProcessExtraFields value={form} onChange={set} />
                 </div>
 
                 <div className={styles.cardActions}>

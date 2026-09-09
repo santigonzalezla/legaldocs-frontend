@@ -1,0 +1,579 @@
+.panel {
+    background: var(--content-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+
+.header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.headerIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: var(--primary-color-alpha);
+    color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+.headerIcon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.headerTitle {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.headerSub {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.countPill {
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--hover-bg);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.headerActions {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.advanceWrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.hint {
+    font-size: 11px;
+    color: var(--text-secondary);
+    max-width: 220px;
+    text-align: right;
+}
+
+.ghostBtn {
+    padding: 8px 12px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    background: none;
+    color: var(--text-secondary);
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.ghostBtn:hover {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+}
+
+.primaryBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary-color);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.primaryBtn:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.primaryBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.primaryBtn svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* ── Búsqueda ───────────────────────────────────────────────────────────── */
+
+.searchWrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+}
+
+.searchWrapper:focus-within {
+    border-color: var(--primary-color);
+}
+
+.searchWrapper svg {
+    width: 15px;
+    height: 15px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.searchInput {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: none;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+/* ── Estados vacíos ─────────────────────────────────────────────────────── */
+
+.empty {
+    margin: 0;
+    padding: 24px 0;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.emptyBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 28px 16px;
+    border: 1px dashed var(--border-light);
+    border-radius: 12px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    text-align: center;
+}
+
+/* ── Rail de etapas ─────────────────────────────────────────────────────── */
+
+.timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.stageRow {
+    position: relative;
+    padding-left: 26px;
+}
+
+.stageRow::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 6px;
+    bottom: -14px;
+    width: 2px;
+    background: var(--border-light);
+}
+
+.timeline .stageRow:last-child::before {
+    display: none;
+}
+
+.node {
+    position: absolute;
+    left: 0;
+    top: 4px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 3px solid var(--content-bg);
+    box-shadow: 0 0 0 1px var(--border-light);
+}
+
+.nodeCurrent {
+    width: 16px;
+    height: 16px;
+    left: -1px;
+}
+
+/* ── Tarjeta de etapa ──────────────────────────────────────────────────── */
+
+.stageCard {
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stageCardCurrent {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color-alpha);
+}
+
+.stageHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.stageBadge {
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.microTag {
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: var(--hover-bg);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.currentPill {
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.spacer {
+    flex: 1;
+}
+
+.expandBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 6px;
+    background: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.expandBtn:hover {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+}
+
+.expandBtn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.stageMeta {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+/* ── Comentarios ───────────────────────────────────────────────────────── */
+
+.commentList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 4px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-light);
+}
+
+.comment {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    background: var(--hover-bg);
+}
+
+.commentHeader {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--primary-color-alpha);
+    color: var(--primary-color);
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.commentAuthor {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.authorLine {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.authorName {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.roleChip {
+    padding: 1px 7px;
+    border-radius: 6px;
+    background: var(--content-bg);
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.commentDate {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.commentHeaderActions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.iconBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    background: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.iconBtn:hover {
+    background: var(--content-bg);
+    color: var(--text-primary);
+}
+
+.iconBtn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.iconBtn.danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.commentBody {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+}
+
+.commentMeta {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.commentMeta strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.actionBtn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 11px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    background: var(--content-bg);
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.actionBtn:hover {
+    background: var(--hover-bg);
+}
+
+.actionBtn svg {
+    width: 13px;
+    height: 13px;
+}
+
+.actionBtn.danger {
+    color: #ef4444;
+    border-color: transparent;
+}
+
+.actionBtn.danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.addCommentBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+    padding: 8px 12px;
+    border: 1px dashed var(--border-light);
+    border-radius: 8px;
+    background: none;
+    color: var(--primary-color);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.addCommentBtn:hover {
+    background: var(--primary-color-alpha);
+}
+
+.addCommentBtn svg {
+    width: 13px;
+    height: 13px;
+}
+
+/* ── Progreso de etapas (header) ───────────────────────────────────────── */
+
+.progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.progressBadge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: var(--primary-color-alpha);
+    color: var(--primary-color);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.progressBar {
+    display: flex;
+    gap: 3px;
+}
+
+.progressSeg {
+    width: 18px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border-light);
+}
+
+.progressSeg[data-filled='true'] {
+    background: var(--primary-color);
+}
+
+/* ── Etapa sin registro (omitida / no alcanzada) ──────────────────────── */
+
+.stageRowMuted {
+    opacity: 0.85;
+}
+
+.nodeMuted {
+    position: absolute;
+    left: 1px;
+    top: 6px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--content-bg);
+    border: 2px solid var(--border-color);
+}
+
+.placeholderCard {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px;
+    border-radius: 10px;
+    background: var(--hover-bg);
+}
+
+.placeholderTitle {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.placeholderHint {
+    font-size: 12px;
+    color: var(--text-secondary);
+    opacity: 0.8;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mutedPill {
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+}

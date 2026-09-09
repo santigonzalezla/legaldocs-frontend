@@ -2,34 +2,44 @@
 
 import styles from './createclientmodal.module.css';
 import {X, Plus} from '@/app/components/svg';
-import {ClientType} from '@/app/interfaces/enums';
+import {CLIENT_DOCUMENT_TYPE_LABELS, ClientIdDocumentType, ClientType} from '@/app/interfaces/enums';
+import ClientExtraFields from '@/app/components/clients/clientextrafields/ClientExtraFields';
+import AttachmentsPanel from '@/app/components/shared/attachmentspanel/AttachmentsPanel';
+import type {PendingAttachment} from '@/lib/attachments';
 
-interface CreateClientForm
+// Solo `type` tiene valor por defecto — el resto queda undefined hasta que el
+// usuario lo llena, en vez de arrancar cada campo en '' a mano.
+export interface CreateClientForm
 {
-    type:           ClientType;
-    firstName:      string;
-    lastName:       string;
-    companyName:    string;
-    documentType:   string;
-    documentNumber: string;
-    email:          string;
-    phone:          string;
-    city:           string;
+    type:                   ClientType;
+    firstName?:             string;
+    lastName?:              string;
+    companyName?:           string;
+    documentType?:          string;
+    documentNumber?:        string;
+    email?:                 string;
+    phone?:                 string;
+    city?:                  string;
+    address?:               string;
+    regimeType?:            string;
+    sector?:                string;
+    isBusinessGroup?:       boolean;
+    responsiblePartnerId?:  string;
 }
 
 interface CreateClientModalProps
 {
-    open:     boolean;
-    saving:   boolean;
-    form:     CreateClientForm;
-    onChange: (field: keyof CreateClientForm, value: string) => void;
-    onClose:  () => void;
-    onSave:   () => void;
+    open:               boolean;
+    saving:             boolean;
+    form:               CreateClientForm;
+    attachments:        PendingAttachment[];
+    onChange:           (field: keyof CreateClientForm, value: string | boolean) => void;
+    onAttachmentsChange: (attachments: PendingAttachment[]) => void;
+    onClose:            () => void;
+    onSave:             () => void;
 }
 
-const DOC_TYPES = ['CC', 'NIT', 'CE', 'PP', 'TI', 'RUT'];
-
-const CreateClientModal = ({open, saving, form, onChange, onClose, onSave}: CreateClientModalProps) =>
+const CreateClientModal = ({open, saving, form, attachments, onChange, onAttachmentsChange, onClose, onSave}: CreateClientModalProps) =>
 {
     if (!open) return null;
 
@@ -70,7 +80,7 @@ const CreateClientModal = ({open, saving, form, onChange, onClose, onSave}: Crea
                             <input
                                 className={styles.input}
                                 placeholder="Ej: Inversiones XYZ S.A.S."
-                                value={form.companyName}
+                                value={form.companyName ?? ''}
                                 onChange={e => onChange('companyName', e.target.value)}
                                 autoFocus
                             />
@@ -82,7 +92,7 @@ const CreateClientModal = ({open, saving, form, onChange, onClose, onSave}: Crea
                                 <input
                                     className={styles.input}
                                     placeholder="Juan"
-                                    value={form.firstName}
+                                    value={form.firstName ?? ''}
                                     onChange={e => onChange('firstName', e.target.value)}
                                     autoFocus
                                 />
@@ -92,7 +102,7 @@ const CreateClientModal = ({open, saving, form, onChange, onClose, onSave}: Crea
                                 <input
                                     className={styles.input}
                                     placeholder="Pérez"
-                                    value={form.lastName}
+                                    value={form.lastName ?? ''}
                                     onChange={e => onChange('lastName', e.target.value)}
                                 />
                             </div>
@@ -104,11 +114,11 @@ const CreateClientModal = ({open, saving, form, onChange, onClose, onSave}: Crea
                             <label>Tipo de documento</label>
                             <select
                                 className={styles.select}
-                                value={form.documentType}
+                                value={form.documentType ?? ''}
                                 onChange={e => onChange('documentType', e.target.value)}
                             >
                                 <option value="">Seleccionar</option>
-                                {DOC_TYPES.map(d => <option key={d} value={d}>{d}</option>)}
+                                {Object.values(ClientIdDocumentType).map(docType => <option key={docType} value={docType}>{docType}</option>)}
                             </select>
                         </div>
                         <div className={styles.formGroup}>
@@ -116,7 +126,7 @@ const CreateClientModal = ({open, saving, form, onChange, onClose, onSave}: Crea
                             <input
                                 className={styles.input}
                                 placeholder="1234567890"
-                                value={form.documentNumber}
+                                value={form.documentNumber ?? ''}
                                 onChange={e => onChange('documentNumber', e.target.value)}
                             />
                         </div>
@@ -129,7 +139,7 @@ const CreateClientModal = ({open, saving, form, onChange, onClose, onSave}: Crea
                                 className={styles.input}
                                 type="email"
                                 placeholder="cliente@email.com"
-                                value={form.email}
+                                value={form.email ?? ''}
                                 onChange={e => onChange('email', e.target.value)}
                             />
                         </div>
@@ -138,7 +148,7 @@ const CreateClientModal = ({open, saving, form, onChange, onClose, onSave}: Crea
                             <input
                                 className={styles.input}
                                 placeholder="+57 300 123 4567"
-                                value={form.phone}
+                                value={form.phone ?? ''}
                                 onChange={e => onChange('phone', e.target.value)}
                             />
                         </div>
@@ -149,10 +159,27 @@ const CreateClientModal = ({open, saving, form, onChange, onClose, onSave}: Crea
                         <input
                             className={styles.input}
                             placeholder="Bogotá"
-                            value={form.city}
+                            value={form.city ?? ''}
                             onChange={e => onChange('city', e.target.value)}
                         />
                     </div>
+
+                    <ClientExtraFields
+                        value={{
+                            address:               form.address ?? '',
+                            regimeType:            form.regimeType ?? '',
+                            sector:                form.sector ?? '',
+                            isBusinessGroup:       form.isBusinessGroup ?? false,
+                            responsiblePartnerId:  form.responsiblePartnerId ?? '',
+                        }}
+                        onChange={onChange}
+                    />
+
+                    <AttachmentsPanel
+                        typeOptions={Object.entries(CLIENT_DOCUMENT_TYPE_LABELS).map(([value, label]) => ({value, label}))}
+                        pendingAttachments={attachments}
+                        onPendingChange={onAttachmentsChange}
+                    />
                 </div>
 
                 <div className={styles.modalActions}>
@@ -160,7 +187,7 @@ const CreateClientModal = ({open, saving, form, onChange, onClose, onSave}: Crea
                     <button
                         className={styles.saveButton}
                         onClick={onSave}
-                        disabled={saving || (isCompany ? !form.companyName.trim() : !form.firstName.trim())}
+                        disabled={saving || (isCompany ? !(form.companyName ?? '').trim() : !(form.firstName ?? '').trim())}
                         type="button"
                     >
                         {saving ? 'Guardando...' : <><Plus /> Crear Cliente</>}

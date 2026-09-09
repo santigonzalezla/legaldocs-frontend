@@ -3,6 +3,11 @@
 import styles from './createprocessmodal.module.css';
 import {X, Plus} from '@/app/components/svg';
 import type {ClientPickerOption, LegalBranch} from '@/app/interfaces/interfaces';
+import ProcessExtraFields, {ProcessExtraFieldsValue} from '@/app/components/processes/processextrafields/ProcessExtraFields';
+import CategoryCombobox from '@/app/components/processes/categorycombobox/CategoryCombobox';
+import AttachmentsPanel from '@/app/components/shared/attachmentspanel/AttachmentsPanel';
+import {PROCESS_DOCUMENT_TYPE_LABELS} from '@/app/interfaces/enums';
+import type {PendingAttachment} from '@/lib/attachments';
 
 const formatThousands = (raw: string) =>
 {
@@ -10,10 +15,11 @@ const formatThousands = (raw: string) =>
     return digits ? Number(digits).toLocaleString('es-CO') : '';
 };
 
-export interface CreateProcessForm
+export interface CreateProcessForm extends ProcessExtraFieldsValue
 {
     clientId:     string;
     title:        string;
+    categoryId:   string;
     description:  string;
     reference:    string;
     branchId:     string;
@@ -25,17 +31,19 @@ export interface CreateProcessForm
 
 interface CreateProcessModalProps
 {
-    open:     boolean;
-    saving:   boolean;
-    form:     CreateProcessForm;
-    clients:  ClientPickerOption[];
-    branches: LegalBranch[];
-    onChange: (field: keyof CreateProcessForm, value: string) => void;
-    onClose:  () => void;
-    onSave:   () => void;
+    open:                boolean;
+    saving:              boolean;
+    form:                CreateProcessForm;
+    clients:             ClientPickerOption[];
+    branches:            LegalBranch[];
+    attachments:         PendingAttachment[];
+    onChange:            (field: keyof CreateProcessForm, value: string | boolean) => void;
+    onAttachmentsChange: (attachments: PendingAttachment[]) => void;
+    onClose:             () => void;
+    onSave:              () => void;
 }
 
-const CreateProcessModal = ({open, saving, form, clients, branches, onChange, onClose, onSave}: CreateProcessModalProps) =>
+const CreateProcessModal = ({open, saving, form, clients, branches, attachments, onChange, onAttachmentsChange, onClose, onSave}: CreateProcessModalProps) =>
 {
     if (!open) return null;
 
@@ -64,12 +72,15 @@ const CreateProcessModal = ({open, saving, form, clients, branches, onChange, on
 
                     <div className={styles.formGroup}>
                         <label>Título del proceso *</label>
-                        <input
-                            className={styles.input}
+                        <CategoryCombobox
+                            categoryId={form.categoryId}
+                            categoryName={form.title}
                             placeholder="Ej: Proceso arrendamiento Apto 301"
-                            value={form.title}
-                            onChange={e => onChange('title', e.target.value)}
-                            autoFocus
+                            onChange={(categoryId, categoryName) =>
+                            {
+                                onChange('categoryId', categoryId);
+                                onChange('title', categoryName);
+                            }}
                         />
                     </div>
 
@@ -153,6 +164,14 @@ const CreateProcessModal = ({open, saving, form, clients, branches, onChange, on
                             />
                         </div>
                     </div>
+
+                    <ProcessExtraFields value={form} onChange={onChange} />
+
+                    <AttachmentsPanel
+                        typeOptions={Object.entries(PROCESS_DOCUMENT_TYPE_LABELS).map(([value, label]) => ({value, label}))}
+                        pendingAttachments={attachments}
+                        onPendingChange={onAttachmentsChange}
+                    />
                 </div>
 
                 <div className={styles.modalActions}>

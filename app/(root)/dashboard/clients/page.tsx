@@ -1,45 +1,44 @@
 'use client';
 
 import styles from './page.module.css';
-import {useState} from 'react';
-import {Building, Plus, User, Users} from '@/app/components/svg';
+import {useSearchParams} from 'next/navigation';
+import {Suspense, useState} from 'react';
+import {Plus} from '@/app/components/svg';
 import {useFetch} from '@/hooks/useFetch';
 import {toast} from 'sonner';
 import {ClientType} from '@/app/interfaces/enums';
 import type {Client, PaginatedResponse} from '@/app/interfaces/interfaces';
 import {useConfirm} from '@/hooks/useConfirm';
+import {useAuth} from '@/context/AuthContext';
+import {useFirmId} from '@/hooks/useFirmId';
+import {uploadAttachment, type PendingAttachment} from '@/lib/attachments';
 import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
-import DocumentStatCard    from '@/app/components/documents/generated/documentstatscard/DocumentStatsCard';
 import ClientFilters       from '@/app/components/clients/clientfilters/ClientFilters';
 import ClientGrid          from '@/app/components/clients/clientgrid/ClientGrid';
 import ClientList          from '@/app/components/clients/clientlist/ClientList';
-import CreateClientModal   from '@/app/components/clients/createclientmodal/CreateClientModal';
+import CreateClientModal, {CreateClientForm} from '@/app/components/clients/createclientmodal/CreateClientModal';
 import ClientDetailModal   from '@/app/components/clients/clientdetailmodal/ClientDetailModal';
 import {PermissionGuard}  from '@/app/components/auth/PermissionGuard';
 
-const EMPTY_FORM = {
-    type:           ClientType.INDIVIDUAL,
-    firstName:      '',
-    lastName:       '',
-    companyName:    '',
-    documentType:   '',
-    documentNumber: '',
-    email:          '',
-    phone:          '',
-    city:           '',
-};
+// Solo `type` arranca con valor — el resto queda undefined hasta que el
+// usuario lo llena (evita listar cada campo con su '' por defecto).
+const EMPTY_FORM: CreateClientForm = {type: ClientType.INDIVIDUAL};
 
 const ClientsPage = () =>
 {
     const [search,           setSearch]           = useState('');
     const [selectedType,     setSelectedType]     = useState('all');
-    const [view,             setView]             = useState<'grid' | 'list'>('grid');
+    const [view,             setView]             = useState<'grid' | 'list'>('list');
     const [showCreateModal,  setShowCreateModal]  = useState(false);
     const [saving,           setSaving]           = useState(false);
     const [form,             setForm]             = useState({...EMPTY_FORM});
-    const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+    const [attachments,      setAttachments]      = useState<PendingAttachment[]>([]);
+    const searchParams = useSearchParams();
+    const [selectedClientId, setSelectedClientId] = useState<string | null>(searchParams.get('clientId'));
 
     const {confirm, confirmState, handleConfirm, handleCancel} = useConfirm();
+    const {accessToken} = useAuth();
+    const firmId         = useFirmId();
 
     const {data: response, isLoading, execute: refetch} =
         useFetch<PaginatedResponse<Client>>('client?limit=100', {firmScoped: true});
@@ -69,28 +68,45 @@ const ClientsPage = () =>
         return matchesSearch && matchesType;
     });
 
-    const stats = {
-        total:      clients.length,
-        individual: clients.filter(c => c.type === ClientType.INDIVIDUAL).length,
-        company:    clients.filter(c => c.type === ClientType.COMPANY).length,
-    };
-
-    const handleChange = (field: keyof typeof EMPTY_FORM, value: string) =>
+    const handleChange = (field: keyof CreateClientForm, value: string | boolean) =>
         setForm(prev => ({...prev, [field]: value}));
 
-    const handleOpenModal  = () => { setForm({...EMPTY_FORM}); setShowCreateModal(true); };
+    const handleOpenModal  = () => { setForm({...EMPTY_FORM}); setAttachments([]); setShowCreateModal(true); };
     const handleCloseModal = () => setShowCreateModal(false);
 
     const handleCreate = async () =>
     {
         setSaving(true);
+
+        const shared = {
+            documentType:          form.documentType || undefined,
+            documentNumber:        form.documentNumber || undefined,
+            email:                 form.email || undefined,
+            phone:                 form.phone || undefined,
+            city:                  form.city || undefined,
+            address:               form.address || undefined,
+            regimeType:            form.regimeType || undefined,
+            sector:                form.sector || undefined,
+            isBusinessGroup:       form.isBusinessGroup ?? false,
+            responsiblePartnerId:  form.responsiblePartnerId || undefined,
+        };
+
         const body = form.type === ClientType.COMPANY
-            ? {type: form.type, companyName: form.companyName || undefined, documentType: form.documentType || undefined, documentNumber: form.documentNumber || undefined, email: form.email || undefined, phone: form.phone || undefined, city: form.city || undefined}
-            : {type: form.type, firstName: form.firstName || undefined, lastName: form.lastName || undefined, documentType: form.documentType || undefined, documentNumber: form.documentNumber || undefined, email: form.email || undefined, phone: form.phone || undefined, city: form.city || undefined};
+            ? {type: form.type, companyName: form.companyName || undefined, ...shared}
+            : {type: form.type, firstName: form.firstName || undefined, lastName: form.lastName || undefined, ...shared};
 
         const result = await createClient({body});
+        if (!result) { setSaving(false); return; }
+
+        if (attachments.length > 0)
+        {
+            const uploads = await Promise.all(
+                attachments.map(attachment => uploadAttachment(`client/${result.id}/documents`, attachment.file, attachment.type, accessToken, firmId)),
+            );
+            if (uploads.some(ok => !ok)) toast.error('El cliente se creó, pero algunos documentos no se pudieron adjuntar.');
+        }
+
         setSaving(false);
-        if (!result) return;
         toast.success('Cliente registrado correctamente.');
         setShowCreateModal(false);
         refetch();
@@ -119,16 +135,6 @@ const ClientsPage = () =>
                         <Plus /> Nuevo Cliente
                     </button>
                 </div>
-
-                <div className={styles.statsContainer}>
-                    {[
-                        {title: 'Total clientes',     value: stats.total,      icon: <Users />,    color: '#3b82f6', bgColor: '#eff6ff', percentage: null},
-                        {title: 'Personas naturales', value: stats.individual, icon: <User />,     color: '#10b981', bgColor: '#ecfdf5', percentage: stats.total ? Math.round(stats.individual / stats.total * 100) : 0},
-                        {title: 'Empresas',           value: stats.company,    icon: <Building />, color: '#f59e0b', bgColor: '#fffbeb', percentage: stats.total ? Math.round(stats.company    / stats.total * 100) : 0},
-                    ].map((s, i) => (
-                        <DocumentStatCard documentStat={s} key={i} />
-                    ))}
-                </div>
             </div>
 
             <ClientFilters
@@ -153,7 +159,9 @@ const ClientsPage = () =>
                 open={showCreateModal}
                 saving={saving}
                 form={form}
+                attachments={attachments}
                 onChange={handleChange}
+                onAttachmentsChange={setAttachments}
                 onClose={handleCloseModal}
                 onSave={handleCreate}
             />
@@ -183,7 +191,9 @@ const ClientsPage = () =>
 
 const ClientsPageGuarded = () => (
     <PermissionGuard permission="clients:view">
-        <ClientsPage/>
+        <Suspense fallback={null}>
+            <ClientsPage/>
+        </Suspense>
     </PermissionGuard>
 );
 

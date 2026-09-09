@@ -5,7 +5,7 @@ import styles from './page.module.css';
 import {useParams, useRouter} from 'next/navigation';
 import {useFetch} from '@/hooks/useFetch';
 import {toast} from 'sonner';
-import {ArrowLeft, Briefcase, Building, Calendar, DollarSign, Edit, Plus, Trash, User} from '@/app/components/svg';
+import {ArrowLeft, Briefcase, DollarSign, Edit, Plus, Trash} from '@/app/components/svg';
 import type {Firm, LegalBranch, LegalProcess, ProcessClientSummary, ProcessValueEntry, TimeEntry} from '@/app/interfaces/interfaces';
 import {useConfirm} from '@/hooks/useConfirm';
 import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
@@ -13,7 +13,9 @@ import TimeTracker from '@/app/components/processes/timetracker/TimeTracker';
 import ProcessDocuments from '@/app/components/processes/processdocuments/ProcessDocuments';
 import BillingPanel from '@/app/components/processes/billingpanel/BillingPanel';
 import AddValueEntryModal from '@/app/components/processes/addvalueentrymodal/AddValueEntryModal';
-import {BillableType, ClientType, ProcessStatus} from '@/app/interfaces/enums';
+import AttachmentsPanel from '@/app/components/shared/attachmentspanel/AttachmentsPanel';
+import ProcessTimeline from '@/app/components/processes/processtimeline/ProcessTimeline';
+import {BillableType, ClientType, PROCESS_BILLING_TYPE_LABELS, PROCESS_DOCUMENT_TYPE_LABELS, ProcessStatus} from '@/app/interfaces/enums';
 import {STATUS_LABEL} from '@/app/components/processes/processgrid/ProcessGrid';
 import {PermissionGuard} from '@/app/components/auth/PermissionGuard';
 import {usePermissions} from '@/context/PermissionsContext';
@@ -28,6 +30,9 @@ const clientName = (client: ProcessClientSummary) =>
     client.type === ClientType.COMPANY
         ? (client.companyName ?? '—')
         : [client.firstName, client.lastName].filter(Boolean).join(' ') || '—';
+
+const memberName = (member: {user: {firstName: string; lastName: string} | null} | null | undefined) =>
+    member?.user ? `${member.user.firstName} ${member.user.lastName}` : '—';
 
 const STATUS_DOT: Record<ProcessStatus, string> = {
     [ProcessStatus.ACTIVE]:    '#10b981',
@@ -135,6 +140,8 @@ const ProcessDetailPage = () =>
                             title={STATUS_LABEL[process.status]}
                             style={{background: STATUS_DOT[process.status]}}
                         />
+                        {process.isProBono && <span className={styles.tagBadge}>Pro bono</span>}
+                        {process.hasPartialPayment && <span className={styles.tagBadge}>Cobro parcial</span>}
                     </div>
                     {process.reference && <span className={styles.reference}>Rad. {process.reference}</span>}
                 </div>
@@ -156,55 +163,67 @@ const ProcessDetailPage = () =>
 
             {/* Info grid */}
             <div className={styles.infoGrid}>
-                <div className={styles.infoCard}>
+                <div className={styles.infoItem}>
                     <span className={styles.infoCardLabel}>Cliente</span>
                     {client ? (
                         can('clients:view') ? (
                             <button
                                 className={styles.clientLink}
-                                onClick={() => router.push(`/dashboard/clients/${client.id}`)}
+                                onClick={() => router.push(`/dashboard/clients?clientId=${client.id}`)}
                             >
-                                <div className={styles.clientAvatar}>
-                                    {client.type === ClientType.COMPANY ? <Building /> : <User />}
-                                </div>
-                                <span>{clientName(client)}</span>
+                                {clientName(client)}
                             </button>
                         ) : (
-                            <div className={styles.clientLink} style={{cursor: 'default'}}>
-                                <div className={styles.clientAvatar}>
-                                    {client.type === ClientType.COMPANY ? <Building /> : <User />}
-                                </div>
-                                <span>{clientName(client)}</span>
-                            </div>
+                            <span className={styles.infoValue}>{clientName(client)}</span>
                         )
                     ) : (
                         <span className={styles.infoValue}>—</span>
                     )}
                 </div>
 
-                <div className={styles.infoCard}>
+                <div className={styles.infoItem}>
                     <span className={styles.infoCardLabel}>Rama del derecho</span>
                     <span className={styles.infoValue}>{branch?.name ?? '—'}</span>
                 </div>
 
-                <div className={styles.infoCard}>
+                <div className={styles.infoItem}>
                     <span className={styles.infoCardLabel}>Juzgado / Entidad</span>
                     <span className={styles.infoValue}>{process.court ?? '—'}</span>
                 </div>
 
-                <div className={styles.infoCard}>
+                <div className={styles.infoItem}>
                     <span className={styles.infoCardLabel}>Contraparte</span>
                     <span className={styles.infoValue}>{process.counterpart ?? '—'}</span>
                 </div>
 
-                <div className={styles.infoCard}>
+                <div className={styles.infoItem}>
                     <span className={styles.infoCardLabel}>Fecha de inicio</span>
                     <span className={styles.infoValue}>{formatDate(process.startDate)}</span>
                 </div>
 
-                <div className={styles.infoCard}>
+                <div className={styles.infoItem}>
                     <span className={styles.infoCardLabel}>Fecha de cierre</span>
                     <span className={styles.infoValue}>{formatDate(process.endDate)}</span>
+                </div>
+
+                <div className={styles.infoItem}>
+                    <span className={styles.infoCardLabel}>Tipo de cobro</span>
+                    <span className={styles.infoValue}>{process.billingType ? PROCESS_BILLING_TYPE_LABELS[process.billingType] : '—'}</span>
+                </div>
+
+                <div className={styles.infoItem}>
+                    <span className={styles.infoCardLabel}>Socio responsable</span>
+                    <span className={styles.infoValue}>{memberName(process.responsiblePartner)}</span>
+                </div>
+
+                <div className={styles.infoItem}>
+                    <span className={styles.infoCardLabel}>Originador</span>
+                    <span className={styles.infoValue}>{memberName(process.originator)}</span>
+                </div>
+
+                <div className={styles.infoItem}>
+                    <span className={styles.infoCardLabel}>Responsable de facturación</span>
+                    <span className={styles.infoValue}>{memberName(process.billingResponsible)}</span>
                 </div>
             </div>
 
@@ -302,27 +321,12 @@ const ProcessDetailPage = () =>
 
             <ProcessDocuments processId={process.id} />
 
-            <div className={styles.placeholderGrid}>
-                <div className={styles.placeholderCard}>
-                    <div className={styles.placeholderHeader}>
-                        <Calendar />
-                        <h3>Términos y Vencimientos</h3>
-                    </div>
-                    <p className={styles.placeholderText}>
-                        Próximamente: registro de fechas críticas, términos judiciales y alertas de vencimiento.
-                    </p>
-                </div>
+            <AttachmentsPanel
+                apiBasePath={`process/${process.id}/documents`}
+                typeOptions={Object.entries(PROCESS_DOCUMENT_TYPE_LABELS).map(([value, label]) => ({value, label}))}
+            />
 
-                <div className={styles.placeholderCard}>
-                    <div className={styles.placeholderHeader}>
-                        <Edit />
-                        <h3>Actuaciones</h3>
-                    </div>
-                    <p className={styles.placeholderText}>
-                        Próximamente: bitácora cronológica de actuaciones, notas y diligencias del proceso.
-                    </p>
-                </div>
-            </div>
+            <ProcessTimeline processId={process.id} />
 
             {confirmState && (
                 <ConfirmModal

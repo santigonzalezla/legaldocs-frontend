@@ -1,12 +1,9 @@
 'use client';
 
-import styles from '@/app/components/documents/generated/documenttable/documenttable.module.css';
+import styles from './clientlist.module.css';
 import {Building, Mail, Phone, Trash, User} from '@/app/components/svg';
 import type {Client} from '@/app/interfaces/interfaces';
 import {ClientType} from '@/app/interfaces/enums';
-
-const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric'});
 
 const clientName = (c: Client) =>
     c.type === ClientType.COMPANY
@@ -26,6 +23,14 @@ const ClientList = ({clients, onSelect, onDelete}: ClientListProps) =>
         <div className={styles.tableContainer}>
             <div className={styles.tableWrapper}>
                 <table className={styles.table}>
+                    <colgroup>
+                        <col style={{width: '21%'}} />
+                        <col style={{width: '15%'}} />
+                        <col style={{width: '19%'}} />
+                        <col style={{width: '22%'}} />
+                        <col style={{width: '11%'}} />
+                        <col style={{width: '12%'}} />
+                    </colgroup>
                     <thead>
                         <tr>
                             <th>Cliente</th>
@@ -33,8 +38,7 @@ const ClientList = ({clients, onSelect, onDelete}: ClientListProps) =>
                             <th>Documento</th>
                             <th>Contacto</th>
                             <th>Ciudad</th>
-                            <th>Registro</th>
-                            <th>Acciones</th>
+                            <th className={styles.actionsCell}>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -63,27 +67,31 @@ const ClientList = ({clients, onSelect, onDelete}: ClientListProps) =>
                                         {c.type === ClientType.COMPANY ? 'Empresa' : 'Persona Natural'}
                                     </span>
                                 </td>
-                                <td className={styles.dateCell}>
-                                    {c.documentNumber ? `${c.documentType ?? 'Doc'}: ${c.documentNumber}` : '—'}
+                                <td className={styles.docCell}>
+                                    {c.documentNumber ? (
+                                        <>
+                                            <span className={styles.docLabel}>{c.documentType ?? 'Doc'}:</span>{' '}
+                                            <span className={styles.docValue}>{c.documentNumber}</span>
+                                        </>
+                                    ) : '—'}
                                 </td>
                                 <td>
-                                    <div style={{display: 'flex', flexDirection: 'column', gap: '0.2rem'}}>
+                                    <div className={styles.contactCell}>
                                         {c.email && (
-                                            <span className={styles.clientCell} style={{display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem'}}>
-                                                <Mail style={{width: 13, height: 13, flexShrink: 0}} />{c.email}
+                                            <span className={styles.contactLine}>
+                                                <Mail /><span className={styles.contactText}>{c.email}</span>
                                             </span>
                                         )}
                                         {c.phone && (
-                                            <span className={styles.clientCell} style={{display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem'}}>
-                                                <Phone style={{width: 13, height: 13, flexShrink: 0}} />{c.phone}
+                                            <span className={styles.contactLine}>
+                                                <Phone /><span className={styles.contactText}>{c.phone}</span>
                                             </span>
                                         )}
                                         {!c.email && !c.phone && <span className={styles.clientCell}>—</span>}
                                     </div>
                                 </td>
                                 <td className={styles.dateCell}>{c.city ?? '—'}</td>
-                                <td className={styles.dateCell}>{formatDate(c.createdAt)}</td>
-                                <td>
+                                <td className={styles.actionsCell}>
                                     <div className={styles.tableActions}>
                                         <button
                                             className={styles.actionButton}

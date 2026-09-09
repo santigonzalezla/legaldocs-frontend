@@ -54,18 +54,18 @@ const ClientFilters = ({search, onSearch, selectedType, onTypeChange, view, onVi
             <div className={styles.viewModeSection}>
                 <div className={styles.viewModeToggle}>
                     <button
+                        className={`${styles.viewModeButton} ${view === 'list' ? styles.active : ''}`}
+                        onClick={() => onViewChange('list')}
+                        title="Vista tabla"
+                    >
+                        <List />
+                    </button>
+                    <button
                         className={`${styles.viewModeButton} ${view === 'grid' ? styles.active : ''}`}
                         onClick={() => onViewChange('grid')}
                         title="Vista cuadrícula"
                     >
                         <Grid />
-                    </button>
-                    <button
-                        className={`${styles.viewModeButton} ${view === 'list' ? styles.active : ''}`}
-                        onClick={() => onViewChange('list')}
-                        title="Vista lista"
-                    >
-                        <List />
                     </button>
                 </div>
             </div>

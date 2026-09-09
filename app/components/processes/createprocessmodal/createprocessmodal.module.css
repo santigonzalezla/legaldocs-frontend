@@ -188,3 +188,25 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+.checkboxRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.checkboxRow input {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--primary-color);
+}
+
+.hint {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 0;
+}

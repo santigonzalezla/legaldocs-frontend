@@ -1,5 +1,6 @@
 'use client';
 
+import {useState} from 'react';
 import styles from './page.module.css';
 import Link from 'next/link';
 import {useFetch} from '@/hooks/useFetch';
@@ -8,7 +9,7 @@ import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
 import {toast} from 'sonner';
 import type {Subscription} from '@/app/interfaces/interfaces';
 import {SubscriptionStatus, BillingCycle} from '@/app/interfaces/enums';
-import {ArrowGo, Check, Card, Users, File, BookOpen, Legalito} from '@/app/components/svg';
+import {ArrowGo, Check, Card, Users, File, BookOpen, Legalito, Inventory} from '@/app/components/svg';
 import {PermissionGuard} from '@/app/components/auth/PermissionGuard';
 
 interface Usage {
@@ -27,6 +28,29 @@ const formatTokens = (n: number) =>
     if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
     if (n >= 1_000)     return `${(n / 1_000).toFixed(0)}K`;
     return String(n);
+};
+
+const formatBytes = (n: number) =>
+{
+    if (n >= 1024 ** 3) return `${(n / 1024 ** 3).toFixed(1)} GB`;
+    if (n >= 1024 ** 2) return `${(n / 1024 ** 2).toFixed(1)} MB`;
+    if (n >= 1024)      return `${Math.round(n / 1024)} KB`;
+    return `${n} B`;
+};
+
+interface StorageUsage {
+    usedBytes:   number;
+    fileCount:   number;
+    quotaBytes:  number | null;
+    percentUsed: number | null;
+    byArea:      Array<{area: string; bytes: number; count: number}>;
+}
+
+const AREA_LABELS: Record<string, string> = {
+    PROCESS_DOCUMENT:    'Documentos de procesos',
+    TIMELINE_ATTACHMENT: 'Adjuntos de línea de tiempo',
+    CLIENT_DOCUMENT:     'Documentos de clientes',
+    LIBRARY_DOCUMENT:    'Biblioteca jurídica',
 };
 
 const STATUS_LABEL: Record<SubscriptionStatus, string> = {
@@ -82,10 +106,15 @@ const CurrentSubscriptionPage = () =>
     const {data: usage} =
         useFetch<Usage>('subscription/me/usage', {firmScoped: true});
 
+    const {data: storage} =
+        useFetch<StorageUsage>('firm/me/storage', {firmScoped: true});
+
     const {execute: cancelSub} =
         useFetch<{message: string}>('subscription/me', {method: 'DELETE', immediate: false, firmScoped: true});
 
     const {confirm, confirmState, handleConfirm, handleCancel} = useConfirm();
+
+    const [showBreakdown, setShowBreakdown] = useState(false);
 
     const handleCancelSub = async () =>
     {
@@ -148,37 +177,43 @@ const CurrentSubscriptionPage = () =>
     const aiUsedMonthly = usage?.aiTokens.usedMonthly  ?? null;
     const aiMaxMonthly  = usage?.aiTokens.maxMonthly   ?? null;
 
-    const limits = [
+    const asString = (n: number) => String(n);
+    const pctOf = (used: number | null, max: number | null) =>
+        used !== null && max !== null && max > 0 ? Math.min(100, Math.round((used / max) * 100)) : null;
+
+    type Secondary = 'remaining' | 'available' | 'raw';
+
+    const compactLimits: Array<{
+        icon: React.ReactNode; label: string; sublabel: string;
+        used: number | null; max: number | null; unit: string;
+        format: (n: number) => string; asPercent?: boolean; secondary: Secondary;
+    }> = [
         {
-            icon:       <File />,
-            label:      'Documentos este mes',
-            used:       usage?.documents.used  ?? null,
-            max:        usage?.documents.max   ?? plan.maxDocuments,
-            formatter:  (n: number) => String(n),
+            icon: <File />, label: 'Documentos este mes', sublabel: 'Contratos y documentos generados',
+            used: usage?.documents.used ?? null, max: usage?.documents.max ?? plan.maxDocuments,
+            unit: 'documentos', format: asString, secondary: 'remaining',
         },
         {
-            icon:       <Users />,
-            label:      'Usuarios activos',
-            used:       usage?.users.used      ?? null,
-            max:        usage?.users.max       ?? plan.maxUsers,
-            formatter:  (n: number) => String(n),
+            icon: <Legalito />, label: 'Tokens IA este mes', sublabel: 'Análisis y redacción con Legalito',
+            used: aiUsedMonthly, max: aiMaxMonthly,
+            unit: 'cupo', format: formatTokens, asPercent: true, secondary: 'raw',
         },
         {
-            icon:       <BookOpen />,
-            label:      'Plantillas personalizadas',
-            used:       usage?.templates.used  ?? null,
-            max:        usage?.templates.max   ?? plan.maxTemplates,
-            formatter:  (n: number) => String(n),
-        },
-        {
-            icon:       <Legalito />,
-            label:      'Tokens IA este mes',
-            used:       aiUsedMonthly,
-            max:        aiMaxMonthly,
-            formatter:  formatTokens,
-            showAsPct:  true,
+            icon: <BookOpen />, label: 'Plantillas personalizadas', sublabel: 'Formatos propios del despacho',
+            used: usage?.templates.used ?? null, max: usage?.templates.max ?? plan.maxTemplates,
+            unit: 'plantillas', format: asString, secondary: 'available',
         },
     ];
+
+    const usersUsed    = usage?.users.used ?? null;
+    const usersMax     = usage?.users.max ?? plan.maxUsers;
+    const usersPct     = pctOf(usersUsed, usersMax);
+    const usersFree    = usersUsed !== null && usersMax !== null ? Math.max(0, usersMax - usersUsed) : null;
+
+    const storageUsed  = storage?.usedBytes  ?? null;
+    const storageQuota = storage?.quotaBytes ?? null;
+    const storagePct   = pctOf(storageUsed, storageQuota);
+    const storageFree  = storageUsed !== null && storageQuota !== null ? Math.max(0, storageQuota - storageUsed) : null;
 
     return (
         <div className={styles.page}>
@@ -252,63 +287,133 @@ const CurrentSubscriptionPage = () =>
                 </div>
             </div>
 
-            {/* ── Limits ── */}
+            {/* ── Uso del plan ── */}
             <section className={styles.section}>
                 <h3 className={styles.sectionTitle}>Uso del plan</h3>
-                <div className={styles.limitsGrid}>
-                    {limits.map((l, i) =>
+
+                {/* Fila 1: 3 tarjetas compactas */}
+                <div className={styles.limitsRow}>
+                    {compactLimits.map((l, i) =>
                     {
-                        const pct = l.used !== null && l.max !== null
-                            ? Math.min(100, Math.round((l.used / l.max) * 100))
-                            : null;
+                        const pct = pctOf(l.used, l.max);
                         const isUnlimited = l.max === null;
-                        const isNearLimit = pct !== null && pct >= 80;
+                        const isNear = pct !== null && pct >= 80;
+                        const remaining = l.used !== null && l.max !== null ? Math.max(0, l.max - l.used) : null;
 
                         return (
                             <div key={i} className={styles.limitCard}>
-                                <div className={styles.limitCardTop}>
-                                    <div className={styles.limitIcon}>{l.icon}</div>
-                                    <div className={styles.limitInfo}>
+                                <div className={styles.limitTop}>
+                                    <span className={styles.limitIcon}>{l.icon}</span>
+                                    <div className={styles.limitHeadings}>
                                         <span className={styles.limitLabel}>{l.label}</span>
-                                        {'showAsPct' in l && l.showAsPct
-                                            ? (
-                                                <div className={styles.limitPctRow}>
-                                                    <span className={styles.limitValue} style={{color: isNearLimit ? '#ef4444' : undefined}}>
-                                                        {pct !== null ? `${pct}%` : '—'}
-                                                    </span>
-                                                    <span className={styles.limitMax}>/ 100%</span>
-                                                </div>
-                                            )
-                                            : (
-                                                <span className={styles.limitValue}>
-                                                    {l.used !== null ? l.formatter(l.used) : '—'}
-                                                    <span className={styles.limitMax}>
-                                                        {isUnlimited ? ' / ∞' : l.max !== null ? ` / ${l.formatter(l.max)}` : ''}
-                                                    </span>
-                                                </span>
-                                            )
-                                        }
+                                        <span className={styles.limitSub}>{l.sublabel}</span>
                                     </div>
+                                    <span className={styles.limitPill} style={isNear ? {background: '#fee2e2', color: '#dc2626'} : undefined}>
+                                        {pct !== null ? `${pct}%` : isUnlimited ? '∞' : '—'}
+                                    </span>
                                 </div>
-                                {!isUnlimited && pct !== null && (
-                                    <div className={styles.limitTrack}>
-                                        <div
-                                            className={styles.limitFill}
-                                            style={{
-                                                width:      `${pct}%`,
-                                                background: isNearLimit ? '#ef4444' : 'var(--primary-color)',
-                                            }}
-                                        />
-                                    </div>
-                                )}
-                                {isUnlimited && (
-                                    <div className={styles.limitTrack}>
-                                        <div className={styles.limitFillUnlimited} />
-                                    </div>
-                                )}
+
+                                <div className={styles.limitValueRow}>
+                                    <span className={styles.limitValue} style={isNear ? {color: '#dc2626'} : undefined}>
+                                        {l.asPercent
+                                            ? <>{pct !== null ? `${pct}%` : '—'}<span className={styles.limitValueRest}> / 100% {l.unit}</span></>
+                                            : <>{l.used !== null ? l.format(l.used) : '—'}<span className={styles.limitValueRest}> / {isUnlimited ? '∞' : l.format(l.max as number)} {l.unit}</span></>
+                                        }
+                                    </span>
+                                    <span className={styles.limitSecondary}>
+                                        {isUnlimited
+                                            ? 'Sin límite'
+                                            : l.secondary === 'raw'
+                                                ? (l.used !== null && l.max !== null ? `${l.format(l.used)} / ${l.format(l.max)}` : '')
+                                                : remaining !== null
+                                                    ? `${remaining} ${l.secondary === 'available' ? 'disponibles' : 'restantes'}`
+                                                    : ''}
+                                    </span>
+                                </div>
+
+                                <div className={styles.limitTrack}>
+                                    {isUnlimited
+                                        ? <div className={styles.limitFillUnlimited} />
+                                        : <div className={styles.limitFill} style={{width: `${pct ?? 0}%`, background: isNear ? '#dc2626' : 'var(--primary-color)'}} />}
+                                </div>
                             </div>
                         );
                     })}
+                </div>
+
+                {/* Fila 2: 2 tarjetas anchas */}
+                <div className={styles.limitsWideRow}>
+                    <div className={styles.wideCard}>
+                        <div className={styles.wideMain}>
+                            <span className={styles.limitIcon}><Users /></span>
+                            <div className={styles.wideHeadings}>
+                                <span className={styles.wideLabel}>Usuarios activos en despacho</span>
+                                <span className={styles.limitSub}>Licencias de abogados y asistentes</span>
+                            </div>
+                            <span className={styles.wideValue}>
+                                {usersUsed ?? '—'}
+                                <span className={styles.limitValueRest}> / {usersMax === null ? '∞' : usersMax} licencias</span>
+                            </span>
+                        </div>
+                        <div className={styles.limitTrack}>
+                            {usersMax === null
+                                ? <div className={styles.limitFillUnlimited} />
+                                : <div className={styles.limitFill} style={{width: `${usersPct ?? 0}%`}} />}
+                        </div>
+                        <div className={styles.wideFooter}>
+                            <span className={styles.legend}>
+                                <span className={styles.dot} />{usersUsed ?? 0} en uso
+                                {usersFree !== null && <><span className={styles.dotMuted} />{usersFree} disponibles</>}
+                            </span>
+                            <Link href="/dashboard/settings/office" className={styles.wideLink}>
+                                Gestionar asientos <ArrowGo />
+                            </Link>
+                        </div>
+                    </div>
+
+                    <div className={styles.wideCard}>
+                        <div className={styles.wideMain}>
+                            <span className={styles.limitIcon}><Inventory /></span>
+                            <div className={styles.wideHeadings}>
+                                <span className={styles.wideLabel}>Almacenamiento en nube</span>
+                                <span className={styles.limitSub}>Adjuntos, anexos y evidencias</span>
+                            </div>
+                            <span className={styles.wideValue}>
+                                {storageUsed !== null ? formatBytes(storageUsed) : '—'}
+                                <span className={styles.limitValueRest}> / {storageQuota !== null ? `${formatBytes(storageQuota)} total` : '∞'}</span>
+                            </span>
+                        </div>
+                        <div className={styles.limitTrack}>
+                            {storageQuota === null
+                                ? <div className={styles.limitFillUnlimited} />
+                                : <div className={styles.limitFill} style={{width: `${storagePct ?? 0}%`}} />}
+                        </div>
+                        <div className={styles.wideFooter}>
+                            <span className={styles.legend}>
+                                <span className={styles.dot} />
+                                {storageUsed !== null ? formatBytes(storageUsed) : '—'} ocupados
+                                {storagePct !== null ? ` (${storagePct}%)` : ''}
+                                {storageFree !== null
+                                    ? <><span className={styles.dotMuted} />{formatBytes(storageFree)} libres</>
+                                    : storage ? ` · ${storage.fileCount} archivo${storage.fileCount === 1 ? '' : 's'}` : ''}
+                            </span>
+                            {(storage?.byArea.length ?? 0) > 0 && (
+                                <button type="button" className={styles.wideLink} onClick={() => setShowBreakdown(value => !value)}>
+                                    {showBreakdown ? 'Ocultar desglose' : 'Ver desglose de archivos'} <ArrowGo />
+                                </button>
+                            )}
+                        </div>
+                        {showBreakdown && storage && (
+                            <div className={styles.breakdown}>
+                                {[...storage.byArea].sort((first, second) => second.bytes - first.bytes).map(row => (
+                                    <div key={row.area} className={styles.breakdownRow}>
+                                        <span>{AREA_LABELS[row.area] ?? row.area}</span>
+                                        <span className={styles.breakdownMeta}>{row.count} · {formatBytes(row.bytes)}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </section>
 

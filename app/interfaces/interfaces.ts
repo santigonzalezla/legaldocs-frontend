@@ -1,6 +1,8 @@
 import {
     BillingCycle,
     BillableType,
+    ClientDocumentType,
+    ClientRegimeType,
     ClientType,
     DocumentStatus,
     FirmMemberRole,
@@ -9,7 +11,13 @@ import {
     LegalUpdateSource,
     LegalUpdateType,
     PaymentMethodType,
+    ProcessBillingType,
+    ProcessDocumentType,
     ProcessStatus,
+    ProcessTimelineAttachmentType,
+    ReminderChannel,
+    ReminderStatus,
+    TimelineStage,
     SignatureType,
     SubscriptionStatus,
     TemplateOrigin,
@@ -120,6 +128,8 @@ export interface FirmMember
     firmRoleId: string | null;
     firmRole: {id: string; name: string; slug: string | null} | null;
     status: FirmMemberStatus;
+    isPartner: boolean;
+    user?: {firstName: string; lastName: string; email: string; phone: string | null; hourlyRate: number | null} | null;
     inviteEmail: string | null;
     inviteExpiresAt: string | null;
     joinedAt: string | null;
@@ -373,7 +383,29 @@ export interface Client
     phone: string | null;
     address: string | null;
     city: string | null;
+    regimeType: ClientRegimeType | null;
+    sector: string | null;
+    isBusinessGroup: boolean;
+    responsiblePartnerId: string | null;
+    responsiblePartner?: {id: string; user: {firstName: string; lastName: string} | null} | null;
     createdBy: string;
+    deletedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface ClientDocument
+{
+    id: string;
+    numId: number;
+    clientId: string;
+    uploadedBy: string;
+    type: ClientDocumentType;
+    fileKey: string;
+    fileUrl: string;
+    fileName: string;
+    fileSize: number;
+    mimeType: string;
     deletedAt: string | null;
     createdAt: string;
     updatedAt: string;
@@ -416,13 +448,172 @@ export interface LegalProcess
     endDate: string | null;
     assignedTo: string | null;
     processValue: number | null;
+    billingType: ProcessBillingType | null;
+    categoryId: string | null;
+    responsiblePartnerId: string | null;
+    originatorId: string | null;
+    billingResponsibleId: string | null;
+    isProBono: boolean;
+    hasPartialPayment: boolean;
     valueEntries: ProcessValueEntry[];
-    // Solo viene poblado en GET process/:id (no en el listado).
+    // client/assignee vienen en el listado y en GET process/:id; category/responsiblePartner/
+    // originator/billingResponsible solo vienen poblados en GET process/:id.
     client?: ProcessClientSummary | null;
+    category?: {id: string; name: string; slug: string} | null;
+    responsiblePartner?: {id: string; user: {firstName: string; lastName: string} | null} | null;
+    originator?: {id: string; user: {firstName: string; lastName: string} | null} | null;
+    billingResponsible?: {id: string; user: {firstName: string; lastName: string} | null} | null;
+    assignee?: {id: string; firstName: string; lastName: string} | null;
     createdBy: string;
     deletedAt: string | null;
     createdAt: string;
     updatedAt: string;
+}
+
+export interface ProcessCategory
+{
+    id: string;
+    numId: number;
+    firmId: string | null;
+    name: string;
+    slug: string;
+    isSystem: boolean;
+    isActive: boolean;
+    sortOrder: number;
+    deletedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface ProcessDocument
+{
+    id: string;
+    numId: number;
+    processId: string;
+    uploadedBy: string;
+    type: ProcessDocumentType;
+    fileKey: string;
+    fileUrl: string;
+    fileName: string;
+    fileSize: number;
+    mimeType: string;
+    deletedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+// ─── Línea de tiempo del proceso (etapas + comentarios) ──────────────────────
+
+export interface ProcessTimelineAttachment
+{
+    id: string;
+    numId: number;
+    commentId: string;
+    uploadedBy: string;
+    type: ProcessTimelineAttachmentType;
+    fileKey: string;
+    fileUrl: string;
+    fileName: string;
+    fileSize: number;
+    mimeType: string;
+    deletedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface ProcessTimelineReminder
+{
+    id: string;
+    numId: number;
+    commentId: string;
+    processId: string;
+    channel: ReminderChannel;
+    offsetMinutes: number;
+    remindAt: string;
+    recipientEmail: string;
+    status: ReminderStatus;
+    sentAt: string | null;
+    lastError: string | null;
+    createdBy: string;
+    deletedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface ProcessTimelineComment
+{
+    id: string;
+    numId: number;
+    stageId: string;
+    processId: string;
+    body: string;
+    commentDate: string | null;
+    responsibleId: string | null;
+    // Poblados en GET /process/:id/timeline
+    creator?: {id: string; firstName: string; lastName: string; email: string} | null;
+    responsible?: {id: string; user: {firstName: string; lastName: string; email: string} | null} | null;
+    attachments?: ProcessTimelineAttachment[];
+    reminders?: ProcessTimelineReminder[];
+    createdBy: string;
+    deletedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface ProcessTimelineStage
+{
+    id: string;
+    numId: number;
+    processId: string;
+    firmId: string;
+    stage: TimelineStage;
+    microStageLabel: string | null;
+    // Poblados en GET /process/:id/timeline
+    comments?: ProcessTimelineComment[];
+    createdBy: string;
+    deletedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+// Documento en espera de subirse — formularios de creación donde todavía no
+// existe el ID de la entidad para adjuntarlo.
+export interface PendingAttachment
+{
+    file: File;
+    type: string;
+}
+
+// ── Drafts / opciones de los modales de la línea de tiempo ──────────────────
+
+// Borrador del modal de comentario (crear/editar).
+export interface TimelineCommentDraft
+{
+    body: string;
+    isFutureEvent: boolean;
+    eventDate: string;      // datetime-local; solo aplica si isFutureEvent
+    responsibleId: string;
+}
+
+// Borrador del avance de etapa: primer comentario + adjuntos.
+export interface StageAdvanceDraft
+{
+    body: string;
+    attachments: PendingAttachment[];
+}
+
+// Recordatorio aún no persistido (modal de creación).
+export interface PendingReminder
+{
+    offsetMinutes: number;
+    recipientEmail: string;
+}
+
+// Opción del selector de destinatario de recordatorios.
+export interface MemberEmailOption
+{
+    email: string;
+    name: string;
 }
 
 // Subconjunto de Client sin datos de contacto (email/teléfono/dirección),
