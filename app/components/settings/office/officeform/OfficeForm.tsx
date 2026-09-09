@@ -3,8 +3,10 @@
 import {useEffect, useRef, useState} from 'react';
 import {useRouter} from 'next/navigation';
 import styles from './officeform.module.css';
-import {Building, File, Globe, Mail, MapPin, Phone, Trash, Upload} from '@/app/components/svg';
+import {BarChart, Building, DollarSign, Edit, File, Globe, Mail, MapPin, Phone, Plus, Tag, Trash, TriangleAlert, Upload, X} from '@/app/components/svg';
 import {useFetch} from '@/hooks/useFetch';
+import {API_BASE_URL} from '@/lib/constants';
+import ImageUploadField from '@/app/components/shared/imageupload/ImageUploadField';
 import {useAuth} from '@/context/AuthContext';
 import {usePermissions} from '@/context/PermissionsContext';
 import {useConfirm} from '@/hooks/useConfirm';
@@ -66,8 +68,19 @@ const OfficeForm = () =>
     const [rates,          setRates]          = useState<RatesForm>(emptyRates);
     const [ratesSnapshot,  setRatesSnapshot]  = useState<RatesForm>(emptyRates);
     const [isEditingRates, setIsEditingRates] = useState(false);
+    const [logoVersion,    setLogoVersion]    = useState(0);
 
-    const {data: firm, isLoading: loadingFirm} = useFetch<Firm>('firm/me', {firmScoped: true});
+    const logoPickerRef = useRef<(() => void) | null>(null);
+
+    const {data: firm, isLoading: loadingFirm, execute: refetchFirm} = useFetch<Firm>('firm/me', {firmScoped: true});
+
+    const {execute: uploadLogo} = useFetch<Firm>('firm/me/logo', {
+        method: 'POST', immediate: false, isFormData: true, firmScoped: true,
+    });
+
+    const {execute: deleteLogo} = useFetch<Firm>('firm/me/logo', {
+        method: 'DELETE', immediate: false, firmScoped: true,
+    });
 
     const {data: me} = useFetch<User>('user/me');
 
@@ -177,6 +190,32 @@ const OfficeForm = () =>
 
     const handleCancel = () => { setForm(snapshot); setIsEditing(false); };
 
+    const handleLogoUpload = async (blob: Blob): Promise<boolean> =>
+    {
+        const body = new FormData();
+        body.append('file', blob, 'logo.png');
+
+        const result = await uploadLogo({body});
+        if (!result) return false;
+
+        setLogoVersion(v => v + 1);
+        refetchFirm();
+        window.dispatchEvent(new Event('ld:logo-updated'));
+        toast.success('Logo del despacho actualizado.');
+        return true;
+    };
+
+    const handleLogoRemove = async () =>
+    {
+        const result = await deleteLogo();
+        if (!result) return;
+
+        setLogoVersion(v => v + 1);
+        refetchFirm();
+        window.dispatchEvent(new Event('ld:logo-updated'));
+        toast.success('Logo del despacho eliminado.');
+    };
+
     const handleRatesField = (key: keyof RatesForm, value: string) =>
         setRates(prev => ({...prev, [key]: value}));
 
@@ -270,208 +309,303 @@ const OfficeForm = () =>
     };
 
     if (loadingFirm) return <div className={styles.officeForm}><p>Cargando datos del despacho...</p></div>;
+    if (!firm)       return <div className={styles.officeForm}><p>No se pudo cargar el despacho.</p></div>;
+
+    const hasLogo    = Boolean(firm.logoKey || firm.logoUrl);
+    const locationText = [form.city, form.country].filter(Boolean).join(', ');
 
     return (
         <div className={styles.officeForm}>
-            <div className={styles.logoSection}>
-                <div className={styles.logoContainer}>
-                    <div className={styles.logoPlaceholder}>
-                        <Building />
+
+            <div className={`${styles.card} ${styles.headerCard}`}>
+                <div className={styles.headerMain}>
+                    <ImageUploadField
+                        variant="logo"
+                        src={`${API_BASE_URL}/files/firm-logo/${firm.id}?v=${logoVersion}`}
+                        alt={form.name || 'Logo del despacho'}
+                        editable
+                        showActions={false}
+                        hasImage={hasLogo}
+                        fallback={<Building />}
+                        onUpload={handleLogoUpload}
+                        onRemove={handleLogoRemove}
+                        cropTitle="Ajustar logo del despacho"
+                        caption="PNG o JPG · máx. 2 MB"
+                        pickerRef={logoPickerRef}
+                    />
+
+                    <div className={styles.headerInfo}>
+                        <div className={styles.headerTitleRow}>
+                            <h2 className={styles.firmName}>{form.name || 'Mi Despacho'}</h2>
+                            <span className={styles.badge}>Activa</span>
+                        </div>
+                        <p className={styles.firmSubtitle}>Firma jurídica registrada</p>
+                        <div className={styles.firmMeta}>
+                            {form.nit && <span><File />NIT: {form.nit}</span>}
+                            {form.website && <span><Globe />{form.website}</span>}
+                            {locationText && <span><MapPin />{locationText}</span>}
+                        </div>
                     </div>
-                    <button className={styles.logoButton} disabled>
-                        <Upload />
-                        Cambiar Logo
-                    </button>
                 </div>
-                <div className={styles.logoInfo}>
-                    <h3 className={styles.officeName}>{form.name || 'Mi Despacho'}</h3>
-                    <p className={styles.officeType}>Firma Legal</p>
+
+                <div className={styles.headerActions}>
+                    <button type="button" className={styles.btnOutline} onClick={() => logoPickerRef.current?.()}>
+                        <Upload />
+                        {hasLogo ? 'Cambiar logo' : 'Subir logo'}
+                    </button>
+                    {hasLogo && (
+                        <button type="button" className={styles.btnOutlineDanger} onClick={handleLogoRemove}>
+                            <Trash />
+                            Eliminar logo
+                        </button>
+                    )}
                 </div>
             </div>
 
-            <div className={styles.formSection}>
-                <div className={styles.sectionHeader}>
-                    <h4 className={styles.sectionTitle}>Información del Despacho</h4>
+            <div className={styles.card}>
+                <div className={styles.cardHead}>
+                    <div className={styles.cardHeadText}>
+                        <h3 className={styles.cardTitle}><Building />Información Corporativa y Tributaria</h3>
+                        <p className={styles.cardSubtitle}>
+                            Datos utilizados en facturación electrónica DIAN, encabezados de minutas y poderes especiales.
+                        </p>
+                    </div>
                     {!isEditing ? (
-                        <button className={styles.editButton} onClick={() => setIsEditing(true)}>Editar</button>
+                        <button className={styles.btnEdit} onClick={() => setIsEditing(true)}><Edit />Editar</button>
                     ) : (
-                        <div className={styles.actionButtons}>
-                            <button className={styles.cancelButton} onClick={handleCancel}>Cancelar</button>
-                            <button className={styles.saveButton} onClick={handleSave} disabled={isSaving}>
-                                {isSaving ? 'Guardando...' : 'Guardar'}
+                        <div className={styles.btnGroup}>
+                            <button className={styles.btnGhost} onClick={handleCancel}>Cancelar</button>
+                            <button className={styles.btnPrimary} onClick={handleSave} disabled={isSaving}>
+                                {isSaving ? 'Guardando...' : 'Guardar cambios'}
                             </button>
                         </div>
                     )}
                 </div>
 
-                <div className={styles.formGrid}>
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}><Building />Nombre Comercial</label>
-                        <input type="text" className={styles.input} value={form.name} disabled={!isEditing}
-                            onChange={e => handleField('name', e.target.value)} />
-                    </div>
-
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}><File />Razón Social</label>
-                        <input type="text" className={styles.input} value={form.legalName} disabled={!isEditing}
-                            onChange={e => handleField('legalName', e.target.value)} />
-                    </div>
-
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}><File />NIT</label>
-                        <input type="text" className={styles.input} value={form.nit} disabled={!isEditing}
-                            onChange={e => handleField('nit', e.target.value)} />
-                    </div>
-
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}><Phone />Teléfono</label>
-                        <input type="tel" className={styles.input} value={form.phone} disabled={!isEditing}
-                            onChange={e => handleField('phone', e.target.value)} />
-                    </div>
-
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}><Mail />Email</label>
-                        <input type="email" className={styles.input} value={form.email} disabled={!isEditing}
-                            onChange={e => handleField('email', e.target.value)} />
-                    </div>
-
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}><Globe />Sitio Web</label>
-                        <input type="url" className={styles.input} value={form.website} disabled={!isEditing}
-                            onChange={e => handleField('website', e.target.value)} />
-                    </div>
-
-                    <div className={styles.formGroupFull}>
-                        <label className={styles.label}><MapPin />Dirección</label>
-                        <input type="text" className={styles.input} value={form.address} disabled={!isEditing}
-                            onChange={e => handleField('address', e.target.value)} />
-                    </div>
-
-                    <div className={styles.formGroupFull}>
-                        <label className={styles.label}>Descripción</label>
-                        <textarea className={styles.textarea} rows={4} value={form.description} disabled={!isEditing}
-                            onChange={e => handleField('description', e.target.value)} />
-                    </div>
-
-                    <div className={styles.formGroupFull}>
-                        <label className={styles.label}>Especialidades</label>
-                        <div className={styles.specialtiesContainer}>
-                            <div className={styles.specialtiesList}>
-                                {(specialties ?? []).map(s => (
-                                    <div key={s.id} className={styles.specialtyTag}>
-                                        <span>{s.specialty}</span>
-                                        <button type="button" className={styles.removeSpecialty}
-                                            onClick={() => handleRemoveSpecialty(s.id)}>×</button>
-                                    </div>
-                                ))}
-                            </div>
-                            <div className={styles.addSpecialtyRow}>
-                                <input
-                                    type="text"
-                                    className={styles.input}
-                                    placeholder="Nueva especialidad..."
-                                    value={newSpecialty}
-                                    onChange={e => setNewSpecialty(e.target.value)}
-                                    onKeyDown={e => e.key === 'Enter' && handleAddSpecialty()}
-                                />
-                                <button type="button" className={styles.addSpecialty}
-                                    onClick={handleAddSpecialty} disabled={isAdding || !newSpecialty.trim()}>
-                                    {isAdding ? '...' : '+ Agregar'}
-                                </button>
-                            </div>
+                <div className={styles.grid2}>
+                    <div className={styles.field}>
+                        <label className={styles.label}>Nombre comercial <span className={styles.req}>*</span></label>
+                        <div className={styles.inputWrap}>
+                            <span className={styles.inputIcon}><Building /></span>
+                            <input type="text" className={styles.input} value={form.name} readOnly={!isEditing}
+                                onChange={e => handleField('name', e.target.value)} />
                         </div>
+                    </div>
+
+                    <div className={styles.field}>
+                        <label className={styles.label}>Razón social <span className={styles.req}>*</span></label>
+                        <div className={styles.inputWrap}>
+                            <span className={styles.inputIcon}><File /></span>
+                            <input type="text" className={styles.input} value={form.legalName} readOnly={!isEditing}
+                                onChange={e => handleField('legalName', e.target.value)} />
+                        </div>
+                    </div>
+
+                    <div className={styles.field}>
+                        <label className={styles.label}>NIT (Número de Identificación Tributaria)</label>
+                        <div className={styles.inputWrap}>
+                            <span className={styles.inputIcon}><File /></span>
+                            <input type="text" className={styles.input} value={form.nit} readOnly={!isEditing}
+                                onChange={e => handleField('nit', e.target.value)} />
+                        </div>
+                    </div>
+
+                    <div className={styles.field}>
+                        <label className={styles.label}>Teléfono corporativo</label>
+                        <div className={styles.inputWrap}>
+                            <span className={styles.inputIcon}><Phone /></span>
+                            <input type="tel" className={styles.input} value={form.phone} readOnly={!isEditing}
+                                onChange={e => handleField('phone', e.target.value)} />
+                        </div>
+                    </div>
+
+                    <div className={styles.field}>
+                        <label className={styles.label}>Email institucional</label>
+                        <div className={styles.inputWrap}>
+                            <span className={styles.inputIcon}><Mail /></span>
+                            <input type="email" className={styles.input} value={form.email} readOnly={!isEditing}
+                                onChange={e => handleField('email', e.target.value)} />
+                        </div>
+                    </div>
+
+                    <div className={styles.field}>
+                        <label className={styles.label}>Sitio web oficial</label>
+                        <div className={styles.inputWrap}>
+                            <span className={styles.inputIcon}><Globe /></span>
+                            <input type="url" className={styles.input} value={form.website} readOnly={!isEditing}
+                                onChange={e => handleField('website', e.target.value)} />
+                        </div>
+                    </div>
+
+                    <div className={`${styles.field} ${styles.full}`}>
+                        <label className={styles.label}>Dirección física principal</label>
+                        <div className={styles.inputWrap}>
+                            <span className={styles.inputIcon}><MapPin /></span>
+                            <input type="text" className={styles.input} value={form.address} readOnly={!isEditing}
+                                onChange={e => handleField('address', e.target.value)} />
+                        </div>
+                    </div>
+
+                    <div className={`${styles.field} ${styles.full}`}>
+                        <div className={styles.fieldLabelRow}>
+                            <label className={styles.label}>Descripción del despacho</label>
+                            <span className={styles.counter}>{form.description.length} / 500</span>
+                        </div>
+                        <textarea className={styles.textarea} rows={4} maxLength={500} value={form.description} readOnly={!isEditing}
+                            onChange={e => handleField('description', e.target.value)} />
                     </div>
                 </div>
             </div>
 
-            <div className={styles.formSection}>
-                <div className={styles.sectionHeader}>
-                    <h4 className={styles.sectionTitle}>Tarifas y Metas</h4>
+            <div className={styles.card}>
+                <div className={styles.cardHead}>
+                    <div className={styles.cardHeadText}>
+                        <h3 className={styles.cardTitle}><Tag />Especialidades Jurídicas del Despacho</h3>
+                        <p className={styles.cardSubtitle}>
+                            Áreas del derecho practicadas por la firma. Se guardan y gestionan de forma inmediata e independiente.
+                        </p>
+                    </div>
+                    <span className={styles.pill}>Autoguardado</span>
+                </div>
+
+                <div className={styles.addRow}>
+                    <div className={styles.inputWrap}>
+                        <span className={styles.inputIcon}><Plus /></span>
+                        <input
+                            type="text"
+                            className={styles.input}
+                            placeholder="Ej. Derecho Tributario, Litigio Arbitral..."
+                            value={newSpecialty}
+                            onChange={e => setNewSpecialty(e.target.value)}
+                            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddSpecialty(); } }}
+                        />
+                    </div>
+                    <button type="button" className={styles.btnPrimary}
+                        onClick={handleAddSpecialty} disabled={isAdding || !newSpecialty.trim()}>
+                        <Plus />
+                        {isAdding ? 'Agregando...' : 'Agregar'}
+                    </button>
+                </div>
+
+                <div className={styles.chips}>
+                    {(specialties ?? []).map(s => (
+                        <span key={s.id} className={styles.chip}>
+                            {s.specialty}
+                            <button type="button" className={styles.chipRemove} onClick={() => handleRemoveSpecialty(s.id)}>
+                                <X />
+                            </button>
+                        </span>
+                    ))}
+                    {(specialties ?? []).length === 0 && (
+                        <span className={styles.chipsEmpty}>Aún no hay especialidades registradas.</span>
+                    )}
+                </div>
+            </div>
+
+            <div className={styles.card}>
+                <div className={styles.cardHead}>
+                    <div className={styles.cardHeadText}>
+                        <h3 className={styles.cardTitle}><BarChart />Tarifas y Metas Diarias de Rendimiento</h3>
+                        <p className={styles.cardSubtitle}>
+                            Objetivos de productividad para el equipo jurídico y costo horario base de la firma.
+                        </p>
+                    </div>
                     {!isEditingRates ? (
-                        <button className={styles.editButton} onClick={() => setIsEditingRates(true)}>Editar</button>
+                        <button className={styles.btnEditGhost} onClick={() => setIsEditingRates(true)}>
+                            <Edit />Editar tarifas y metas
+                        </button>
                     ) : (
-                        <div className={styles.actionButtons}>
-                            <button className={styles.cancelButton} onClick={handleCancelRates}>Cancelar</button>
-                            <button className={styles.saveButton} onClick={handleSaveRates} disabled={isSavingRates}>
+                        <div className={styles.btnGroup}>
+                            <button className={styles.btnGhost} onClick={handleCancelRates}>Cancelar</button>
+                            <button className={styles.btnPrimary} onClick={handleSaveRates} disabled={isSavingRates}>
                                 {isSavingRates ? 'Guardando...' : 'Guardar'}
                             </button>
                         </div>
                     )}
                 </div>
 
-                <div className={styles.formGrid} style={{gridTemplateColumns: 'repeat(3, 1fr)'}}>
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}>Tarifa por hora (COP)</label>
-                        <input
-                            type="number" min={0} step={1000}
-                            className={styles.input}
-                            placeholder="Ej: 250000"
-                            value={rates.firmHourlyRate}
-                            disabled={!isEditingRates}
-                            onChange={e => handleRatesField('firmHourlyRate', e.target.value)}
-                        />
+                <div className={styles.grid3}>
+                    <div className={styles.field}>
+                        <label className={styles.label}>Tarifa por hora de la firma</label>
+                        <div className={styles.inputWrap}>
+                            <span className={styles.inputIcon}><DollarSign /></span>
+                            <input type="number" min={0} step={5000}
+                                className={`${styles.input} ${styles.inputWithSuffix}`}
+                                placeholder="Ej. 520000"
+                                value={rates.firmHourlyRate}
+                                readOnly={!isEditingRates}
+                                onChange={e => handleRatesField('firmHourlyRate', e.target.value)} />
+                            <span className={styles.suffix}>COP / h</span>
+                        </div>
+                        <p className={styles.hint}>Tarifa base liquidada por socio principal.</p>
                     </div>
 
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}>Meta diaria — facturables</label>
-                        <div style={{display: 'flex', gap: '0.5rem', alignItems: 'center'}}>
-                            <input
-                                type="number" min={0} max={24} step={1}
-                                className={styles.input}
-                                placeholder="h"
-                                value={rates.billableHours}
-                                disabled={!isEditingRates}
-                                onChange={e => handleRatesField('billableHours', e.target.value)}
-                            />
-                            <span style={{color: 'var(--text-muted)', flexShrink: 0}}>h</span>
-                            <input
-                                type="number" min={0} max={59} step={1}
-                                className={styles.input}
-                                placeholder="min"
-                                value={rates.billableMinutes}
-                                disabled={!isEditingRates}
-                                onChange={e => handleRatesField('billableMinutes', e.target.value)}
-                            />
-                            <span style={{color: 'var(--text-muted)', flexShrink: 0}}>min</span>
+                    <div className={styles.field}>
+                        <label className={styles.label}>Meta diaria facturable (por abogado)</label>
+                        <div className={styles.hmGrid}>
+                            <div className={styles.inputWrap}>
+                                <input type="number" min={0} max={24} step={1}
+                                    className={`${styles.input} ${styles.inputWithSuffix}`}
+                                    placeholder="h"
+                                    value={rates.billableHours}
+                                    readOnly={!isEditingRates}
+                                    onChange={e => handleRatesField('billableHours', e.target.value)} />
+                                <span className={styles.suffix}>h</span>
+                            </div>
+                            <div className={styles.inputWrap}>
+                                <input type="number" min={0} max={59} step={5}
+                                    className={`${styles.input} ${styles.inputWithSuffix}`}
+                                    placeholder="min"
+                                    value={rates.billableMinutes}
+                                    readOnly={!isEditingRates}
+                                    onChange={e => handleRatesField('billableMinutes', e.target.value)} />
+                                <span className={styles.suffix}>min</span>
+                            </div>
                         </div>
+                        <p className={styles.hint}>Ideal: 6 h 30 min por jornada laboral.</p>
                     </div>
 
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}>Meta diaria — no facturables</label>
-                        <div style={{display: 'flex', gap: '0.5rem', alignItems: 'center'}}>
-                            <input
-                                type="number" min={0} max={24} step={1}
-                                className={styles.input}
-                                placeholder="h"
-                                value={rates.nonBillableHours}
-                                disabled={!isEditingRates}
-                                onChange={e => handleRatesField('nonBillableHours', e.target.value)}
-                            />
-                            <span style={{color: 'var(--text-muted)', flexShrink: 0}}>h</span>
-                            <input
-                                type="number" min={0} max={59} step={1}
-                                className={styles.input}
-                                placeholder="min"
-                                value={rates.nonBillableMinutes}
-                                disabled={!isEditingRates}
-                                onChange={e => handleRatesField('nonBillableMinutes', e.target.value)}
-                            />
-                            <span style={{color: 'var(--text-muted)', flexShrink: 0}}>min</span>
+                    <div className={styles.field}>
+                        <label className={styles.label}>Meta diaria no facturable (gestión)</label>
+                        <div className={styles.hmGrid}>
+                            <div className={styles.inputWrap}>
+                                <input type="number" min={0} max={24} step={1}
+                                    className={`${styles.input} ${styles.inputWithSuffix}`}
+                                    placeholder="h"
+                                    value={rates.nonBillableHours}
+                                    readOnly={!isEditingRates}
+                                    onChange={e => handleRatesField('nonBillableHours', e.target.value)} />
+                                <span className={styles.suffix}>h</span>
+                            </div>
+                            <div className={styles.inputWrap}>
+                                <input type="number" min={0} max={59} step={5}
+                                    className={`${styles.input} ${styles.inputWithSuffix}`}
+                                    placeholder="min"
+                                    value={rates.nonBillableMinutes}
+                                    readOnly={!isEditingRates}
+                                    onChange={e => handleRatesField('nonBillableMinutes', e.target.value)} />
+                                <span className={styles.suffix}>min</span>
+                            </div>
                         </div>
+                        <p className={styles.hint}>Administración, estudio jurisprudencial y reuniones.</p>
                     </div>
                 </div>
-                <p style={{fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem'}}>
-                    La tarifa aplica a todos los procesos del despacho. Las metas diarias son las horas que cada abogado debe registrar por día. La suma de ambas metas no puede superar las 24 horas.
+
+                <p className={styles.hint}>
+                    La tarifa aplica a todos los procesos del despacho. Las metas diarias son las horas que cada abogado
+                    debe registrar por día. La suma de ambas metas no puede superar las 24 horas.
                 </p>
             </div>
 
             {canDeleteFirm && (
-                <div className={styles.dangerZone}>
+                <div className={styles.dangerCard}>
                     <div className={styles.dangerInfo}>
-                        <h4 className={styles.dangerTitle}>Eliminar firma</h4>
+                        <div className={styles.dangerLabel}><TriangleAlert />Zona de Peligro</div>
+                        <h4 className={styles.dangerTitle}>Dar de baja o eliminar firma jurídica</h4>
                         <p className={styles.dangerText}>
-                            Elimina la firma y todos sus datos asociados (documentos, plantillas, clientes, procesos y registros de tiempo).
-                            Es recuperable durante 30 días; después se borra de forma permanente.
+                            Al eliminar el despacho se revocará el acceso de todos los abogados dependientes y se
+                            suspenderán los procesos activos.{' '}
+                            <strong>La firma entra en papelera y se puede restaurar durante 30 días.</strong>
                         </p>
                     </div>
                     <button

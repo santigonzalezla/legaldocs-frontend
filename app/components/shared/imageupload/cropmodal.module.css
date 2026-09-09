@@ -1,0 +1,144 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+    padding: 1rem;
+    animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.modal {
+    background: var(--content-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    padding: 1.75rem;
+    animation: slideUp 0.18s ease;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(10px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+
+.title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    text-align: center;
+}
+
+.cropArea {
+    position: relative;
+    width: 100%;
+    height: 280px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #1a1a1a;
+}
+
+.cropInner {
+    position: absolute;
+    inset: 0;
+}
+
+.cropAreaDisabled .cropInner {
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+.skipHint {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0.01em;
+    pointer-events: none;
+}
+
+.zoom {
+    width: 100%;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+}
+
+.zoom:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.skipRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    user-select: none;
+}
+
+.skipRow input {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+}
+
+.actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btnCancel,
+.btnConfirm {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+}
+
+.btnCancel {
+    background: var(--button-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+}
+
+.btnCancel:hover {
+    background: var(--button-hover-bg);
+    color: var(--text-primary);
+}
+
+.btnConfirm {
+    background: var(--primary-color);
+    border: none;
+    color: #fff;
+}
+
+.btnConfirm:hover:not(:disabled) { opacity: 0.88; }
+
+.btnConfirm:disabled,
+.btnCancel:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

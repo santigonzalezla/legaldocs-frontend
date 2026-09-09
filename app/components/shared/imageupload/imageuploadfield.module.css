@@ -1,0 +1,106 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.frame {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.frameAvatar {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+}
+
+.frameLogo {
+    width: 96px;
+    height: 96px;
+    border-radius: 16px;
+}
+
+.preview {
+    border: 1px solid var(--border-color);
+    background: var(--hover-bg);
+    color: var(--text-secondary);
+}
+
+.frameLogo .preview {
+    background: #ffffff;
+    padding: 6px;
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    border: none;
+    border-radius: inherit;
+    background: rgba(15, 23, 42, 0.62);
+    backdrop-filter: blur(1px);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.18s ease;
+}
+
+.overlay svg {
+    width: 16px;
+    height: 16px;
+}
+
+.overlayHint {
+    margin-top: 2px;
+    font-size: 0.5rem;
+    font-weight: 500;
+    line-height: 1.2;
+    text-align: center;
+    padding: 0 4px;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.frame:hover .overlay {
+    opacity: 1;
+}
+
+.overlay:disabled {
+    cursor: not-allowed;
+}
+
+.removeButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: color 0.15s ease;
+}
+
+.removeButton svg {
+    width: 13px;
+    height: 13px;
+}
+
+.removeButton:hover:not(:disabled) {
+    color: #ef4444;
+}
+
+.removeButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

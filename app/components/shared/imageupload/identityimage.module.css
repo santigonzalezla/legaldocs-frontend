@@ -1,0 +1,19 @@
+.image {
+    display: block;
+    flex-shrink: 0;
+}
+
+.fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+    font-weight: 700;
+}
+
+.fallback svg {
+    width: auto;
+    height: 44%;
+    max-width: 60%;
+}

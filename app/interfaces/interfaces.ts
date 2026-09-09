@@ -41,6 +41,7 @@ export interface User
     bio: string | null;
     hourlyRate: number | null;
     avatarUrl: string | null;
+    avatarKey: string | null;
     lastLoginAt: string | null;
     deletedAt: string | null;
     createdAt: string;
@@ -104,6 +105,7 @@ export interface Firm
     website: string | null;
     description: string | null;
     logoUrl: string | null;
+    logoKey: string | null;
     firmHourlyRate: number | null;
     dailyBillableGoalHours: number | null;
     dailyNonBillableGoalHours: number | null;
@@ -129,7 +131,7 @@ export interface FirmMember
     firmRole: {id: string; name: string; slug: string | null} | null;
     status: FirmMemberStatus;
     isPartner: boolean;
-    user?: {firstName: string; lastName: string; email: string; phone: string | null; hourlyRate: number | null} | null;
+    user?: {id: string; firstName: string; lastName: string; email: string; phone: string | null; hourlyRate: number | null; avatarKey: string | null} | null;
     inviteEmail: string | null;
     inviteExpiresAt: string | null;
     joinedAt: string | null;

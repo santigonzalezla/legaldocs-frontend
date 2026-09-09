@@ -4,16 +4,16 @@ import {useEffect, useRef, useState} from 'react';
 import {Crown, Shield, User as UserIcon, Users, Mail, Phone, MoreHorizontal, UserPlus, StarFilled, X} from '@/app/components/svg';
 import styles from './teammanagement.module.css';
 import {useFetch} from '@/hooks/useFetch';
+import {API_BASE_URL} from '@/lib/constants';
+import IdentityImage from '@/app/components/shared/imageupload/IdentityImage';
 import type {FirmMember, FirmRole, User} from '@/app/interfaces/interfaces';
 import {FirmMemberStatus} from '@/app/interfaces/enums';
 import {toast} from 'sonner';
 import {useConfirm} from '@/hooks/useConfirm';
 import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
 
-// Backend populates user y firmRole relations en los miembros
-type MemberWithUser = FirmMember & {
-    user?: {firstName: string; lastName: string; email: string; phone: string | null; hourlyRate: number | null};
-};
+// El backend popula las relaciones user y firmRole (ver FirmMember en interfaces).
+type MemberWithUser = FirmMember;
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -269,9 +269,17 @@ const TeamManagement = () =>
                                     <tr key={member.id}>
                                         <td>
                                             <div className={styles.memberCell}>
-                                                <div className={styles.memberInitials}>
-                                                    {memberName(member).charAt(0).toUpperCase()}
-                                                </div>
+                                                <IdentityImage
+                                                    src={member.userId && member.user?.avatarKey
+                                                        ? `${API_BASE_URL}/files/user-avatar/${member.userId}`
+                                                        : null}
+                                                    fallback={memberName(member).charAt(0).toUpperCase()}
+                                                    width={48}
+                                                    height={48}
+                                                    radius="50%"
+                                                    alt={memberName(member)}
+                                                    className={styles.memberInitials}
+                                                />
                                                 <div className={styles.memberDetails}>
                                                     <h5 className={styles.memberName}>
                                                         {memberName(member)}

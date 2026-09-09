@@ -6,6 +6,8 @@ import {useTheme} from '@/context/ThemeContext';
 import {useSearch} from '@/context/SearchContext';
 import {useAuth} from '@/context/AuthContext';
 import {useFetch} from '@/hooks/useFetch';
+import {API_BASE_URL} from '@/lib/constants';
+import IdentityImage from '@/app/components/shared/imageupload/IdentityImage';
 import {Bell, Building, Check, Moon, Search, Settings, Sun, User, Logout, ArrowDown} from '@/app/components/svg';
 import {useEffect, useRef, useState} from 'react';
 import Link from 'next/link';
@@ -44,8 +46,9 @@ const Topbar = () =>
     const searchRef = useRef<HTMLDivElement>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [avatarVersion, setAvatarVersion]  = useState(0);
 
-    const {data: userData}  = useFetch<UserType>('user/me');
+    const {data: userData, execute: refetchUser} = useFetch<UserType>('user/me');
     const {data: firmData}  = useFetch<Firm>('firm/me', {firmScoped: true});
     const {data: myFirms}   = useFetch<FirmWithRole[]>('firm/my-firms');
     const {data: subData}   = useFetch<Subscription>('subscription/me', {firmScoped: true});
@@ -56,6 +59,10 @@ const Topbar = () =>
     const initials = userData
         ? `${userData.firstName[0]}${userData.lastName[0]}`.toUpperCase()
         : '--';
+
+    const avatarSrc = userData
+        ? `${API_BASE_URL}/files/user-avatar/${userData.id}?v=${avatarVersion}`
+        : null;
 
     const fullName = userData
         ? `${userData.firstName} ${userData.lastName}`
@@ -90,6 +97,13 @@ const Topbar = () =>
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
     }, []);
+
+    useEffect(() =>
+    {
+        const handler = () => { setAvatarVersion(v => v + 1); refetchUser(); };
+        window.addEventListener('ld:avatar-updated', handler);
+        return () => window.removeEventListener('ld:avatar-updated', handler);
+    }, [refetchUser]);
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     {
@@ -183,7 +197,15 @@ const Topbar = () =>
                 {/* User menu */}
                 <div className={styles.userWrapper} ref={dropdownRef}>
                     <button className={styles.toprightuser} onClick={() => setIsDropdownOpen((v) => !v)}>
-                        <div className={styles.avatar}>{initials}</div>
+                        <IdentityImage
+                            src={avatarSrc}
+                            fallback={initials}
+                            width={32}
+                            height={32}
+                            radius={8}
+                            alt={fullName}
+                            className={styles.avatar}
+                        />
                         <div className={styles.toprightusertitle}>
                             <h2>{fullName}</h2>
                             <p>{planLabel}</p>
@@ -197,7 +219,15 @@ const Topbar = () =>
                         <div className={styles.dropdown}>
                             {/* Header */}
                             <div className={styles.dropdownHeader}>
-                                <div className={styles.dropdownAvatar}>{initials}</div>
+                                <IdentityImage
+                                    src={avatarSrc}
+                                    fallback={initials}
+                                    width={38}
+                                    height={38}
+                                    radius={10}
+                                    alt={fullName}
+                                    className={styles.dropdownAvatar}
+                                />
                                 <div>
                                     <p className={styles.dropdownName}>{fullName}</p>
                                     <p className={styles.dropdownEmail}>{userData?.email ?? ''}</p>

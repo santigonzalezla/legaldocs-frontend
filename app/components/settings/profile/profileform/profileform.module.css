@@ -1,206 +1,315 @@
-.profileForm
-{
-    display: flex;
-    flex-direction: column;
-    gap: 32px;
-}
-
-.avatarSection
-{
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    padding: 24px;
-    background: var(--hover-bg);
-    border-radius: 12px;
-}
-
-.avatarContainer
-{
-    position: relative;
-}
-
-.avatarPlaceholder
-{
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background: var(--hover-bg);
-    border: 3px solid var(--primary-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-secondary);
-}
-
-.avatar
-{
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid var(--primary-color);
-}
-
-.avatarButton {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 28px;
-    height: 28px;
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-}
-
-.avatarButton:hover {
-    transform: scale(1.1);
-}
-
-.avatarInfo {
-    flex: 1;
-}
-
-.userName {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0 0 0.25rem 0;
-}
-
-.userRole {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    margin: 0;
-}
-
-.formSection {
+.profileForm {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
 }
 
-.sectionHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border-light);
+/* ── Card shell ──────────────────────────────────────────────────────── */
+
+.card {
+    background: var(--content-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 1.75rem;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
-.sectionTitle {
+/* ── Profile header card ─────────────────────────────────────────────── */
+
+.headerCard {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.headerMain {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.headerInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.headerTitleRow {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.name {
     font-size: 1.25rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text-primary);
     margin: 0;
 }
 
-.editButton
-{
-    font-family: var(--font-family), serif;
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
+.subtitle {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    margin: 0;
 }
 
-.editButton:hover {
-    background: var(--primary-color);
-    transform: translateY(-1px);
-}
-
-.actionButtons {
+.meta {
     display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.85rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 0.15rem;
+}
+
+.meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.meta svg {
+    width: 12px;
+    height: 12px;
+}
+
+.headerActions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
     gap: 0.5rem;
 }
 
-.cancelButton {
-    background: none;
+/* ── Card headers ────────────────────────────────────────────────────── */
+
+.cardHead {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 1.25rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.cardHeadText {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.cardTitle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.cardTitle svg {
+    width: 15px;
+    height: 15px;
+    color: var(--primary-color);
+}
+
+.cardSubtitle {
+    font-size: 0.75rem;
     color: var(--text-secondary);
+    margin: 0;
+    max-width: 52ch;
+    line-height: 1.5;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────── */
+
+.btnEdit,
+.btnPrimary,
+.btnGhost,
+.btnEditGhost,
+.btnOutline,
+.btnOutlineDanger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 0.5rem 0.9rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.btnEdit svg,
+.btnPrimary svg,
+.btnEditGhost svg,
+.btnOutline svg,
+.btnOutlineDanger svg {
+    width: 13px;
+    height: 13px;
+}
+
+.btnEdit,
+.btnPrimary {
+    background: var(--primary-color);
+    color: #fff;
+    border: 1px solid var(--primary-color);
+}
+
+.btnEdit:hover:not(:disabled),
+.btnPrimary:hover:not(:disabled) {
+    filter: brightness(0.95);
+}
+
+.btnGhost,
+.btnEditGhost,
+.btnOutline {
+    background: var(--content-bg);
+    color: var(--text-primary);
     border: 1px solid var(--border-color);
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
 }
 
-.cancelButton:hover {
+.btnGhost {
+    color: var(--text-secondary);
+}
+
+.btnGhost:hover,
+.btnEditGhost:hover,
+.btnOutline:hover {
     background: var(--hover-bg);
+    color: var(--text-primary);
 }
 
-.saveButton {
-    background: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
+.btnOutlineDanger {
+    background: var(--content-bg);
+    color: #dc2626;
+    border: 1px solid var(--border-color);
 }
 
-.saveButton:hover:not(:disabled) {
-    background: var(--primary-color);
-    transform: translateY(-1px);
+.btnOutlineDanger:hover {
+    background: rgba(220, 38, 38, 0.06);
+    border-color: #fca5a5;
+    color: #b91c1c;
 }
 
-.saveButton:disabled {
+.btnPrimary:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
 
-.formGrid {
+.btnGroup {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+/* ── Form grid & fields ─────────────────────────────────────────────── */
+
+.grid2 {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
+    gap: 1.25rem;
 }
 
-.formGroup {
+.field {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.4rem;
+    min-width: 0;
 }
 
-.formGroupFull {
+.full {
     grid-column: 1 / -1;
+}
+
+.rateField {
     display: flex;
     flex-direction: column;
+    gap: 0.4rem;
+    max-width: 22rem;
+}
+
+.fieldLabelRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: 0.5rem;
 }
 
 .label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.req {
+    color: #f43f5e;
+}
+
+.counter {
+    font-size: 0.6875rem;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.roBadge {
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: #b45309;
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    padding: 0.05rem 0.4rem;
+    border-radius: 6px;
+}
+
+.inputWrap {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--text-primary);
+}
+
+.inputIcon {
+    position: absolute;
+    left: 0.7rem;
+    display: flex;
+    align-items: center;
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+.inputIcon svg {
+    width: 14px;
+    height: 14px;
 }
 
 .input,
 .textarea {
-    font-family: var(--font-family), serif;
-    padding: 0.75rem;
-    border: 2px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 0.875rem;
+    width: 100%;
+    font-family: inherit;
+    font-size: 0.8125rem;
     color: var(--text-primary);
     background: var(--content-bg);
-    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0.6rem 0.8rem 0.6rem 2.1rem;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.textarea {
+    padding-left: 0.8rem;
+    resize: vertical;
+    min-height: 96px;
+    line-height: 1.55;
 }
 
 .input:focus,
@@ -210,36 +319,93 @@
     box-shadow: 0 0 0 3px var(--primary-color-alpha);
 }
 
-.input:disabled,
-.textarea:disabled {
+.input:read-only,
+.textarea:read-only,
+.input:disabled {
     background: var(--hover-bg);
     color: var(--text-secondary);
-    cursor: not-allowed;
+    cursor: default;
 }
 
-.textarea {
-    resize: vertical;
-    min-height: 100px;
+.input:read-only:focus,
+.textarea:read-only:focus {
+    border-color: var(--border-color);
+    box-shadow: none;
 }
 
-/* Responsive */
+.select {
+    appearance: none;
+    padding-right: 2.2rem;
+    cursor: pointer;
+}
+
+.select:disabled {
+    cursor: default;
+}
+
+.selectChevron {
+    position: absolute;
+    right: 0.7rem;
+    display: flex;
+    align-items: center;
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+.selectChevron svg {
+    width: 14px;
+    height: 14px;
+}
+
+.inputWithSuffix {
+    padding-right: 3.4rem;
+}
+
+.suffix {
+    position: absolute;
+    right: 0.8rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+.hint {
+    font-size: 0.6875rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────── */
+
 @media (max-width: 768px) {
-    .avatarSection {
-        flex-direction: column;
-        text-align: center;
+    .card {
+        padding: 1.25rem;
     }
 
-    .formGrid {
+    .headerCard {
+        flex-direction: column;
+    }
+
+    .headerActions {
+        align-self: stretch;
+    }
+
+    .grid2 {
         grid-template-columns: 1fr;
     }
 
-    .sectionHeader {
+    .cardHead {
         flex-direction: column;
-        gap: 1rem;
-        align-items: stretch;
+        gap: 0.85rem;
     }
 
-    .actionButtons {
-        justify-content: center;
+    .btnGroup {
+        width: 100%;
+    }
+
+    .btnGroup button {
+        flex: 1;
     }
 }
