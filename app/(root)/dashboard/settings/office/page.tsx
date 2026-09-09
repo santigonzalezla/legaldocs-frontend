@@ -6,6 +6,7 @@ import BillingSettings from "@/app/components/settings/office/billingsettings/Bi
 import TeamManagement from "@/app/components/settings/office/teammanagement/TeamManagement";
 import RolesManagement from "@/app/components/settings/office/rolesmanagement/RolesManagement";
 import { useState } from "react";
+import { Building, Users, Card, LockUser } from "@/app/components/svg";
 import {PermissionGuard} from '@/app/components/auth/PermissionGuard';
 import {usePermissions} from '@/context/PermissionsContext';
 
@@ -19,10 +20,10 @@ const Office = () =>
     const canViewFirm = canAny(['firm_settings:view', 'firm_settings:edit']);
 
     const tabs = [
-        ...(canViewFirm ? [{ id: "info", label: "Información del Despacho", icon: "🏢" }] : []),
-        ...(can('team:view') ? [{ id: "team", label: "Equipo", icon: "👥" }] : []),
-        ...(canViewFirm ? [{ id: "billing", label: "Facturación", icon: "💳" }] : []),
-        ...(can('team:manage-roles') ? [{ id: "roles", label: "Roles y Permisos", icon: "🔐" }] : []),
+        ...(canViewFirm ? [{ id: "info", label: "Información del Despacho", Icon: Building, color: "#2563EB" }] : []),
+        ...(can('team:view') ? [{ id: "team", label: "Equipo", Icon: Users, color: "#7C3AED" }] : []),
+        ...(canViewFirm ? [{ id: "billing", label: "Facturación", Icon: Card, color: "#059669" }] : []),
+        ...(can('team:manage-roles') ? [{ id: "roles", label: "Roles y Permisos", Icon: LockUser, color: "#D97706" }] : []),
     ];
 
     const [activeTab, setActiveTab] = useState(tabs[0]?.id ?? "info");
@@ -35,14 +36,14 @@ const Office = () =>
             </div>
             <div className={styles.tabsContainer}>
                 <div className={styles.tabsList}>
-                    {tabs.map((tab) => (
+                    {tabs.map(({ id, label, Icon, color }) => (
                         <button
-                            key={tab.id}
-                            className={`${styles.tabButton} ${activeTab === tab.id ? styles.active : ""}`}
-                            onClick={() => setActiveTab(tab.id)}
+                            key={id}
+                            className={`${styles.tabButton} ${activeTab === id ? styles.active : ""}`}
+                            onClick={() => setActiveTab(id)}
                         >
-                            <span className={styles.tabIcon}>{tab.icon}</span>
-                            <span className={styles.tabLabel}>{tab.label}</span>
+                            <Icon className={styles.tabIcon} style={{ color }} />
+                            <span className={styles.tabLabel}>{label}</span>
                         </button>
                     ))}
                 </div>

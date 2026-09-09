@@ -9,8 +9,6 @@ import {toast} from 'sonner';
 import {ClientType} from '@/app/interfaces/enums';
 import type {Client, PaginatedResponse} from '@/app/interfaces/interfaces';
 import {useConfirm} from '@/hooks/useConfirm';
-import {useAuth} from '@/context/AuthContext';
-import {useFirmId} from '@/hooks/useFirmId';
 import {uploadAttachment, type PendingAttachment} from '@/lib/attachments';
 import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
 import ClientFilters       from '@/app/components/clients/clientfilters/ClientFilters';
@@ -37,8 +35,8 @@ const ClientsPage = () =>
     const [selectedClientId, setSelectedClientId] = useState<string | null>(searchParams.get('clientId'));
 
     const {confirm, confirmState, handleConfirm, handleCancel} = useConfirm();
-    const {accessToken} = useAuth();
-    const firmId         = useFirmId();
+    const {execute: uploadDoc} =
+        useFetch('', {method: 'POST', immediate: false, firmScoped: true, isFormData: true});
 
     const {data: response, isLoading, execute: refetch} =
         useFetch<PaginatedResponse<Client>>('client?limit=100', {firmScoped: true});
@@ -101,7 +99,7 @@ const ClientsPage = () =>
         if (attachments.length > 0)
         {
             const uploads = await Promise.all(
-                attachments.map(attachment => uploadAttachment(`client/${result.id}/documents`, attachment.file, attachment.type, accessToken, firmId)),
+                attachments.map(attachment => uploadAttachment(uploadDoc, `client/${result.id}/documents`, attachment.file, attachment.type)),
             );
             if (uploads.some(ok => !ok)) toast.error('El cliente se creó, pero algunos documentos no se pudieron adjuntar.');
         }

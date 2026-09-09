@@ -9,8 +9,6 @@ import {toast} from 'sonner';
 import {ClientType, ProcessStatus} from '@/app/interfaces/enums';
 import type {ClientPickerOption, LegalBranch, LegalProcess, PaginatedResponse} from '@/app/interfaces/interfaces';
 import {useConfirm} from '@/hooks/useConfirm';
-import {useAuth} from '@/context/AuthContext';
-import {useFirmId} from '@/hooks/useFirmId';
 import {uploadAttachment, type PendingAttachment} from '@/lib/attachments';
 import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
 import ProcessFilters     from '@/app/components/processes/processfilters/ProcessFilters';
@@ -61,8 +59,8 @@ const ProcessesPage = () =>
     const [form,            setForm]            = useState<CreateProcessForm>({...EMPTY_FORM});
     const [attachments,     setAttachments]     = useState<PendingAttachment[]>([]);
 
-    const {accessToken} = useAuth();
-    const firmId         = useFirmId();
+    const {execute: uploadDoc} =
+        useFetch('', {method: 'POST', immediate: false, firmScoped: true, isFormData: true});
 
     const {data: processRes, isLoading, execute: refetch} =
         useFetch<PaginatedResponse<LegalProcess>>('process?limit=100', {firmScoped: true});
@@ -150,7 +148,7 @@ const ProcessesPage = () =>
         if (attachments.length > 0)
         {
             const uploads = await Promise.all(
-                attachments.map(attachment => uploadAttachment(`process/${result.id}/documents`, attachment.file, attachment.type, accessToken, firmId)),
+                attachments.map(attachment => uploadAttachment(uploadDoc, `process/${result.id}/documents`, attachment.file, attachment.type)),
             );
             if (uploads.some(ok => !ok)) toast.error('El proceso se creó, pero algunos documentos no se pudieron adjuntar.');
         }

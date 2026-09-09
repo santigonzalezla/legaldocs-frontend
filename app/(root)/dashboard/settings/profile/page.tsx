@@ -5,15 +5,16 @@ import ProfileForm from "@/app/components/settings/profile/profileform/ProfileFo
 import { useState } from "react";
 import SecuritySettings from "@/app/components/settings/profile/securitysettings/SecuritySettings";
 import NotificationSettings from "@/app/components/settings/profile/notificationsettings/NotificationSettings";
+import { User, Lock, Bell } from "@/app/components/svg";
 
 const Profile = () =>
 {
     const [activeTab, setActiveTab] = useState("profile")
 
     const tabs = [
-        { id: "profile", label: "Información Personal", icon: "👤" },
-        { id: "security", label: "Seguridad", icon: "🔒" },
-        { id: "notifications", label: "Notificaciones", icon: "🔔" },
+        { id: "profile", label: "Información Personal", Icon: User, color: "#2563EB" },
+        { id: "security", label: "Seguridad", Icon: Lock, color: "#059669" },
+        { id: "notifications", label: "Notificaciones", Icon: Bell, color: "#D97706" },
     ];
 
     return (
@@ -24,14 +25,14 @@ const Profile = () =>
             </div>
             <div className={styles.tabsContainer}>
                 <div className={styles.tabsList}>
-                    {tabs.map((tab) => (
+                    {tabs.map(({ id, label, Icon, color }) => (
                         <button
-                            key={tab.id}
-                            className={`${styles.tabButton} ${activeTab === tab.id ? styles.active : ""}`}
-                            onClick={() => setActiveTab(tab.id)}
+                            key={id}
+                            className={`${styles.tabButton} ${activeTab === id ? styles.active : ""}`}
+                            onClick={() => setActiveTab(id)}
                         >
-                            <span className={styles.tabIcon}>{tab.icon}</span>
-                            <span className={styles.tabLabel}>{tab.label}</span>
+                            <Icon className={styles.tabIcon} style={{ color }} />
+                            <span className={styles.tabLabel}>{label}</span>
                         </button>
                     ))}
                 </div>

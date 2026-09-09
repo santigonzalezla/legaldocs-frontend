@@ -584,6 +584,18 @@ export interface PendingAttachment
     type: string;
 }
 
+// Fila de adjunto que renderiza AttachmentsPanel (proceso / cliente / timeline).
+export interface AttachmentItem
+{
+    id: string;
+    fileKey: string;
+    fileName: string;
+    fileUrl: string;
+    fileSize: number;
+    type: string;
+    createdAt: string;
+}
+
 // ── Drafts / opciones de los modales de la línea de tiempo ──────────────────
 
 // Borrador del modal de comentario (crear/editar).

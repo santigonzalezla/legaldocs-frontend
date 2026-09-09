@@ -3,8 +3,6 @@
 import {useEffect, useMemo, useState} from 'react';
 import styles from './processtimeline.module.css';
 import {useFetch} from '@/hooks/useFetch';
-import {useAuth} from '@/context/AuthContext';
-import {useFirmId} from '@/hooks/useFirmId';
 import {usePermissions} from '@/context/PermissionsContext';
 import {useConfirm} from '@/hooks/useConfirm';
 import {toast} from 'sonner';
@@ -76,10 +74,8 @@ interface ProcessTimelineProps
 
 const ProcessTimeline = ({processId}: ProcessTimelineProps) =>
 {
-    const {accessToken} = useAuth();
-    const firmId         = useFirmId();
-    const {can}          = usePermissions();
-    const canEdit        = can('processes:edit');
+    const {can}   = usePermissions();
+    const canEdit = can('processes:edit');
 
     const {data: stages, isLoading, execute: refetch} =
         useFetch<ProcessTimelineStage[]>(`process/${processId}/timeline`, {firmScoped: true});
@@ -97,6 +93,7 @@ const ProcessTimeline = ({processId}: ProcessTimelineProps) =>
     const {execute: updateComment}  = useFetch<ProcessTimelineComment>('',{method: 'PATCH',  immediate: false, firmScoped: true});
     const {execute: deleteComment}  = useFetch<{message: string}>('',     {method: 'DELETE', immediate: false, firmScoped: true});
     const {execute: createReminder} = useFetch('', {method: 'POST', immediate: false, firmScoped: true});
+    const {execute: uploadDoc}      = useFetch('', {method: 'POST', immediate: false, firmScoped: true, isFormData: true});
 
     const {confirm, confirmState, handleConfirm, handleCancel} = useConfirm();
 
@@ -208,7 +205,7 @@ const ProcessTimeline = ({processId}: ProcessTimelineProps) =>
         if (advance && advance.attachments.length > 0 && result.firstCommentId)
         {
             const uploads = await Promise.all(advance.attachments.map(attachment =>
-                uploadAttachment(`process/${processId}/timeline/${result.id}/comments/${result.firstCommentId}/attachments`, attachment.file, attachment.type, accessToken, firmId)
+                uploadAttachment(uploadDoc, `process/${processId}/timeline/${result.id}/comments/${result.firstCommentId}/attachments`, attachment.file, attachment.type)
                     .catch(() => false),
             ));
             uploadsFailed = uploads.filter(ok => !ok).length;
@@ -272,7 +269,7 @@ const ProcessTimeline = ({processId}: ProcessTimelineProps) =>
         if (pendingAttachments.length > 0)
         {
             const uploads = await Promise.all(pendingAttachments.map(attachment =>
-                uploadAttachment(`process/${processId}/timeline/${stageId}/comments/${created.id}/attachments`, attachment.file, attachment.type, accessToken, firmId)
+                uploadAttachment(uploadDoc, `process/${processId}/timeline/${stageId}/comments/${created.id}/attachments`, attachment.file, attachment.type)
                     .catch(() => false),
             ));
             uploadsFailed = uploads.filter(ok => !ok).length;
@@ -479,11 +476,6 @@ const ProcessTimeline = ({processId}: ProcessTimelineProps) =>
                 <div className={styles.headerActions}>
                     {expandedIds.size > 0 && (
                         <button className={styles.ghostBtn} onClick={() => setExpandedIds(new Set())}>Contraer todo</button>
-                    )}
-                    {canEdit && allStages.length === 0 && (
-                        <button className={styles.primaryBtn} onClick={() => setStageModalOpen(true)}>
-                            <Plus /> Agregar etapa
-                        </button>
                     )}
                     {canEdit && allStages.length > 0 && canAdvance && (
                         <div className={styles.advanceWrap}>

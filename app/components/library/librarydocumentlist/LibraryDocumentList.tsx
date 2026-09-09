@@ -1,6 +1,8 @@
 'use client';
 
 import {useEffect, useRef, useState} from 'react';
+import {toast} from 'sonner';
+import {useFetch} from '@/hooks/useFetch';
 import styles from './librarydocumentlist.module.css';
 import {BookOpen, Check, Clock, ExternalLink, File, Options, Tag, Trash} from '@/app/components/svg';
 import type {LegalBranch, LibraryDocument} from '@/app/interfaces/interfaces';
@@ -47,6 +49,17 @@ const OptionsMenu = ({doc, branches, onDelete, onAssign}: OptionsMenuProps) =>
     const [assignOpen, setAssignOpen] = useState(false);
     const [assignLoading, setAssignLoading] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
+
+    const {execute: getFileUrl} = useFetch<{url: string}>('', {immediate: false, firmScoped: true});
+
+    const handleOpenDoc = async () =>
+    {
+        setOpen(false);
+        const win = window.open('', '_blank');
+        const result = await getFileUrl({}, `firm/me/storage/file-url?key=${encodeURIComponent(doc.fileKey)}`);
+        if (result?.url && win) win.location.href = result.url;
+        else { win?.close(); toast.error('No se pudo abrir el documento.'); }
+    };
 
     useEffect(() =>
     {
@@ -121,16 +134,10 @@ const OptionsMenu = ({doc, branches, onDelete, onAssign}: OptionsMenuProps) =>
                         </div>
                     )}
 
-                    <a
-                        href={doc.fileUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.optionsItem}
-                        onClick={() => setOpen(false)}
-                    >
+                    <button type="button" className={styles.optionsItem} onClick={handleOpenDoc}>
                         <ExternalLink className={styles.optionsItemIcon}/>
                         Ver documento
-                    </a>
+                    </button>
 
                     <div className={styles.optionsDivider}/>
 

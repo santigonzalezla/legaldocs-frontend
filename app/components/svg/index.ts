@@ -95,6 +95,7 @@ export { default as Phone } from './phone.svg';
 export { default as EyeOff } from './eyeoff.svg';
 export { default as Smartphone } from './smartphone.svg';
 export { default as Lock } from './lock.svg';
+export { default as LockUser } from './lockuser.svg';
 export { default as Monitor } from './monitor.svg';
 export { default as DollarSign } from './dollarsign.svg';
 export { default as UserPlus } from './userplus.svg';

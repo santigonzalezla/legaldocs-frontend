@@ -3,23 +3,12 @@
 import {useRef, useState} from 'react';
 import styles from './attachmentspanel.module.css';
 import {useFetch} from '@/hooks/useFetch';
-import {useAuth} from '@/context/AuthContext';
-import {useFirmId} from '@/hooks/useFirmId';
-import {uploadAttachment, type PendingAttachment} from '@/lib/attachments';
+import {uploadAttachment} from '@/lib/attachments';
+import type {AttachmentItem, PendingAttachment} from '@/app/interfaces/interfaces';
 import {toast} from 'sonner';
 import {useConfirm} from '@/hooks/useConfirm';
 import ConfirmModal from '@/app/components/ui/confirmmodal/ConfirmModal';
 import {ExternalLink, File, Plus, Trash, Upload} from '@/app/components/svg';
-
-export interface AttachmentItem
-{
-    id: string;
-    fileName: string;
-    fileUrl: string;
-    fileSize: number;
-    type: string;
-    createdAt: string;
-}
 
 interface AttachmentsPanelProps
 {
@@ -56,17 +45,21 @@ const AttachmentsPanel = ({apiBasePath, typeOptions, variant = 'panel', typeColo
     const isControlled = !isPending && items !== undefined;
     const isInline     = variant === 'inline';
 
-    const {accessToken} = useAuth();
-    const firmId         = useFirmId();
-    const fileInputRef   = useRef<HTMLInputElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const {data: documents, isLoading, execute: refetch} =
         useFetch<AttachmentItem[]>(apiBasePath ?? '', {firmScoped: true, immediate: !isPending && !isControlled});
 
     const notifyChanged = () => { if (isControlled) onChanged?.(); else refetch(); };
 
+    const {execute: uploadDoc} =
+        useFetch<AttachmentItem>('', {method: 'POST', immediate: false, firmScoped: true, isFormData: true});
+
     const {execute: deleteDocument} =
         useFetch<{message: string}>('', {method: 'DELETE', immediate: false, firmScoped: true});
+
+    const {execute: getFileUrl} =
+        useFetch<{url: string}>('', {immediate: false, firmScoped: true});
 
     const {confirm, confirmState, handleConfirm, handleCancel} = useConfirm();
 
@@ -95,7 +88,7 @@ const AttachmentsPanel = ({apiBasePath, typeOptions, variant = 'panel', typeColo
         }
 
         setUploading(true);
-        const ok = await uploadAttachment(apiBasePath, file, type, accessToken, firmId);
+        const ok = await uploadAttachment(uploadDoc, apiBasePath, file, type);
         setUploading(false);
 
         if (!ok) { toast.error('Error al subir el documento'); return; }
@@ -104,6 +97,14 @@ const AttachmentsPanel = ({apiBasePath, typeOptions, variant = 'panel', typeColo
         setFile(null);
         setShowUpload(false);
         notifyChanged();
+    };
+
+    const handleOpen = async (doc: AttachmentItem) =>
+    {
+        const win = window.open('', '_blank');
+        const result = await getFileUrl({}, `firm/me/storage/file-url?key=${encodeURIComponent(doc.fileKey)}`);
+        if (result?.url && win) win.location.href = result.url;
+        else { win?.close(); toast.error('No se pudo abrir el documento.'); }
     };
 
     const handleDelete = async (doc: AttachmentItem, index: number) =>
@@ -125,6 +126,7 @@ const AttachmentsPanel = ({apiBasePath, typeOptions, variant = 'panel', typeColo
     const docs: AttachmentItem[] = isPending
         ? (pendingAttachments ?? []).map((pending, index) => ({
             id:        `pending-${index}`,
+            fileKey:   '',
             fileName:  pending.file.name,
             fileUrl:   '',
             fileSize:  pending.file.size,
@@ -224,10 +226,10 @@ const AttachmentsPanel = ({apiBasePath, typeOptions, variant = 'panel', typeColo
                                         {typeLabel} · {formatSize(doc.fileSize)}{!isInline && doc.createdAt && ` · ${formatDate(doc.createdAt)}`}
                                     </span>
                                 </div>
-                                {doc.fileUrl && (
-                                    <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" className={styles.itemAction}>
+                                {doc.fileKey && (
+                                    <button type="button" className={styles.itemAction} title="Abrir" onClick={() => handleOpen(doc)}>
                                         <ExternalLink />
-                                    </a>
+                                    </button>
                                 )}
                                 <button className={styles.itemDelete} onClick={() => handleDelete(doc, index)}>
                                     <Trash />

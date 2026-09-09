@@ -1,39 +1,23 @@
-import {API_BASE_URL} from '@/lib/constants';
+import type {UseFetchOptions} from '@/hooks/useFetch';
 
 // Interface centralizada en app/interfaces/interfaces.ts; se re-exporta acá por compatibilidad.
 export type {PendingAttachment} from '@/app/interfaces/interfaces';
 
+type Execute = (overrideOptions?: Partial<UseFetchOptions>, overrideUrl?: string) => Promise<unknown>;
+
+// Arma el multipart y lo manda a través del execute de un useFetch({isFormData: true}).
+// El fetch real vive solo dentro de useFetch. Devuelve true si el backend respondió 2xx.
 export const uploadAttachment = async (
+    execute: Execute,
     apiBasePath: string,
     file: File,
     type: string,
-    accessToken: string | null,
-    firmId: string | null,
 ): Promise<boolean> =>
 {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('type', type);
 
-    try
-    {
-        const response = await fetch(`${API_BASE_URL}/${apiBasePath}`, {
-            method:  'POST',
-            headers: {Authorization: `Bearer ${accessToken}`, 'X-Firm-Id': firmId ?? ''},
-            body:    formData,
-        });
-
-        if (!response.ok)
-        {
-            const detail = await response.text().catch(() => '');
-            console.error(`[uploadAttachment] ${response.status} ${apiBasePath} → ${detail}`);
-        }
-
-        return response.ok;
-    }
-    catch (error)
-    {
-        console.error(`[uploadAttachment] network error ${apiBasePath}`, error);
-        return false;
-    }
+    const result = await execute({body: formData}, apiBasePath);
+    return result != null;
 };
