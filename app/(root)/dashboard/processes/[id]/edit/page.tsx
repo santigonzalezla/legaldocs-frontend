@@ -33,8 +33,10 @@ const ProcessEditPage = () =>
     const {data: branches} =
         useFetch<LegalBranch[]>('branch?isActive=true&limit=50', {firmScoped: true});
 
-    const {execute: updateProcess, isLoading: saving} =
+    const {execute: updateProcess, isLoading: saving, error: updateError} =
         useFetch<LegalProcess>('', {method: 'PATCH', immediate: false, firmScoped: true});
+
+    useEffect(() => { if (updateError) toast.error(updateError); }, [updateError]);
 
     const [form, setForm] = useState({
         clientId:              '',

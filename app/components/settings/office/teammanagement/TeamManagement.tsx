@@ -77,20 +77,26 @@ const TeamManagement = () =>
     const {data: firmRoles} =
         useFetch<FirmRole[]>('permissions/firm-roles', {firmScoped: true});
 
-    const {execute: inviteMember, isLoading: isInviting} =
+    const {execute: inviteMember, isLoading: isInviting, error: inviteError} =
         useFetch<FirmMember>('firm/me/members', {method: 'POST', immediate: false, firmScoped: true});
 
-    const {execute: updateMember, isLoading: isUpdating} =
+    const {execute: updateMember, isLoading: isUpdating, error: updateError} =
         useFetch<FirmMember>('', {method: 'PATCH', immediate: false, firmScoped: true});
 
-    const {execute: updateMemberProfile, isLoading: isSavingProfile} =
+    const {execute: updateMemberProfile, isLoading: isSavingProfile, error: profileError} =
         useFetch<{firstName: string; lastName: string; phone: string | null; hourlyRate: number | null}>('', {method: 'PATCH', immediate: false, firmScoped: true});
 
-    const {execute: sendPasswordReset, isLoading: isSendingReset} =
+    const {execute: sendPasswordReset, isLoading: isSendingReset, error: resetError} =
         useFetch<{message: string}>('auth/forgot-password', {method: 'POST', immediate: false});
 
-    const {execute: removeMember} =
+    const {execute: removeMember, error: removeError} =
         useFetch<void>('', {method: 'DELETE', immediate: false, firmScoped: true});
+
+    useEffect(() =>
+    {
+        const message = inviteError ?? updateError ?? profileError ?? resetError ?? removeError;
+        if (message) toast.error(message);
+    }, [inviteError, updateError, profileError, resetError, removeError]);
 
     const {confirm, confirmState, handleConfirm, handleCancel} = useConfirm();
 
@@ -186,7 +192,8 @@ const TeamManagement = () =>
     const handleRemove = async (member: MemberWithUser) =>
     {
         if (!await confirm({title: 'Eliminar miembro', message: `¿Eliminar a ${memberName(member)} del equipo?`, confirmLabel: 'Eliminar'})) return;
-        await removeMember({}, `firm/me/members/${member.id}`);
+        const result = await removeMember({}, `firm/me/members/${member.id}`);
+        if (!result) return;
         toast.success('Miembro eliminado.');
         refetch();
     };

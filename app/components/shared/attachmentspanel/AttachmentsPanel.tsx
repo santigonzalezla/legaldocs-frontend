@@ -3,7 +3,7 @@
 import {useRef, useState} from 'react';
 import styles from './attachmentspanel.module.css';
 import {useFetch} from '@/hooks/useFetch';
-import {uploadAttachment} from '@/lib/attachments';
+import {uploadAttachment, validateAttachmentFile} from '@/lib/attachments';
 import type {AttachmentItem, PendingAttachment} from '@/app/interfaces/interfaces';
 import {toast} from 'sonner';
 import {useConfirm} from '@/hooks/useConfirm';
@@ -68,11 +68,20 @@ const AttachmentsPanel = ({apiBasePath, typeOptions, variant = 'panel', typeColo
     const [type,       setType]       = useState(typeOptions[0]?.value ?? '');
     const [uploading,  setUploading]  = useState(false);
 
+    const pickFile = async (candidate: File | undefined | null) =>
+    {
+        if (!candidate) return;
+
+        const error = await validateAttachmentFile(candidate);
+        if (error) { toast.error(error); return; }
+
+        setFile(candidate);
+    };
+
     const handleDrop = (event: React.DragEvent) =>
     {
         event.preventDefault();
-        const dropped = event.dataTransfer.files[0];
-        if (dropped) setFile(dropped);
+        void pickFile(event.dataTransfer.files[0]);
     };
 
     const handleUpload = async () =>
@@ -168,7 +177,7 @@ const AttachmentsPanel = ({apiBasePath, typeOptions, variant = 'panel', typeColo
                             type="file"
                             accept=".pdf,.docx,.jpg,.jpeg,.png"
                             className={styles.fileInput}
-                            onChange={event => setFile(event.target.files?.[0] ?? null)}
+                            onChange={event => void pickFile(event.target.files?.[0])}
                         />
                         {file ? (
                             <div className={styles.fileSelected}>

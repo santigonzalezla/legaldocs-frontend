@@ -124,7 +124,7 @@ const ProcessDetailPage = () =>
     return (
         <div className={styles.page}>
             {/* Back button */}
-            <button className={styles.backBtn} onClick={() => router.back()}>
+            <button className={styles.backBtn} onClick={() => router.push('/dashboard/processes')}>
                 <ArrowLeft />
             </button>
 

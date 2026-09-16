@@ -6,21 +6,30 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {toast} from 'sonner';
 import {useFetch} from '@/hooks/useFetch';
+import {useAuth} from '@/context/AuthContext';
 import {ArrowBack, Eye, EyeClosed, Lock} from '@/app/components/svg';
 import styles from '../form.module.css';
+
+interface ResetPasswordResult
+{
+    accessToken:        string;
+    refreshToken:       string;
+    mustChangePassword: boolean;
+}
 
 const ResetPasswordForm = () =>
 {
     const router       = useRouter();
     const searchParams = useSearchParams();
     const token        = searchParams.get('token') ?? '';
+    const {login}      = useAuth();
 
     const [password,        setPassword]        = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword,    setShowPassword]    = useState(false);
     const [done,            setDone]            = useState(false);
 
-    const {execute, isLoading, error} = useFetch<{message: string}>('auth/reset-password', {
+    const {execute, isLoading, error} = useFetch<ResetPasswordResult>('auth/reset-password', {
         method:    'POST',
         immediate: false,
     });
@@ -47,8 +56,9 @@ const ResetPasswordForm = () =>
         if (!result) return;
 
         setDone(true);
+        login(result.accessToken, result.refreshToken, result.mustChangePassword);
         toast.success('Contraseña actualizada correctamente');
-        setTimeout(() => router.push('/signin'), 2000);
+        setTimeout(() => router.push('/dashboard'), 1500);
     };
 
     return (
@@ -61,7 +71,7 @@ const ResetPasswordForm = () =>
 
             {done ? (
                 <div className={styles.successMsg}>
-                    Contraseña actualizada. Redirigiendo a inicio de sesión...
+                    Contraseña actualizada. Ingresando a tu cuenta...
                 </div>
             ) : (
                 <form className={styles.form} onSubmit={handleSubmit}>
