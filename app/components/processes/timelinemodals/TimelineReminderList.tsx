@@ -1,6 +1,6 @@
 'use client';
 
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import styles from './timelinereminderlist.module.css';
 import {useFetch} from '@/hooks/useFetch';
 import {toast} from 'sonner';
@@ -26,8 +26,10 @@ interface TimelineReminderListProps
     onChanged?: () => void;
     // Deshabilita "agregar" por completo.
     disabled?: boolean;
-    // Si el comentario NO tiene fecha de evento futura, solo tiene sentido "Ahora".
-    hasEventDate?: boolean;
+    // Fecha del evento (null si el comentario no tiene una). Un anticipo solo
+    // tiene sentido si eventDate - offsetMinutes sigue quedando en el futuro;
+    // "Ahora" (offset 0) siempre es válido porque no depende de eventDate.
+    eventDate?: Date | null;
 }
 
 const NEW_TINT = REMINDER_STATUS_COLORS[ReminderStatus.Pending];
@@ -38,25 +40,30 @@ const offsetLabel = (minutes: number) =>
 const fmtSentAt = (iso: string) =>
     new Date(iso).toLocaleString('es-ES', {day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'});
 
-const TimelineReminderList = ({memberEmails, defaultEmail, value, onChange, apiBasePath, reminders, onChanged, disabled, hasEventDate}: TimelineReminderListProps) =>
+const TimelineReminderList = ({memberEmails, defaultEmail, value, onChange, apiBasePath, reminders, onChanged, disabled, eventDate}: TimelineReminderListProps) =>
 {
     const isLive = !!apiBasePath;
 
-    // Sin fecha de evento futura, solo "Ahora" (offset 0); con fecha, todos los anticipos.
-    const offsetOptions = hasEventDate
-        ? REMINDER_OFFSET_OPTIONS
-        : REMINDER_OFFSET_OPTIONS.filter(option => option.value === 0);
+    const offsetOptions = REMINDER_OFFSET_OPTIONS.filter(option =>
+        option.value === 0 || (eventDate != null && eventDate.getTime() - option.value * 60_000 > Date.now())
+    );
 
     const [showAdd, setShowAdd] = useState(false);
-    const [offset,  setOffset]  = useState(hasEventDate ? 1440 : 0);
+    const [offset,  setOffset]  = useState(eventDate ? 1440 : 0);
     const [email,   setEmail]   = useState(defaultEmail ?? memberEmails[0]?.email ?? '');
     const [busy,    setBusy]    = useState(false);
 
-    // Si cambió `hasEventDate`, el offset guardado puede ya no estar disponible.
+    // Si cambió `eventDate`, el offset guardado puede ya no estar disponible.
     const effectiveOffset = offsetOptions.some(option => option.value === offset) ? offset : offsetOptions[0].value;
 
-    const {execute: createReminder} = useFetch('', {method: 'POST',   immediate: false, firmScoped: true});
-    const {execute: deleteReminder} = useFetch('', {method: 'DELETE', immediate: false, firmScoped: true});
+    const {execute: createReminder, error: createError} = useFetch('', {method: 'POST',   immediate: false, firmScoped: true});
+    const {execute: deleteReminder, error: deleteError} = useFetch('', {method: 'DELETE', immediate: false, firmScoped: true});
+
+    useEffect(() =>
+    {
+        const message = createError ?? deleteError;
+        if (message) toast.error(message);
+    }, [createError, deleteError]);
 
     const nameFor = (recipientEmail: string) =>
         memberEmails.find(option => option.email === recipientEmail)?.name ?? recipientEmail;
@@ -155,7 +162,7 @@ const TimelineReminderList = ({memberEmails, defaultEmail, value, onChange, apiB
                         ))}
                     </select>
                     <select className={styles.input} value={email} onChange={event => setEmail(event.target.value)}>
-                        <option value="">Elegí un destinatario</option>
+                        <option value="">Elige un destinatario</option>
                         {memberEmails.map(option => (
                             <option key={option.email} value={option.email}>{option.name} · {option.email}</option>
                         ))}

@@ -85,7 +85,7 @@ const ProcessTimeline = ({processId}: ProcessTimelineProps) =>
     const firstLoad = isLoading && stages == null;
 
     const {data: members} =
-        useFetch<FirmMember[]>('firm/me/members', {firmScoped: true});
+        useFetch<FirmMember[]>('process/member-options', {firmScoped: true});
 
     const {execute: createStage}    = useFetch<ProcessTimelineStage & {firstCommentId: string | null}>('', {method: 'POST', immediate: false, firmScoped: true});
     const {execute: deleteStage}    = useFetch<{message: string}>('',     {method: 'DELETE', immediate: false, firmScoped: true});
@@ -300,7 +300,7 @@ const ProcessTimeline = ({processId}: ProcessTimelineProps) =>
             ? `${comment.creator.firstName} ${comment.creator.lastName}`
             : 'Miembro del despacho';
         const authorRole = comment.creator ? memberRoleByUserId[comment.creator.id] : undefined;
-        const hasEventDate = comment.commentDate != null;
+        const eventDate = comment.commentDate ? new Date(comment.commentDate) : null;
 
         return (
             <div key={comment.id} className={styles.comment}>
@@ -355,7 +355,7 @@ const ProcessTimeline = ({processId}: ProcessTimelineProps) =>
                     onChanged={refetch}
                     memberEmails={memberEmails}
                     defaultEmail={comment.responsible?.user?.email ?? ''}
-                    hasEventDate={hasEventDate}
+                    eventDate={eventDate}
                 />
             </div>
         );

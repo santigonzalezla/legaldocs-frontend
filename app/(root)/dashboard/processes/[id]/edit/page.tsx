@@ -5,6 +5,7 @@ import formStyles from '@/app/components/processes/createprocessmodal/createproc
 import {useParams, useRouter} from 'next/navigation';
 import {useEffect, useState} from 'react';
 import {useFetch} from '@/hooks/useFetch';
+import {usePermissions} from '@/context/PermissionsContext';
 import {toast} from 'sonner';
 import {ArrowLeft, Save} from '@/app/components/svg';
 import type {ClientPickerOption, LegalBranch, LegalProcess} from '@/app/interfaces/interfaces';
@@ -23,6 +24,9 @@ const ProcessEditPage = () =>
 {
     const {id}   = useParams<{id: string}>();
     const router = useRouter();
+    const {can}  = usePermissions();
+
+    const canEditFull = can('processes:edit');
 
     const {data: process, isLoading} =
         useFetch<LegalProcess>(`process/${id}`, {firmScoped: true});
@@ -89,28 +93,35 @@ const ProcessEditPage = () =>
 
     const handleSave = async () =>
     {
-        const body = {
-            clientId:              form.clientId    || undefined,
-            title:                 form.title       || undefined,
-            description:           form.description || undefined,
-            reference:             form.reference   || undefined,
-            branchId:              form.branchId    || undefined,
-            status:                form.status,
-            court:                 form.court       || undefined,
-            counterpart:           form.counterpart || undefined,
-            startDate:             form.startDate   || undefined,
-            endDate:               form.endDate     || undefined,
-            billingType:           form.billingType || undefined,
-            categoryId:            form.categoryId  || undefined,
-            responsiblePartnerId:  form.responsiblePartnerId || undefined,
-            originatorId:          form.originatorId         || undefined,
-            billingResponsibleId:  form.billingResponsibleId || undefined,
-            assignedTo:            form.assignedTo           || undefined,
-            isProBono:             form.isProBono,
-            hasPartialPayment:     form.hasPartialPayment,
+        const caseDetails = {
+            reference:   form.reference || undefined,
+            branchId:    form.branchId  || undefined,
+            court:       form.court     || undefined,
+            counterpart: form.counterpart || undefined,
+            startDate:   form.startDate   || undefined,
+            endDate:     form.endDate     || undefined,
         };
 
-        const result = await updateProcess({body}, `process/${id}`);
+        const body = canEditFull
+            ? {
+                ...caseDetails,
+                clientId:              form.clientId    || undefined,
+                title:                 form.title       || undefined,
+                description:           form.description || undefined,
+                status:                form.status,
+                billingType:           form.billingType || undefined,
+                categoryId:            form.categoryId  || undefined,
+                responsiblePartnerId:  form.responsiblePartnerId || undefined,
+                originatorId:          form.originatorId         || undefined,
+                billingResponsibleId:  form.billingResponsibleId || undefined,
+                assignedTo:            form.assignedTo           || undefined,
+                isProBono:             form.isProBono,
+                hasPartialPayment:     form.hasPartialPayment,
+            }
+            : caseDetails;
+
+        const url    = canEditFull ? `process/${id}` : `process/${id}/case-details`;
+        const result = await updateProcess({body}, url);
         if (!result) return;
         toast.success('Proceso actualizado correctamente.');
         router.push(`/dashboard/processes/${id}`);
@@ -137,58 +148,62 @@ const ProcessEditPage = () =>
                 </div>
 
                 <div className={formStyles.formBody}>
-                    <div className={formStyles.row}>
-                        <div className={formStyles.formGroup}>
-                            <label>Cliente *</label>
-                            <select
-                                className={formStyles.select}
-                                value={form.clientId}
-                                onChange={e => set('clientId', e.target.value)}
-                            >
-                                <option value="">Seleccionar cliente</option>
-                                {clients.map(client => (
-                                    <option key={client.id} value={client.id}>{client.name}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className={formStyles.formGroup}>
-                            <label>Estado</label>
-                            <select
-                                className={formStyles.select}
-                                value={form.status}
-                                onChange={e => set('status', e.target.value)}
-                            >
-                                {STATUS_OPTIONS.map(o => (
-                                    <option key={o.value} value={o.value}>{o.label}</option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
+                    {canEditFull && (
+                        <>
+                            <div className={formStyles.row}>
+                                <div className={formStyles.formGroup}>
+                                    <label>Cliente *</label>
+                                    <select
+                                        className={formStyles.select}
+                                        value={form.clientId}
+                                        onChange={e => set('clientId', e.target.value)}
+                                    >
+                                        <option value="">Seleccionar cliente</option>
+                                        {clients.map(client => (
+                                            <option key={client.id} value={client.id}>{client.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className={formStyles.formGroup}>
+                                    <label>Estado</label>
+                                    <select
+                                        className={formStyles.select}
+                                        value={form.status}
+                                        onChange={e => set('status', e.target.value)}
+                                    >
+                                        {STATUS_OPTIONS.map(o => (
+                                            <option key={o.value} value={o.value}>{o.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
 
-                    <div className={formStyles.formGroup}>
-                        <label>Título del proceso *</label>
-                        <CategoryCombobox
-                            categoryId={form.categoryId}
-                            categoryName={form.title}
-                            placeholder="Ej: Proceso arrendamiento Apto 301"
-                            onChange={(categoryId, categoryName) =>
-                            {
-                                set('categoryId', categoryId);
-                                set('title', categoryName);
-                            }}
-                        />
-                    </div>
+                            <div className={formStyles.formGroup}>
+                                <label>Título del proceso *</label>
+                                <CategoryCombobox
+                                    categoryId={form.categoryId}
+                                    categoryName={form.title}
+                                    placeholder="Ej: Proceso arrendamiento Apto 301"
+                                    onChange={(categoryId, categoryName) =>
+                                    {
+                                        set('categoryId', categoryId);
+                                        set('title', categoryName);
+                                    }}
+                                />
+                            </div>
 
-                    <div className={formStyles.formGroup}>
-                        <label>Descripción</label>
-                        <textarea
-                            className={formStyles.textarea}
-                            placeholder="Describe brevemente el proceso..."
-                            value={form.description}
-                            onChange={e => set('description', e.target.value)}
-                            rows={3}
-                        />
-                    </div>
+                            <div className={formStyles.formGroup}>
+                                <label>Descripción</label>
+                                <textarea
+                                    className={formStyles.textarea}
+                                    placeholder="Describe brevemente el proceso..."
+                                    value={form.description}
+                                    onChange={e => set('description', e.target.value)}
+                                    rows={3}
+                                />
+                            </div>
+                        </>
+                    )}
 
                     <div className={formStyles.row}>
                         <div className={formStyles.formGroup}>
@@ -256,7 +271,7 @@ const ProcessEditPage = () =>
                         />
                     </div>
 
-                    <ProcessExtraFields value={form} onChange={set} />
+                    {canEditFull && <ProcessExtraFields value={form} onChange={set} />}
                 </div>
 
                 <div className={styles.cardActions}>
@@ -266,7 +281,7 @@ const ProcessEditPage = () =>
                     <button
                         className={formStyles.saveButton}
                         onClick={handleSave}
-                        disabled={saving || !form.clientId || !form.title.trim()}
+                        disabled={saving || (canEditFull && (!form.clientId || !form.title.trim()))}
                     >
                         {saving ? 'Guardando...' : <><Save /> Guardar cambios</>}
                     </button>

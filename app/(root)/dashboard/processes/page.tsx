@@ -17,6 +17,7 @@ import ProcessList        from '@/app/components/processes/processlist/ProcessLi
 import CreateProcessModal from '@/app/components/processes/createprocessmodal/CreateProcessModal';
 import type {CreateProcessForm} from '@/app/components/processes/createprocessmodal/CreateProcessModal';
 import {PermissionGuard} from '@/app/components/auth/PermissionGuard';
+import {usePermissions} from '@/context/PermissionsContext';
 
 // Nombre del cliente embebido en el proceso — no requiere el permiso
 // clients:view, a diferencia de listPickerOptions (usado solo para crear).
@@ -48,6 +49,7 @@ const EMPTY_FORM: CreateProcessForm = {
 const ProcessesPage = () =>
 {
     const router = useRouter();
+    const {can}  = usePermissions();
 
     const [search,          setSearch]          = useState('');
     const [selectedStatus,  setSelectedStatus]  = useState('all');
@@ -175,9 +177,11 @@ const ProcessesPage = () =>
                         <h1>Procesos</h1>
                         <p>Gestiona los procesos legales activos en tu despacho.</p>
                     </div>
-                    <button className={styles.addButton} onClick={handleOpenModal}>
-                        <Plus /> Nuevo Proceso
-                    </button>
+                    {can('processes:create') && (
+                        <button className={styles.addButton} onClick={handleOpenModal}>
+                            <Plus /> Nuevo Proceso
+                        </button>
+                    )}
                 </div>
 
                 <div className={styles.statsContainer}>

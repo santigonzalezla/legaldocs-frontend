@@ -31,7 +31,7 @@ export function useFetch<T = any>(url: string, options: UseFetchOptions = {}): U
     const [isLoading, setIsLoading] = useState(false);
     const [error,     setError]     = useState<string | null>(null);
 
-    const {accessToken, activeFirmId, logout, refreshAccessToken} = useAuth();
+    const {accessToken, activeFirmId, logout, refreshAccessToken, isHydrated} = useAuth();
 
     const stableOptions = useMemo(() => options, [
         options.method,
@@ -157,8 +157,10 @@ export function useFetch<T = any>(url: string, options: UseFetchOptions = {}): U
 
     useEffect(() =>
     {
-        if (stableOptions.immediate !== false) execute();
-    }, [execute]);
+        if (stableOptions.immediate === false) return;
+        if (!isHydrated) return;
+        execute();
+    }, [execute, isHydrated]);
 
     return {data, isLoading, error, execute, reset};
 }

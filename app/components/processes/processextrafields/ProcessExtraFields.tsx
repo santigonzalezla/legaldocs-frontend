@@ -27,8 +27,8 @@ const memberName = (member: FirmMember) =>
 
 const ProcessExtraFields = ({value, onChange}: ProcessExtraFieldsProps) =>
 {
-    const {data: partners} = useFetch<FirmMember[]>('firm/me/members?isPartner=true', {firmScoped: true});
-    const {data: members}  = useFetch<FirmMember[]>('firm/me/members', {firmScoped: true});
+    const {data: partners} = useFetch<FirmMember[]>('process/member-options?isPartner=true', {firmScoped: true});
+    const {data: members}  = useFetch<FirmMember[]>('process/member-options', {firmScoped: true});
 
     const assignableMembers = (members ?? []).filter(member => member.userId);
 

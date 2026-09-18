@@ -118,7 +118,7 @@ const TimelineCommentModal = ({open, saving, comment, members, memberEmails, onC
                                 checked={draft.isFutureEvent}
                                 onChange={e => set('isFutureEvent', e.target.checked)}
                             />
-                            ¿Es un evento futuro?
+                            ¿Definir una fecha distinta para el evento?
                         </label>
                         <span className={styles.hint}>
                             Si no, el evento queda con la fecha y hora de este registro.
@@ -131,7 +131,6 @@ const TimelineCommentModal = ({open, saving, comment, members, memberEmails, onC
                             <input
                                 className={styles.input}
                                 type="datetime-local"
-                                min={nowLocalInput()}
                                 value={draft.eventDate}
                                 onChange={e => set('eventDate', e.target.value)}
                             />
@@ -150,7 +149,7 @@ const TimelineCommentModal = ({open, saving, comment, members, memberEmails, onC
                                 defaultEmail={responsibleEmail}
                                 value={reminders}
                                 onChange={setReminders}
-                                hasEventDate={hasEventDate}
+                                eventDate={hasEventDate ? new Date(draft.eventDate) : null}
                             />
                         </>
                     )}

@@ -152,12 +152,16 @@ const ProcessDetailPage = () =>
                             <DollarSign /> Cuenta de cobro
                         </button>
                     )}
-                    <button className={styles.editBtn} onClick={() => router.push(`/dashboard/processes/${id}/edit`)}>
-                        <Edit /> Editar
-                    </button>
-                    <button className={styles.deleteBtn} onClick={handleDelete}>
-                        <Trash /> Eliminar
-                    </button>
+                    {(can('processes:edit') || can('processes:edit-case-details')) && (
+                        <button className={styles.editBtn} onClick={() => router.push(`/dashboard/processes/${id}/edit`)}>
+                            <Edit /> Editar
+                        </button>
+                    )}
+                    {can('processes:delete') && (
+                        <button className={styles.deleteBtn} onClick={handleDelete}>
+                            <Trash /> Eliminar
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -235,6 +239,7 @@ const ProcessDetailPage = () =>
             )}
 
             {/* Panel de valor económico del proceso */}
+            {can('processes:manage-value-entries') && (
             <div className={styles.descCard}>
                 <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', marginBottom: '1.25rem'}}>
                     <div style={{display: 'flex', alignItems: 'center', gap: '0.75rem'}}>
@@ -316,6 +321,7 @@ const ProcessDetailPage = () =>
                     </div>
                 )}
             </div>
+            )}
 
             {canViewTimeEntries && <TimeTracker processId={process.id} onEntryCreated={refetchTimeEntries} />}
 
