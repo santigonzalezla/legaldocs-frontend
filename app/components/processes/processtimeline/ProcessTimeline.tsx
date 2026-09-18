@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect, useMemo, useState} from 'react';
+import {Fragment, useEffect, useMemo, useState} from 'react';
 import styles from './processtimeline.module.css';
 import {useFetch} from '@/hooks/useFetch';
 import {usePermissions} from '@/context/PermissionsContext';
@@ -330,7 +330,7 @@ const ProcessTimeline = ({processId}: ProcessTimelineProps) =>
 
                 {comment.commentDate && (
                     <div className={styles.commentMeta}>
-                        <strong>Evento:</strong> {fmtDateTime(comment.commentDate)}
+                        <strong>Fecha del evento:</strong> {fmtDateTime(comment.commentDate)}
                     </div>
                 )}
 
@@ -406,7 +406,12 @@ const ProcessTimeline = ({processId}: ProcessTimelineProps) =>
                         <div className={styles.commentList}>
                             {comments.length === 0
                                 ? <p className={styles.stageMeta}>Sin comentarios en esta etapa.</p>
-                                : comments.map(comment => renderComment(row.id, comment))}
+                                : comments.map((comment, index) => (
+                                    <Fragment key={comment.id}>
+                                        {index > 0 && <div className={styles.commentDivider} />}
+                                        {renderComment(row.id, comment)}
+                                    </Fragment>
+                                ))}
 
                             {canEdit && (
                                 <button className={styles.addCommentBtn} onClick={() => setCommentModal({stageId: row.id, comment: null})}>

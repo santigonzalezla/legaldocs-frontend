@@ -253,13 +253,15 @@
 .inlineHeader {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px;
 }
 
 .inlineLabel {
     font-size: 13px;
     font-weight: 600;
     color: var(--text-primary);
+    margin-right: 2px;
 }
 
 .inlineAdd {
